@@ -6,78 +6,69 @@
     <title>Task Manager</title>
     <!-- Include Tailwind CSS via CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <style>
-        /* Custom styles for dark mode toggle */
-        .dark-mode {
-            background-color: #1a202c;
-            color: #a0aec0;
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
         }
-        .dark-mode #sidebar {
-            background-color: #2d3748;
-            border-color: #4a5568;
-        }
-        .dark-mode #main-panel {
-            background-color: #2d3748;
-        }
-        .dark-mode input,
-        .dark-mode button {
-            background-color: #4a5568;
-            border-color: #718096;
-            color: #e2e8f0;
-        }
-        .dark-mode input::placeholder {
-            color: #a0aec0;
-        }
-    </style>
+    </script>
 </head>
 
-<body class="bg-gray-100 text-black">
+<body class="bg-gray-100 text-black dark:bg-gray-900 dark:text-white">
     <div id="app" class="flex h-screen">
         <!-- Left Sidebar -->
-        <div id="sidebar" class="w-64 border-r p-4 bg-white shadow-lg">
+        <div id="sidebar" class="w-64 border-r p-4 bg-white shadow-lg dark:bg-gray-800 dark:border-gray-700">
             <div class="flex flex-col space-y-4">
-                <h2 class="text-xl font-bold text-gray-800 cursor-pointer" onclick="showDashboard()">Projects</h2>
+                <h2 class="text-xl font-bold text-gray-800 cursor-pointer dark:text-gray-200" onclick="showDashboard()">
+                    Projects</h2>
             </div>
             <div id="project-list" class="mt-4 h-[calc(100vh-10rem)] overflow-y-auto">
                 <!-- Project buttons will be added here -->
             </div>
             <div class="mt-4">
                 <input id="new-project-name" type="text" placeholder="New project name"
-                    class="mb-2 p-2 border rounded-lg w-full focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all">
-                <button id="add-project-btn" class="w-full bg-blue-500 hover:bg-blue-600 text-white p-2 rounded-lg shadow-sm transition-all duration-200">Add Project</button>
+                    class="mb-2 p-2 border rounded-lg w-full focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200 dark:placeholder-gray-400">
+                <button id="add-project-btn"
+                    class="w-full bg-blue-500 hover:bg-blue-600 text-white p-2 rounded-lg shadow-sm transition-all duration-200">Add
+                    Project</button>
             </div>
         </div>
 
         <!-- Main Panel -->
-        <div id="main-panel" class="flex-1 p-6 bg-gray-50">
+        <div id="main-panel" class="flex-1 p-6 bg-gray-50 dark:bg-gray-900">
             <div class="flex justify-between items-center mb-6">
                 <h1 id="project-title" class="text-2xl font-bold"></h1>
                 <div class="flex items-center space-x-4">
                     <!-- Home button -->
-                    <button id="home-btn" class="p-2 border rounded" title="Home" onclick="showDashboard()">
-                        <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
+                    <button id="home-btn" class="p-2 border rounded dark:border-gray-700" title="Home"
+                        onclick="showDashboard()">
+                        <svg class="h-5 w-5 text-gray-700 dark:text-gray-200" fill="none" stroke="currentColor"
+                            viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
                         </svg>
                     </button>
                     <!-- Search -->
                     <div class="flex items-center gap-2">
                         <div class="relative">
                             <input id="search-input" type="text" placeholder="Search tasks"
-                                class="pl-8 p-2 border rounded">
-                            <svg class="absolute left-2 top-1/2 h-4 w-4 -translate-y-1/2 transform text-gray-500"
+                                class="pl-8 p-2 border rounded dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200 dark:placeholder-gray-400">
+                            <svg class="absolute left-2 top-1/2 h-4 w-4 -translate-y-1/2 transform text-gray-500 dark:text-gray-400"
                                 fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                     d="M21 21l-4.35-4.35M17 10a7 7 0 11-14 0 7 7 0 0114 0z" />
                             </svg>
                         </div>
-                        <button id="refresh-btn" class="p-2 border rounded" title="Refresh">
-                            <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <button id="refresh-btn" class="p-2 border rounded dark:border-gray-700" title="Refresh">
+                            <svg class="h-5 w-5 text-gray-700 dark:text-gray-200" fill="none" stroke="currentColor"
+                                viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                     d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
                             </svg>
                         </button>
-                        <button id="hide-completed-btn" class="p-2 border rounded" title="Toggle completed tasks">
-                            <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <button id="hide-completed-btn" class="p-2 border rounded dark:border-gray-700"
+                            title="Toggle completed tasks">
+                            <svg class="h-5 w-5 text-gray-700 dark:text-gray-200" fill="none" stroke="currentColor"
+                                viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                     d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -88,14 +79,20 @@
                     <!-- Report buttons -->
                     <div class="flex gap-2">
                         <!-- Dark mode button -->
-                        <button id="dark-mode-toggle" class="p-2 border rounded" title="Toggle Dark Mode">
-                            <span id="dark-mode-label">🌙</span>
+                        <button id="dark-mode-toggle" class="p-2 border rounded dark:border-gray-700"
+                            title="Toggle Dark Mode">
+                            <svg id="dark-mode-icon" class="h-5 w-5 text-gray-700 dark:text-gray-200"
+                                fill="currentColor" viewBox="0 0 20 20">
+                            </svg>
                         </button>
-                        <button id="report-btn" class="p-2 border rounded" title="Project Report">
-                            <!-- Bar chart icon -->
-                            <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3v18h18" />
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12h18" />
+                        <button id="report-btn" class="p-2 border rounded dark:border-gray-700" title="Project Report">
+                            <!-- Chart icon -->
+                            <svg class="h-5 w-5 text-gray-700 dark:text-gray-200" fill="none" stroke="currentColor"
+                                viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M9 17v-6a1 1 0 112 0v6a1 1 0 11-2 0zM13 13v4a1 1 0 102 0v-4a1 1 0 10-2 0zM17 9v8a1 1 0 102 0V9a1 1 0 10-2 0z" />
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M5 21h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v14a2 2 0 002 2z" />
                             </svg>
                         </button>
                     </div>
@@ -107,14 +104,15 @@
             <div id="project-view" class="hidden">
                 <div id="task-input" class="mb-4">
                     <input id="new-task-title" type="text" placeholder="New task title (Press Enter to add)"
-                        class="mb-4 p-3 border rounded-lg w-full shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all">
+                        class="mb-4 p-3 border rounded-lg w-full shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200 dark:placeholder-gray-400">
                 </div>
                 <div id="task-list" class="h-[calc(100vh-20rem)] overflow-y-auto">
                     <!-- Tasks will be added here -->
                 </div>
             </div>
             <!-- Pomodoro Timer Display -->
-            <div id="pomodoro-display" class="fixed bottom-0 left-0 right-0 bg-white border-t p-4 hidden">
+            <div id="pomodoro-display"
+                class="fixed bottom-0 left-0 right-0 bg-white border-t p-4 hidden dark:bg-gray-800 dark:border-gray-700">
                 <div class="container mx-auto flex justify-between items-center">
                     <div class="flex items-center">
                         <span class="font-bold mr-2">Current Task:</span>
@@ -131,7 +129,7 @@
 
     <!-- Report Modal -->
     <div id="report-modal" class="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 hidden">
-        <div class="bg-white p-6 rounded">
+        <div class="bg-white p-6 rounded dark:bg-gray-800 dark:text-gray-200">
             <h2 class="text-xl font-bold mb-4">Project Report</h2>
             <div id="report-content">
                 <!-- Report content will be added here -->
@@ -140,20 +138,8 @@
         </div>
     </div>
 
-    <!-- Global Stats Modal -->
-    <div id="global-stats-modal" class="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 hidden">
-        <div class="bg-white p-6 rounded max-w-2xl w-full">
-            <h2 class="text-xl font-bold mb-4">Global Statistics</h2>
-            <div id="global-stats-content" class="space-y-4">
-                <!-- Global stats content will be added here -->
-            </div>
-            <button id="close-global-stats-btn" class="mt-4 bg-blue-500 text-white p-2 rounded">Close</button>
-        </div>
-    </div>
-
     <!-- JavaScript -->
     <script>
-        // Data Structures
         let projects = [];
         let selectedProject = null;
         let isDarkMode = false;
@@ -161,9 +147,8 @@
         let hideCompleted = false;
         let currentPomodoroTask = null;
         let pomodoroTimer = null;
-        let pomodoroTimeLeft = 25 * 60; // 25 minutes in seconds
+        let pomodoroTimeLeft = 25 * 60;
 
-        // Load initial data from localStorage or default
         function loadInitialData() {
             const savedData = localStorage.getItem('taskManagerData');
             if (savedData) {
@@ -228,17 +213,14 @@
             }
         }
 
-        // Save data to localStorage
         function saveData() {
             localStorage.setItem('taskManagerData', JSON.stringify(projects));
         }
 
-        // Generate unique IDs
         function generateId() {
             return Math.random().toString(36).substr(2, 9);
         }
 
-        // Initialize the app
         function init() {
             loadInitialData();
             renderProjectList();
@@ -246,7 +228,6 @@
             setupEventListeners();
         }
 
-        // Event Listeners
         function setupEventListeners() {
             document.getElementById('add-project-btn').addEventListener('click', addProject);
             document.getElementById('new-project-name').addEventListener('keypress', (e) => {
@@ -266,8 +247,6 @@
             document.getElementById('dark-mode-toggle').addEventListener('click', toggleDarkMode);
             document.getElementById('report-btn').addEventListener('click', showReport);
             document.getElementById('close-report-btn').addEventListener('click', hideReport);
-            document.getElementById('global-stats-btn').addEventListener('click', showGlobalStats);
-            document.getElementById('close-global-stats-btn').addEventListener('click', hideGlobalStats);
             document.getElementById('search-input').addEventListener('input', (e) => {
                 searchTerm = e.target.value.toLowerCase();
                 renderTaskList();
@@ -284,7 +263,6 @@
             document.addEventListener('keydown', handleKeyDown);
         }
 
-        // Keyboard Shortcuts
         function handleKeyDown(e) {
             if (e.ctrlKey || e.metaKey) {
                 switch (e.key) {
@@ -304,7 +282,6 @@
             }
         }
 
-        // Add Project
         function addProject() {
             const projectNameInput = document.getElementById('new-project-name');
             const name = projectNameInput.value.trim();
@@ -321,7 +298,6 @@
             }
         }
 
-        // Render Project List
         function renderProjectList() {
             const projectList = document.getElementById('project-list');
             projectList.innerHTML = '';
@@ -334,10 +310,9 @@
 
                 const btn = document.createElement('button');
                 btn.textContent = project.name;
-                btn.className = `flex-grow text-left p-2 rounded mr-2 ${selectedProject && selectedProject.id === project.id ? "bg-blue-500 text-white" : "bg-gray-100 text-black"}`;
+                btn.className = `flex-grow text-left p-2 rounded mr-2 ${selectedProject && selectedProject.id === project.id ? "bg-blue-500 text-white" : "bg-gray-100 text-black dark:bg-gray-700 dark:text-gray-200"}`;
                 btn.addEventListener('click', () => selectProject(project.id));
 
-                // Add progress bar and stats container
                 const statsDiv = document.createElement('div');
                 statsDiv.className = 'mt-1 px-2';
 
@@ -348,17 +323,17 @@
                 const totalTime = calculateProjectTotalTime(project.tasks);
 
                 const progressBar = document.createElement('div');
-                progressBar.className = 'flex-grow h-2 bg-gray-200 rounded';
+                progressBar.className = 'flex-grow h-2 bg-gray-200 rounded dark:bg-gray-600';
                 progressBar.innerHTML = `
                     <div class="h-full bg-green-500 rounded" style="width: ${progress}%"></div>
                 `;
 
                 const progressText = document.createElement('span');
-                progressText.className = 'text-sm text-gray-600';
+                progressText.className = 'text-sm text-gray-600 dark:text-gray-400';
                 progressText.textContent = `${progress}%`;
 
                 const timeText = document.createElement('span');
-                timeText.className = 'text-sm text-gray-600 ml-4';
+                timeText.className = 'text-sm text-gray-600 ml-4 dark:text-gray-400';
                 timeText.textContent = `Total: ${formatTime(totalTime)}`;
 
                 progressContainer.appendChild(progressBar);
@@ -370,8 +345,12 @@
                 menuDiv.className = 'relative';
 
                 const menuBtn = document.createElement('button');
-                menuBtn.innerHTML = '⋮';
-                menuBtn.className = 'p-1 hover:bg-gray-100 rounded';
+                menuBtn.className = 'p-1 hover:bg-gray-100 rounded dark:hover:bg-gray-700';
+                menuBtn.innerHTML = `
+                    <svg class="h-5 w-5 text-gray-700 dark:text-gray-200" fill="currentColor" viewBox="0 0 20 20">
+                        <path d="M10 3a1 1 0 011 1v1a7 7 0 01.217 13.967 1 1 0 11-.434 1.936A9 9 0 1010 2z" />
+                    </svg>
+                `;
                 menuBtn.addEventListener('click', (e) => {
                     e.stopPropagation();
                     const dropdown = menuBtn.nextElementSibling;
@@ -379,11 +358,11 @@
                 });
 
                 const dropdownDiv = document.createElement('div');
-                dropdownDiv.className = 'absolute right-0 mt-1 w-32 bg-white border rounded shadow-lg hidden z-10';
+                dropdownDiv.className = 'absolute right-0 mt-1 w-32 bg-white border rounded shadow-lg hidden z-10 dark:bg-gray-800 dark:border-gray-700';
 
                 const editBtn = document.createElement('button');
-                editBtn.innerHTML = '✏️ Edit';
-                editBtn.className = 'w-full text-left px-4 py-2 hover:bg-gray-100';
+                editBtn.innerHTML = 'Edit';
+                editBtn.className = 'w-full text-left px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-700';
                 editBtn.addEventListener('click', (e) => {
                     e.stopPropagation();
                     dropdownDiv.classList.add('hidden');
@@ -391,8 +370,8 @@
                 });
 
                 const deleteBtn = document.createElement('button');
-                deleteBtn.innerHTML = '🗑️ Delete';
-                deleteBtn.className = 'w-full text-left px-4 py-2 hover:bg-gray-100 text-red-500';
+                deleteBtn.innerHTML = 'Delete';
+                deleteBtn.className = 'w-full text-left px-4 py-2 hover:bg-gray-100 text-red-500 dark:hover:bg-gray-700';
                 deleteBtn.addEventListener('click', (e) => {
                     e.stopPropagation();
                     dropdownDiv.classList.add('hidden');
@@ -404,7 +383,6 @@
                 menuDiv.appendChild(menuBtn);
                 menuDiv.appendChild(dropdownDiv);
 
-                // Close dropdown when clicking outside
                 document.addEventListener('click', () => {
                     dropdownDiv.classList.add('hidden');
                 });
@@ -416,7 +394,6 @@
             });
         }
 
-        // Edit Project
         function editProject(projectId) {
             const project = projects.find(p => p.id === projectId);
             const newName = prompt('Edit project name:', project.name);
@@ -430,7 +407,6 @@
             }
         }
 
-        // Delete Project
         function deleteProject(projectId) {
             if (confirm('Are you sure you want to delete this project and all its tasks?')) {
                 const index = projects.findIndex(p => p.id === projectId);
@@ -452,7 +428,6 @@
             }
         }
 
-        // Select Project
         function selectProject(projectId) {
             selectedProject = projects.find(p => p.id === projectId);
             document.getElementById('project-title').textContent = selectedProject.name;
@@ -462,7 +437,6 @@
             renderTaskList();
         }
 
-        // Show Dashboard
         function showDashboard() {
             selectedProject = null;
             document.getElementById('project-title').textContent = 'Dashboard';
@@ -472,11 +446,9 @@
             renderProjectList();
         }
 
-        // Render Dashboard
         function renderDashboard() {
             const dashboardView = document.getElementById('dashboard-view');
-            
-            // Calculate global statistics
+
             let totalProjects = projects.length;
             let totalTasks = 0;
             let totalCompletedTasks = 0;
@@ -485,7 +457,6 @@
             let mostActiveProject = { name: '-', time: 0 };
             let highestProgress = { name: '-', progress: 0 };
 
-            // Get start of today
             const today = new Date();
             today.setHours(0, 0, 0, 0);
 
@@ -498,8 +469,7 @@
                 totalTasks += completedTasks + ongoingTasks;
                 totalCompletedTasks += completedTasks;
                 totalTimeSpent += projectTotalTime;
-                
-                // Calculate today's time from time entries
+
                 project.tasks.forEach(task => {
                     const calculateTodayTime = (task) => {
                         let time = 0;
@@ -527,32 +497,48 @@
                 }
             });
 
-            // Create dashboard content
             dashboardView.innerHTML = `
-                <div class="grid grid-cols-2 gap-4">
-                    <div class="p-4 bg-white rounded-lg shadow">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div class="p-4 bg-white rounded-lg shadow dark:bg-gray-800 dark:text-gray-200">
                         <h3 class="font-bold mb-2 text-lg">Overview</h3>
                         <p class="mb-2">Total Projects: ${totalProjects}</p>
                         <p class="mb-2">Total Tasks: ${totalTasks}</p>
                         <p class="mb-2">Completed Tasks: ${totalCompletedTasks}</p>
                         <p>Completion Rate: ${totalTasks ? Math.round((totalCompletedTasks / totalTasks) * 100) : 0}%</p>
                     </div>
-                    <div class="p-4 bg-white rounded-lg shadow">
+                    <div class="p-4 bg-white rounded-lg shadow dark:bg-gray-800 dark:text-gray-200">
                         <h3 class="font-bold mb-2 text-lg">Time Statistics</h3>
                         <p class="mb-2">Total Time Spent: ${formatTime(totalTimeSpent)}</p>
-                        <p>Average Time per Project: ${formatTime(Math.round(totalTimeSpent / totalProjects))}</p>
+                        <p>Average Time per Project: ${formatTime(totalProjects ? Math.round(totalTimeSpent / totalProjects) : 0)}</p>
                         <p>Time Spent Today: ${formatTime(todayTimeSpent)}</p>
                     </div>
                 </div>
-                <div class="mt-4 p-4 bg-white rounded-lg shadow">
+                <div class="mt-4 p-4 bg-white rounded-lg shadow dark:bg-gray-800 dark:text-gray-200">
                     <h3 class="font-bold mb-2 text-lg">Project Highlights</h3>
                     <p class="mb-2">Most Active Project: ${mostActiveProject.name} (${formatTime(mostActiveProject.time)})</p>
                     <p>Highest Progress: ${highestProgress.name} (${highestProgress.progress}%)</p>
                 </div>
+                <div class="mt-4">
+                    <h3 class="font-bold mb-2 text-lg">Projects</h3>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        ${projects.map(project => `
+                            <div class="p-4 bg-white rounded-lg shadow dark:bg-gray-800 dark:text-gray-200">
+                                <h4 class="font-bold mb-2">${project.name}</h4>
+                                <div class="mb-2">
+                                    <div class="h-2 bg-gray-200 rounded dark:bg-gray-600">
+                                        <div class="h-full bg-blue-500 rounded" style="width: ${calculateProjectProgress(project.tasks)}%"></div>
+                                    </div>
+                                    <p class="text-sm text-gray-600 dark:text-gray-400 mt-1">${calculateProjectProgress(project.tasks)}% completed</p>
+                                </div>
+                                <p class="text-sm text-gray-600 dark:text-gray-400">Total Time: ${formatTime(calculateProjectTotalTime(project.tasks))}</p>
+                                <button onclick="selectProject('${project.id}')" class="mt-2 bg-blue-500 text-white px-4 py-2 rounded">View Project</button>
+                            </div>
+                        `).join('')}
+                    </div>
+                </div>
             `;
         }
 
-        // Add Task
         async function addTask(parentId = null, customTitle = null) {
             const title = customTitle || document.getElementById('new-task-title').value.trim();
             if (title && selectedProject) {
@@ -564,7 +550,7 @@
                     isExpanded: false,
                     isCompleted: false,
                     subtasks: [],
-                    canHaveSubtasks: true  // All tasks can have subtasks
+                    canHaveSubtasks: true
                 };
                 if (parentId) {
                     addTaskToList(selectedProject.tasks, newTask, parentId);
@@ -598,7 +584,6 @@
             return false;
         }
 
-        // Render Task List
         function renderTaskList() {
             const taskList = document.getElementById('task-list');
             taskList.innerHTML = '';
@@ -611,10 +596,8 @@
             }
         }
 
-        // Filter tasks based on search term
         function filterTasks(tasks, term) {
             return tasks.filter(task => {
-                // First check if task should be hidden due to completion
                 if (hideCompleted && task.isCompleted) {
                     return false;
                 }
@@ -627,7 +610,6 @@
             }));
         }
 
-        // Edit Task
         function editTask(taskId, newTitle) {
             const updateTaskTitle = (tasks, taskId, newTitle) => {
                 for (let task of tasks) {
@@ -645,14 +627,12 @@
 
             updateTaskTitle(selectedProject.tasks, taskId, newTitle);
             saveData();
-            // Delay the re-render slightly to prevent input clearing
             setTimeout(() => {
                 renderTaskList();
                 renderProjectList();
             }, 50);
         }
 
-        // Delete Task
         function deleteTask(taskId) {
             const removeTask = (tasks, taskId) => {
                 for (let i = 0; i < tasks.length; i++) {
@@ -673,23 +653,20 @@
             renderTaskList();
         }
 
-        // Create Task Element
         function createTaskElement(task, level = 0) {
             const container = document.createElement('div');
             container.style.marginLeft = `${level * 24}px`;
 
             const taskDiv = document.createElement('div');
-            taskDiv.className = 'flex items-center justify-between p-3 relative bg-white rounded-lg shadow-sm mb-2 hover:shadow-md transition-shadow duration-200';
+            taskDiv.className = 'flex items-center justify-between p-3 relative bg-white rounded-lg shadow-sm mb-2 hover:shadow-md transition-shadow duration-200 dark:bg-gray-800';
 
-            // Add vertical line for subtasks
             if (level > 0) {
                 const verticalLine = document.createElement('div');
-                verticalLine.className = 'absolute left-[-20px] top-0 bottom-0 border-l-2 border-gray-300';
+                verticalLine.className = 'absolute left-[-20px] top-0 bottom-0 border-l-2 border-gray-300 dark:border-gray-600';
                 taskDiv.appendChild(verticalLine);
 
-                // Add horizontal line
                 const horizontalLine = document.createElement('div');
-                horizontalLine.className = 'absolute left-[-20px] top-1/2 w-[12px] border-t-2 border-gray-300';
+                horizontalLine.className = 'absolute left-[-20px] top-1/2 w-[12px] border-t-2 border-gray-300 dark:border-gray-600';
                 taskDiv.appendChild(horizontalLine);
             }
 
@@ -703,16 +680,23 @@
             checkbox.addEventListener('change', () => toggleTaskCompletion(task.id));
             leftDiv.appendChild(checkbox);
 
-            // Always show expand button for all tasks
             const expandBtn = document.createElement('button');
-            expandBtn.className = 'mr-1 p-1 text-lg w-6 h-6 hover:bg-gray-100 rounded cursor-pointer flex items-center justify-center';
-            expandBtn.innerHTML = task.isExpanded ? '▼' : '►';
+            expandBtn.className = 'mr-1 p-1 text-lg w-6 h-6 hover:bg-gray-100 rounded cursor-pointer flex items-center justify-center dark:hover:bg-gray-700';
+            expandBtn.innerHTML = task.isExpanded ? `
+                <svg class="h-4 w-4 text-gray-700 dark:text-gray-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                </svg>
+            ` : `
+                <svg class="h-4 w-4 text-gray-700 dark:text-gray-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 15l7-7 7 7" />
+                </svg>
+            `;
             expandBtn.addEventListener('click', () => toggleTaskExpand(task.id));
             leftDiv.appendChild(expandBtn);
 
             const label = document.createElement('label');
             label.textContent = task.title;
-            label.className = task.isCompleted ? 'line-through text-gray-500' : '';
+            label.className = task.isCompleted ? 'line-through text-gray-500 dark:text-gray-400' : 'dark:text-gray-200';
             leftDiv.appendChild(label);
 
             taskDiv.appendChild(leftDiv);
@@ -725,10 +709,14 @@
             timeSpan.textContent = formatTime(totalTime);
             rightDiv.appendChild(timeSpan);
 
-            // Edit button
             const editBtn = document.createElement('button');
-            editBtn.className = 'p-1.5 border rounded-lg hover:bg-gray-100 transition-colors duration-200';
-            editBtn.innerHTML = '✏️';
+            editBtn.className = 'p-1.5 border rounded-lg hover:bg-gray-100 transition-colors duration-200 dark:border-gray-700 dark:hover:bg-gray-700';
+            editBtn.innerHTML = `
+                <svg class="h-4 w-4 text-gray-700 dark:text-gray-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M11 5h2a2 2 0 012 2v2m0 0l-6 6m0 0l-6-6m6 6V7" />
+                </svg>
+            `;
             editBtn.addEventListener('click', () => {
                 const newTitle = prompt('Edit task title:', task.title);
                 if (newTitle && newTitle.trim()) {
@@ -737,17 +725,28 @@
             });
             rightDiv.appendChild(editBtn);
 
-            // Timer button
             const timerBtn = document.createElement('button');
-            timerBtn.className = 'p-1.5 border rounded-lg hover:bg-gray-100 transition-colors duration-200';
-            timerBtn.innerHTML = task.isTimerRunning ? '⏸️' : '▶️';
+            timerBtn.className = 'p-1.5 border rounded-lg hover:bg-gray-100 transition-colors duration-200 dark:border-gray-700 dark:hover:bg-gray-700';
+            timerBtn.innerHTML = task.isTimerRunning ? `
+                <svg class="h-4 w-4 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <rect x="6" y="6" width="12" height="12" rx="2" ry="2"></rect>
+                </svg>
+            ` : `
+                <svg class="h-4 w-4 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <polygon points="5 3 19 12 5 21 5 3"></polygon>
+                </svg>
+            `;
             timerBtn.addEventListener('click', () => startPomodoro(task));
             rightDiv.appendChild(timerBtn);
 
-            // Delete button
             const deleteBtn = document.createElement('button');
-            deleteBtn.className = 'p-1.5 border rounded-lg text-red-500 hover:bg-red-50 transition-colors duration-200';
-            deleteBtn.innerHTML = '🗑️';
+            deleteBtn.className = 'p-1.5 border rounded-lg text-red-500 hover:bg-red-50 transition-colors duration-200 dark:border-gray-700 dark:hover:bg-gray-700';
+            deleteBtn.innerHTML = `
+                <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M6 18L18 18M9 18L9 9M15 18L15 9M5 7L19 7M10 7L10 4H14L14 7" />
+                </svg>
+            `;
             deleteBtn.addEventListener('click', () => {
                 if (confirm('Are you sure you want to delete this task?')) {
                     deleteTask(task.id);
@@ -776,18 +775,15 @@
                 const subtaskInput = document.createElement('input');
                 subtaskInput.type = 'text';
                 subtaskInput.placeholder = 'New subtask title (Press Enter to add)';
-                subtaskInput.className = 'mb-2 p-2 border rounded w-full';
+                subtaskInput.className = 'mb-2 p-2 border rounded w-full dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200 dark:placeholder-gray-400';
                 subtaskInput.addEventListener('keydown', async (e) => {
                     if (e.key === 'Enter') {
-                        e.preventDefault(); // Prevent form submission
-                        e.stopPropagation(); // Stop event bubbling
+                        e.preventDefault();
+                        e.stopPropagation();
                         const title = subtaskInput.value.trim();
                         if (title) {
-                            // Keep reference to input element
                             const input = e.target;
-                            // Add task without clearing input
                             await addTask(task.id, title);
-                            // Only clear if still focused and value hasn't changed
                             if (document.activeElement === input && input.value === title) {
                                 input.value = '';
                             }
@@ -802,25 +798,20 @@
             return container;
         }
 
-        // Toggle Task Completion
         function toggleTaskCompletion(taskId) {
-            const updateTaskAndSubtasks = (tasks, taskId) => {
+            const updateTaskAndSubtasks = (tasks, taskId, newStatus) => {
                 for (let task of tasks) {
                     if (task.id === taskId) {
-                        task.isCompleted = !task.isCompleted;
-                        // If task is completed, complete all subtasks
-                        if (task.isCompleted) {
+                        task.isCompleted = newStatus !== undefined ? newStatus : !task.isCompleted;
+                        if (task.subtasks.length > 0) {
                             task.subtasks.forEach(subtask => {
-                                subtask.isCompleted = true;
-                                if (subtask.subtasks.length > 0) {
-                                    updateTaskAndSubtasks(subtask.subtasks, subtask.id);
-                                }
+                                updateTaskAndSubtasks([subtask], subtask.id, task.isCompleted);
                             });
                         }
                         return true;
                     }
                     if (task.subtasks.length > 0) {
-                        const found = updateTaskAndSubtasks(task.subtasks, taskId);
+                        const found = updateTaskAndSubtasks(task.subtasks, taskId, newStatus);
                         if (found) return true;
                     }
                 }
@@ -830,33 +821,28 @@
             updateTaskAndSubtasks(selectedProject.tasks, taskId);
             saveData();
             renderTaskList();
-            renderProjectList(); // Update progress bars
+            renderProjectList();
         }
 
-        // Toggle Task Expand/Collapse
         function toggleTaskExpand(taskId) {
             toggleTaskProperty(selectedProject.tasks, taskId, 'isExpanded');
             saveData();
             renderTaskList();
         }
 
-        // Pomodoro Timer Functions
         function startPomodoro(task) {
-            // Stop any existing pomodoro
             if (currentPomodoroTask) {
                 stopPomodoro();
             }
 
             currentPomodoroTask = task;
             task.isTimerRunning = true;
-            pomodoroTimeLeft = 25 * 60; // 25 minutes in seconds
+            pomodoroTimeLeft = 25 * 60;
 
-            // Show the pomodoro display
             const pomodoroDisplay = document.getElementById('pomodoro-display');
             pomodoroDisplay.classList.remove('hidden');
             document.getElementById('current-task-title').textContent = task.title;
 
-            // Start the timer
             updatePomodoroDisplay();
             pomodoroTimer = setInterval(() => {
                 pomodoroTimeLeft--;
@@ -868,7 +854,6 @@
                 }
             }, 1000);
 
-            // Setup stop button
             document.getElementById('stop-pomodoro').onclick = stopPomodoro;
 
             saveData();
@@ -877,18 +862,15 @@
 
         function stopPomodoro() {
             if (currentPomodoroTask) {
-                // Calculate elapsed time (25 minutes - remaining time)
                 const elapsedSeconds = (25 * 60) - pomodoroTimeLeft;
                 const endTime = new Date();
                 const startTime = new Date(endTime - (elapsedSeconds * 1000));
 
-                // Find and update the task in the project structure
                 const updateTaskTime = (tasks, taskId, timeEntry) => {
                     for (let task of tasks) {
                         if (task.id === taskId) {
                             task.timeSpent += timeEntry.duration;
                             task.isTimerRunning = false;
-                            // Initialize timeEntries array if it doesn't exist
                             if (!task.timeEntries) {
                                 task.timeEntries = [];
                             }
@@ -919,12 +901,11 @@
                 pomodoroTimer = null;
             }
 
-            // Hide the pomodoro display
             document.getElementById('pomodoro-display').classList.add('hidden');
 
             saveData();
             renderTaskList();
-            renderProjectList(); // Update project progress bars
+            renderProjectList();
         }
 
         function updatePomodoroDisplay() {
@@ -934,7 +915,6 @@
             document.getElementById('pomodoro-timer').textContent = display;
         }
 
-        // Toggle Task Property
         function toggleTaskProperty(tasks, taskId, property) {
             for (let task of tasks) {
                 if (task.id === taskId) {
@@ -948,7 +928,6 @@
             return false;
         }
 
-        // Calculate total time for a task including subtasks
         function calculateTaskTotalTime(task) {
             let total = task.timeSpent;
             task.subtasks.forEach(subtask => {
@@ -957,7 +936,6 @@
             return total;
         }
 
-        // Format Time
         function formatTime(seconds) {
             const hours = Math.floor(seconds / 3600);
             const minutes = Math.floor((seconds % 3600) / 60);
@@ -965,20 +943,21 @@
             return `${hours}h ${minutes}m ${secs}s`;
         }
 
-        // Toggle Dark Mode
         function toggleDarkMode() {
             isDarkMode = !isDarkMode;
-            const body = document.body;
             if (isDarkMode) {
-                body.classList.add('dark-mode');
-                document.getElementById('dark-mode-label').textContent = '🌞';
+                document.documentElement.classList.add('dark');
+                document.getElementById('dark-mode-icon').innerHTML = `
+                    <path fill-rule="evenodd" d="M10 2a1 1 0 011 1v1a7 7 0 01.217 13.967 1 1 0 11-.434 1.936A9 9 0 1010 2z" clip-rule="evenodd" />
+                `;
             } else {
-                body.classList.remove('dark-mode');
-                document.getElementById('dark-mode-label').textContent = '🌙';
+                document.documentElement.classList.remove('dark');
+                document.getElementById('dark-mode-icon').innerHTML = `
+                    <path fill-rule="evenodd" d="M5.05 4.05a7 7 0 119.9 9.9 7 7 0 01-9.9-9.9zM10 12a2 2 0 100-4 2 2 0 000 4z" clip-rule="evenodd" />
+                `;
             }
         }
 
-        // Show Report
         function showReport() {
             const reportModal = document.getElementById('report-modal');
             const reportContent = document.getElementById('report-content');
@@ -994,95 +973,11 @@
             reportModal.classList.remove('hidden');
         }
 
-        // Hide Report
         function hideReport() {
             const reportModal = document.getElementById('report-modal');
             reportModal.classList.add('hidden');
         }
 
-        // Show Global Stats
-        function showGlobalStats() {
-            const modal = document.getElementById('global-stats-modal');
-            const content = document.getElementById('global-stats-content');
-            
-            // Calculate global statistics across all projects
-            let totalProjects = projects.length;
-            let totalTasks = 0;
-            let totalCompletedTasks = 0;
-            let totalTimeSpent = 0;
-            let mostActiveProject = { name: '-', time: 0 };
-            let highestProgress = { name: '-', progress: 0 };
-
-            // Calculate statistics for all projects
-            for (const project of projects) {
-                const projectTotalTime = calculateProjectTotalTime(project.tasks);
-                const projectProgress = calculateProjectProgress(project.tasks);
-                const completedTasks = countTasks(project.tasks, true);
-                const ongoingTasks = countTasks(project.tasks, false);
-
-                totalTasks += completedTasks + ongoingTasks;
-                totalCompletedTasks += completedTasks;
-                totalTimeSpent += projectTotalTime;
-
-                if (projectTotalTime > mostActiveProject.time) {
-                    mostActiveProject = { name: project.name, time: projectTotalTime };
-                }
-                if (projectProgress > highestProgress.progress) {
-                    highestProgress = { name: project.name, progress: projectProgress };
-                }
-            }
-
-            // Create HTML content
-            content.innerHTML = `
-                <div class="grid grid-cols-2 gap-4">
-                    <div class="p-4 bg-gray-50 rounded">
-                        <h3 class="font-bold mb-2">Overview</h3>
-                        <p>Total Projects: ${totalProjects}</p>
-                        <p>Total Tasks: ${totalTasks}</p>
-                        <p>Completed Tasks: ${totalCompletedTasks}</p>
-                        <p>Completion Rate: ${totalTasks ? Math.round((totalCompletedTasks / totalTasks) * 100) : 0}%</p>
-                    </div>
-                    <div class="p-4 bg-gray-50 rounded">
-                        <h3 class="font-bold mb-2">Time Statistics</h3>
-                        <p>Total Time Spent: ${formatTime(totalTimeSpent)}</p>
-                        <p>Average Time per Project: ${formatTime(Math.round(totalTimeSpent / totalProjects))}</p>
-                    </div>
-                </div>
-                <div class="mt-4 p-4 bg-gray-50 rounded">
-                    <h3 class="font-bold mb-2">Project Highlights</h3>
-                    <p>Most Active Project: ${mostActiveProject.name} (${formatTime(mostActiveProject.time)})</p>
-                    <p>Highest Progress: ${highestProgress.name} (${highestProgress.progress}%)</p>
-                </div>
-                <div class="mt-4 p-4 bg-gray-50 rounded">
-                    <h3 class="font-bold mb-2">Project Details</h3>
-                    <div class="space-y-2">
-                        ${projects.map(project => {
-                            const progress = calculateProjectProgress(project.tasks);
-                            const time = calculateProjectTotalTime(project.tasks);
-                            return `
-                                <div class="flex items-center justify-between">
-                                    <span class="font-medium">${project.name}</span>
-                                    <div class="flex items-center gap-4">
-                                        <span>${progress}% complete</span>
-                                        <span>${formatTime(time)}</span>
-                                    </div>
-                                </div>
-                            `;
-                        }).join('')}
-                    </div>
-                </div>
-            `;
-            
-            modal.classList.remove('hidden');
-        }
-
-        // Hide Global Stats
-        function hideGlobalStats() {
-            const modal = document.getElementById('global-stats-modal');
-            modal.classList.add('hidden');
-        }
-
-        // Calculate Total Time
         function calculateTotalTime(tasks) {
             let total = 0;
             tasks.forEach(task => {
@@ -1094,7 +989,6 @@
             return total;
         }
 
-        // Count Tasks
         function countTasks(tasks, isCompleted) {
             let count = 0;
             tasks.forEach(task => {
@@ -1108,19 +1002,16 @@
             return count;
         }
 
-        // Calculate Project Progress
         function calculateProjectProgress(tasks) {
             const totalTasks = countTasks(tasks, true) + countTasks(tasks, false);
             const completedTasks = countTasks(tasks, true);
             return totalTasks === 0 ? 0 : Math.round((completedTasks / totalTasks) * 100);
         }
 
-        // Calculate Project Total Time
         function calculateProjectTotalTime(tasks) {
             return calculateTotalTime(tasks);
         }
 
-        // Initialize the app
         init();
     </script>
 </body>
