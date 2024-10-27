@@ -276,7 +276,7 @@
             }
 
             window.weeklyChart = new Chart(ctx, {
-                type: 'bar',
+                type: 'line',
                 data: {
                     labels: labels,
                     datasets: [{
@@ -284,7 +284,11 @@
                         data: data,
                         backgroundColor: isDarkMode ? 'rgba(59, 130, 246, 0.5)' : 'rgba(59, 130, 246, 0.8)',
                         borderColor: isDarkMode ? 'rgba(59, 130, 246, 0.8)' : 'rgba(59, 130, 246, 1)',
-                        borderWidth: 1
+                        borderWidth: 2,
+                        pointRadius: 5,
+                        pointBackgroundColor: isDarkMode ? 'rgba(59, 130, 246, 0.8)' : 'rgba(59, 130, 246, 1)',
+                        tension: 0.4,
+                        fill: false
                     }]
                 },
                 options: {
@@ -292,6 +296,7 @@
                     scales: {
                         y: {
                             beginAtZero: true,
+                            suggestedMax: Math.max(...data) * 1.1,
                             ticks: {
                                 color: isDarkMode ? '#e5e7eb' : '#374151'
                             },
