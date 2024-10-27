@@ -226,12 +226,44 @@
             projectList.innerHTML = '';
             projects.forEach(project => {
                 const projectDiv = document.createElement('div');
-                projectDiv.className = 'flex items-center justify-between mb-2';
+                projectDiv.className = 'mb-4';
+
+                const headerDiv = document.createElement('div');
+                headerDiv.className = 'flex items-center justify-between mb-1';
 
                 const btn = document.createElement('button');
                 btn.textContent = project.name;
                 btn.className = `flex-grow text-left p-2 rounded mr-2 ${selectedProject && selectedProject.id === project.id ? "bg-blue-500 text-white" : "bg-gray-100 text-black"}`;
                 btn.addEventListener('click', () => selectProject(project.id));
+
+                // Add progress bar and stats container
+                const statsDiv = document.createElement('div');
+                statsDiv.className = 'mt-1 px-2';
+
+                const progressContainer = document.createElement('div');
+                progressContainer.className = 'flex items-center gap-2';
+
+                const progress = calculateProjectProgress(project.tasks);
+                const totalTime = calculateProjectTotalTime(project.tasks);
+
+                const progressBar = document.createElement('div');
+                progressBar.className = 'flex-grow h-2 bg-gray-200 rounded';
+                progressBar.innerHTML = `
+                    <div class="h-full bg-green-500 rounded" style="width: ${progress}%"></div>
+                `;
+
+                const progressText = document.createElement('span');
+                progressText.className = 'text-sm text-gray-600';
+                progressText.textContent = `${progress}%`;
+
+                const timeText = document.createElement('span');
+                timeText.className = 'text-sm text-gray-600 ml-4';
+                timeText.textContent = `Total: ${formatTime(totalTime)}`;
+
+                progressContainer.appendChild(progressBar);
+                progressContainer.appendChild(progressText);
+                progressContainer.appendChild(timeText);
+                statsDiv.appendChild(progressContainer);
 
                 const menuDiv = document.createElement('div');
                 menuDiv.className = 'relative';
@@ -275,8 +307,10 @@
                 document.addEventListener('click', () => {
                     dropdownDiv.classList.add('hidden');
                 });
-                projectDiv.appendChild(btn);
-                projectDiv.appendChild(menuDiv);
+                headerDiv.appendChild(btn);
+                headerDiv.appendChild(menuDiv);
+                projectDiv.appendChild(headerDiv);
+                projectDiv.appendChild(statsDiv);
                 projectList.appendChild(projectDiv);
             });
         }
@@ -664,6 +698,18 @@
                 }
             });
             return count;
+        }
+
+        // Calculate Project Progress
+        function calculateProjectProgress(tasks) {
+            const totalTasks = countTasks(tasks, true) + countTasks(tasks, false);
+            const completedTasks = countTasks(tasks, true);
+            return totalTasks === 0 ? 0 : Math.round((completedTasks / totalTasks) * 100);
+        }
+
+        // Calculate Project Total Time
+        function calculateProjectTotalTime(tasks) {
+            return calculateTotalTime(tasks);
         }
 
         // Initialize the app
