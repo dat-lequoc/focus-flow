@@ -55,8 +55,7 @@
                 </div>
             </div>
             <div id="task-input" class="mb-4">
-                <input id="new-task-title" type="text" placeholder="New task title" class="mb-2 p-2 border rounded w-full">
-                <button id="add-task-btn" class="bg-blue-500 text-white p-2 rounded">Add Task</button>
+                <input id="new-task-title" type="text" placeholder="New task title (Press Enter to add)" class="mb-2 p-2 border rounded w-full">
             </div>
             <div id="task-list" class="h-[calc(100vh-16rem)] overflow-y-auto">
                 <!-- Tasks will be added here -->
@@ -172,7 +171,15 @@
         // Event Listeners
         function setupEventListeners() {
             document.getElementById('add-project-btn').addEventListener('click', addProject);
-            document.getElementById('add-task-btn').addEventListener('click', () => addTask());
+            document.getElementById('new-task-title').addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') {
+                    const title = e.target.value.trim();
+                    if (title) {
+                        addTask(null, title);
+                        e.target.value = '';
+                    }
+                }
+            });
             document.getElementById('dark-mode-toggle').addEventListener('change', toggleDarkMode);
             document.getElementById('report-btn').addEventListener('click', showReport);
             document.getElementById('close-report-btn').addEventListener('click', hideReport);
@@ -555,21 +562,18 @@
 
                 const subtaskInput = document.createElement('input');
                 subtaskInput.type = 'text';
-                subtaskInput.placeholder = 'New subtask title';
+                subtaskInput.placeholder = 'New subtask title (Press Enter to add)';
                 subtaskInput.className = 'mb-2 p-2 border rounded w-full';
-                addSubtaskDiv.appendChild(subtaskInput);
-
-                const addSubtaskBtn = document.createElement('button');
-                addSubtaskBtn.className = 'bg-blue-500 text-white p-2 rounded';
-                addSubtaskBtn.textContent = 'Add Subtask';
-                addSubtaskBtn.addEventListener('click', () => {
-                    const title = subtaskInput.value.trim();
-                    if (title) {
-                        addTask(task.id, title);
-                        subtaskInput.value = '';
+                subtaskInput.addEventListener('keypress', (e) => {
+                    if (e.key === 'Enter') {
+                        const title = subtaskInput.value.trim();
+                        if (title) {
+                            addTask(task.id, title);
+                            subtaskInput.value = '';
+                        }
                     }
                 });
-                addSubtaskDiv.appendChild(addSubtaskBtn);
+                addSubtaskDiv.appendChild(subtaskInput);
 
                 container.appendChild(addSubtaskDiv);
             }
