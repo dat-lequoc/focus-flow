@@ -564,13 +564,13 @@
             const checkbox = document.createElement('input');
             checkbox.type = 'checkbox';
             checkbox.checked = task.isCompleted;
-            checkbox.className = 'mr-2';
+            checkbox.className = 'mr-2 w-5 h-5 cursor-pointer';
             checkbox.addEventListener('change', () => toggleTaskCompletion(task.id));
             leftDiv.appendChild(checkbox);
 
             // Always show expand button for all tasks
             const expandBtn = document.createElement('button');
-            expandBtn.className = 'mr-1 p-0';
+            expandBtn.className = 'mr-1 p-1 text-lg w-6 h-6 hover:bg-gray-100 rounded cursor-pointer flex items-center justify-center';
             expandBtn.innerHTML = task.isExpanded ? '▼' : '►';
             expandBtn.addEventListener('click', () => toggleTaskExpand(task.id));
             leftDiv.appendChild(expandBtn);
