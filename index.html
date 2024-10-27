@@ -57,8 +57,21 @@
             <div id="task-input" class="mb-4">
                 <input id="new-task-title" type="text" placeholder="New task title (Press Enter to add)" class="mb-2 p-2 border rounded w-full">
             </div>
-            <div id="task-list" class="h-[calc(100vh-16rem)] overflow-y-auto">
+            <div id="task-list" class="h-[calc(100vh-20rem)] overflow-y-auto">
                 <!-- Tasks will be added here -->
+            </div>
+            <!-- Pomodoro Timer Display -->
+            <div id="pomodoro-display" class="fixed bottom-0 left-0 right-0 bg-white border-t p-4 hidden">
+                <div class="container mx-auto flex justify-between items-center">
+                    <div class="flex items-center">
+                        <span class="font-bold mr-2">Current Task:</span>
+                        <span id="current-task-title">None</span>
+                    </div>
+                    <div class="flex items-center">
+                        <span id="pomodoro-timer" class="text-2xl font-mono">25:00</span>
+                        <button id="stop-pomodoro" class="ml-4 bg-red-500 text-white px-4 py-2 rounded">Stop</button>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
@@ -81,6 +94,9 @@
         let selectedProject = null;
         let isDarkMode = false;
         let searchTerm = '';
+        let currentPomodoroTask = null;
+        let pomodoroTimer = null;
+        let pomodoroTimeLeft = 25 * 60; // 25 minutes in seconds
 
         // Load initial data from localStorage or default
         function loadInitialData() {
@@ -528,7 +544,7 @@
             const timerBtn = document.createElement('button');
             timerBtn.className = 'p-1 border rounded';
             timerBtn.innerHTML = task.isTimerRunning ? '⏸' : '▶';
-            timerBtn.addEventListener('click', () => toggleTaskTimer(task.id));
+            timerBtn.addEventListener('click', () => startPomodoro(task));
             rightDiv.appendChild(timerBtn);
 
             // Delete button
@@ -619,11 +635,64 @@
             renderTaskList();
         }
 
-        // Toggle Task Timer
-        function toggleTaskTimer(taskId) {
-            toggleTaskProperty(selectedProject.tasks, taskId, 'isTimerRunning');
+        // Pomodoro Timer Functions
+        function startPomodoro(task) {
+            // Stop any existing pomodoro
+            if (currentPomodoroTask) {
+                stopPomodoro();
+            }
+
+            currentPomodoroTask = task;
+            task.isTimerRunning = true;
+            pomodoroTimeLeft = 25 * 60; // 25 minutes in seconds
+
+            // Show the pomodoro display
+            const pomodoroDisplay = document.getElementById('pomodoro-display');
+            pomodoroDisplay.classList.remove('hidden');
+            document.getElementById('current-task-title').textContent = task.title;
+
+            // Start the timer
+            updatePomodoroDisplay();
+            pomodoroTimer = setInterval(() => {
+                pomodoroTimeLeft--;
+                updatePomodoroDisplay();
+                
+                if (pomodoroTimeLeft <= 0) {
+                    stopPomodoro();
+                    alert('Pomodoro completed!');
+                }
+            }, 1000);
+
+            // Setup stop button
+            document.getElementById('stop-pomodoro').onclick = stopPomodoro;
+
             saveData();
             renderTaskList();
+        }
+
+        function stopPomodoro() {
+            if (currentPomodoroTask) {
+                currentPomodoroTask.isTimerRunning = false;
+                currentPomodoroTask = null;
+            }
+            
+            if (pomodoroTimer) {
+                clearInterval(pomodoroTimer);
+                pomodoroTimer = null;
+            }
+
+            // Hide the pomodoro display
+            document.getElementById('pomodoro-display').classList.add('hidden');
+            
+            saveData();
+            renderTaskList();
+        }
+
+        function updatePomodoroDisplay() {
+            const minutes = Math.floor(pomodoroTimeLeft / 60);
+            const seconds = pomodoroTimeLeft % 60;
+            const display = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+            document.getElementById('pomodoro-timer').textContent = display;
         }
 
         // Toggle Task Property
