@@ -328,6 +328,12 @@
             renderProjectList();
             showDashboard();
             setupEventListeners();
+            
+            // Initialize dark mode icon
+            const icon = document.getElementById('dark-mode-icon');
+            icon.innerHTML = isDarkMode ? 
+                '<i class="fas fa-moon"></i>' : 
+                '<i class="fas fa-sun"></i>';
         }
 
         function setupEventListeners() {
@@ -1035,13 +1041,11 @@
 
         function toggleDarkMode() {
             isDarkMode = !isDarkMode;
-            if (isDarkMode) {
-                document.documentElement.classList.add('dark');
-                document.getElementById('dark-mode-icon').innerHTML = `<i class="fas fa-moon"></i>`;
-            } else {
-                document.documentElement.classList.remove('dark');
-                document.getElementById('dark-mode-icon').innerHTML = `<i class="fas fa-sun"></i>`;
-            }
+            document.documentElement.classList.toggle('dark');
+            const icon = document.getElementById('dark-mode-icon');
+            icon.innerHTML = isDarkMode ? 
+                '<i class="fas fa-moon"></i>' : 
+                '<i class="fas fa-sun"></i>';
             renderWeeklyChart();
         }
 
