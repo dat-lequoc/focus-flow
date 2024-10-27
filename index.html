@@ -579,7 +579,30 @@
 
         // Toggle Task Completion
         function toggleTaskCompletion(taskId) {
-            toggleTaskProperty(selectedProject.tasks, taskId, 'isCompleted');
+            const updateTaskAndSubtasks = (tasks, taskId) => {
+                for (let task of tasks) {
+                    if (task.id === taskId) {
+                        task.isCompleted = !task.isCompleted;
+                        // If task is completed, complete all subtasks
+                        if (task.isCompleted) {
+                            task.subtasks.forEach(subtask => {
+                                subtask.isCompleted = true;
+                                if (subtask.subtasks.length > 0) {
+                                    updateTaskAndSubtasks(subtask.subtasks, subtask.id);
+                                }
+                            });
+                        }
+                        return true;
+                    }
+                    if (task.subtasks.length > 0) {
+                        const found = updateTaskAndSubtasks(task.subtasks, taskId);
+                        if (found) return true;
+                    }
+                }
+                return false;
+            };
+
+            updateTaskAndSubtasks(selectedProject.tasks, taskId);
             saveData();
             renderTaskList();
             renderProjectList(); // Update progress bars
