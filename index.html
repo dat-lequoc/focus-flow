@@ -595,6 +595,7 @@
                 subtaskInput.className = 'mb-2 p-2 border rounded w-full';
                 subtaskInput.addEventListener('keypress', (e) => {
                     if (e.key === 'Enter') {
+                        e.preventDefault(); // Prevent form submission
                         const title = subtaskInput.value.trim();
                         if (title) {
                             addTask(task.id, title);
