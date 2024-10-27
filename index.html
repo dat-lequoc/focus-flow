@@ -674,8 +674,25 @@
             if (currentPomodoroTask) {
                 // Calculate elapsed time (25 minutes - remaining time)
                 const elapsedSeconds = (25 * 60) - pomodoroTimeLeft;
-                currentPomodoroTask.timeSpent += elapsedSeconds;
-                currentPomodoroTask.isTimerRunning = false;
+                
+                // Find and update the task in the project structure
+                const updateTaskTime = (tasks, taskId, timeToAdd) => {
+                    for (let task of tasks) {
+                        if (task.id === taskId) {
+                            task.timeSpent += timeToAdd;
+                            task.isTimerRunning = false;
+                            return true;
+                        }
+                        if (task.subtasks.length > 0) {
+                            if (updateTaskTime(task.subtasks, taskId, timeToAdd)) {
+                                return true;
+                            }
+                        }
+                    }
+                    return false;
+                };
+
+                updateTaskTime(selectedProject.tasks, currentPomodoroTask.id, elapsedSeconds);
                 currentPomodoroTask = null;
             }
             
@@ -689,6 +706,7 @@
             
             saveData();
             renderTaskList();
+            renderProjectList(); // Update project progress bars
         }
 
         function updatePomodoroDisplay() {
