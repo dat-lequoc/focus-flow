@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <title>Task Manager</title>
@@ -13,6 +14,7 @@
         }
     </style>
 </head>
+
 <body class="bg-gray-100 text-black">
     <div id="app" class="flex h-screen">
         <!-- Left Sidebar -->
@@ -22,7 +24,8 @@
                 <!-- Project buttons will be added here -->
             </div>
             <div class="mt-4">
-                <input id="new-project-name" type="text" placeholder="New project name" class="mb-2 p-2 border rounded w-full">
+                <input id="new-project-name" type="text" placeholder="New project name"
+                    class="mb-2 p-2 border rounded w-full">
                 <button id="add-project-btn" class="w-full bg-blue-500 text-white p-2 rounded">Add Project</button>
             </div>
         </div>
@@ -35,19 +38,23 @@
                     <!-- Dark mode toggle -->
                     <div class="flex items-center space-x-2">
                         <input type="checkbox" id="dark-mode-toggle">
-                        <label for="dark-mode-toggle" id="dark-mode-label">🌞</label>
+                        <label for="dark-mode-toggle" id="dark-mode-label">🌙</label>
                     </div>
                     <!-- Search -->
                     <div class="flex items-center gap-2">
                         <div class="relative">
-                            <input id="search-input" type="text" placeholder="Search tasks" class="pl-8 p-2 border rounded">
-                            <svg class="absolute left-2 top-1/2 h-4 w-4 -translate-y-1/2 transform text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-4.35-4.35M17 10a7 7 0 11-14 0 7 7 0 0114 0z" />
+                            <input id="search-input" type="text" placeholder="Search tasks"
+                                class="pl-8 p-2 border rounded">
+                            <svg class="absolute left-2 top-1/2 h-4 w-4 -translate-y-1/2 transform text-gray-500"
+                                fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M21 21l-4.35-4.35M17 10a7 7 0 11-14 0 7 7 0 0114 0z" />
                             </svg>
                         </div>
                         <button id="refresh-btn" class="p-2 border rounded" title="Refresh">
                             <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
                             </svg>
                         </button>
                     </div>
@@ -62,7 +69,8 @@
                 </div>
             </div>
             <div id="task-input" class="mb-4">
-                <input id="new-task-title" type="text" placeholder="New task title (Press Enter to add)" class="mb-2 p-2 border rounded w-full">
+                <input id="new-task-title" type="text" placeholder="New task title (Press Enter to add)"
+                    class="mb-2 p-2 border rounded w-full">
             </div>
             <div id="task-list" class="h-[calc(100vh-20rem)] overflow-y-auto">
                 <!-- Tasks will be added here -->
@@ -187,7 +195,6 @@
             if (projects.length > 0) {
                 selectProject(projects[0].id);
             }
-            setInterval(updateTimers, 1000); // Update every second
             setupEventListeners();
         }
 
@@ -479,7 +486,7 @@
                 }
                 return false;
             };
-            
+
             updateTaskTitle(selectedProject.tasks, taskId, newTitle);
             saveData();
             // Delay the re-render slightly to prevent input clearing
@@ -543,7 +550,7 @@
             // Always show expand button for all tasks
             const expandBtn = document.createElement('button');
             expandBtn.className = 'mr-1 p-0';
-            expandBtn.innerHTML = task.isExpanded ? '▼' : '▶';
+            expandBtn.innerHTML = task.isExpanded ? '▼' : '►';
             expandBtn.addEventListener('click', () => toggleTaskExpand(task.id));
             leftDiv.appendChild(expandBtn);
 
@@ -577,7 +584,7 @@
             // Timer button
             const timerBtn = document.createElement('button');
             timerBtn.className = 'p-1 border rounded';
-            timerBtn.innerHTML = task.isTimerRunning ? '⏸' : '▶';
+            timerBtn.innerHTML = task.isTimerRunning ? '⏸️' : '▶️';
             timerBtn.addEventListener('click', () => startPomodoro(task));
             rightDiv.appendChild(timerBtn);
 
@@ -698,7 +705,7 @@
             pomodoroTimer = setInterval(() => {
                 pomodoroTimeLeft--;
                 updatePomodoroDisplay();
-                
+
                 if (pomodoroTimeLeft <= 0) {
                     stopPomodoro();
                     alert('Pomodoro completed!');
@@ -716,7 +723,7 @@
             if (currentPomodoroTask) {
                 // Calculate elapsed time (25 minutes - remaining time)
                 const elapsedSeconds = (25 * 60) - pomodoroTimeLeft;
-                
+
                 // Find and update the task in the project structure
                 const updateTaskTime = (tasks, taskId, timeToAdd) => {
                     for (let task of tasks) {
@@ -737,7 +744,7 @@
                 updateTaskTime(selectedProject.tasks, currentPomodoroTask.id, elapsedSeconds);
                 currentPomodoroTask = null;
             }
-            
+
             if (pomodoroTimer) {
                 clearInterval(pomodoroTimer);
                 pomodoroTimer = null;
@@ -745,7 +752,7 @@
 
             // Hide the pomodoro display
             document.getElementById('pomodoro-display').classList.add('hidden');
-            
+
             saveData();
             renderTaskList();
             renderProjectList(); // Update project progress bars
@@ -772,26 +779,6 @@
             return false;
         }
 
-        // Update Timers
-        function updateTimers() {
-            if (selectedProject) {
-                updateTaskTimers(selectedProject.tasks);
-                saveData();
-                renderTaskList();
-            }
-        }
-
-        function updateTaskTimers(tasks) {
-            tasks.forEach(task => {
-                if (task.isTimerRunning) {
-                    task.timeSpent += 60; // Add 60 seconds since we're now tracking in seconds
-                }
-                if (task.subtasks.length > 0) {
-                    updateTaskTimers(task.subtasks);
-                }
-            });
-        }
-
         // Calculate total time for a task including subtasks
         function calculateTaskTotalTime(task) {
             let total = task.timeSpent;
@@ -815,10 +802,10 @@
             const body = document.body;
             if (isDarkMode) {
                 body.classList.add('dark-mode');
-                document.getElementById('dark-mode-label').textContent = '🌜';
+                document.getElementById('dark-mode-label').textContent = '🌞';
             } else {
                 body.classList.remove('dark-mode');
-                document.getElementById('dark-mode-label').textContent = '🌞';
+                document.getElementById('dark-mode-label').textContent = '🌙';
             }
         }
 
@@ -886,5 +873,5 @@
         init();
     </script>
 </body>
-</html>
 
+</html>

@@ -1,0 +1,5 @@
+.aider*
+.env
+
+*.swo
+*swp
