@@ -6,6 +6,7 @@
     <title>Task Manager</title>
     <!-- Include Tailwind CSS via CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script>
         tailwind.config = {
             darkMode: 'class',
@@ -219,6 +220,103 @@
 
         function generateId() {
             return Math.random().toString(36).substr(2, 9);
+        }
+
+        function getWeeklyTimeData() {
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
+            
+            // Create array of last 7 days centered on today
+            const days = [];
+            for (let i = -3; i <= 3; i++) {
+                const date = new Date(today);
+                date.setDate(date.getDate() + i);
+                days.push({
+                    date: date,
+                    timeSpent: 0
+                });
+            }
+
+            // Calculate time spent for each day
+            projects.forEach(project => {
+                const processTask = (task) => {
+                    if (task.timeEntries) {
+                        task.timeEntries.forEach(entry => {
+                            const entryDate = new Date(entry.start);
+                            entryDate.setHours(0, 0, 0, 0);
+                            
+                            const dayData = days.find(d => 
+                                d.date.getTime() === entryDate.getTime()
+                            );
+                            
+                            if (dayData) {
+                                dayData.timeSpent += entry.duration;
+                            }
+                        });
+                    }
+                    task.subtasks.forEach(processTask);
+                };
+                
+                project.tasks.forEach(processTask);
+            });
+
+            return days;
+        }
+
+        function renderWeeklyChart() {
+            const ctx = document.getElementById('weeklyChart');
+            if (!ctx) return;
+
+            const weekData = getWeeklyTimeData();
+            const labels = weekData.map(d => d.date.toLocaleDateString('en-US', { weekday: 'short' }));
+            const data = weekData.map(d => Math.round(d.timeSpent / 60)); // Convert to minutes
+
+            if (window.weeklyChart) {
+                window.weeklyChart.destroy();
+            }
+
+            window.weeklyChart = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: 'Time Spent (minutes)',
+                        data: data,
+                        backgroundColor: isDarkMode ? 'rgba(59, 130, 246, 0.5)' : 'rgba(59, 130, 246, 0.8)',
+                        borderColor: isDarkMode ? 'rgba(59, 130, 246, 0.8)' : 'rgba(59, 130, 246, 1)',
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: {
+                                color: isDarkMode ? '#e5e7eb' : '#374151'
+                            },
+                            grid: {
+                                color: isDarkMode ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.1)'
+                            }
+                        },
+                        x: {
+                            ticks: {
+                                color: isDarkMode ? '#e5e7eb' : '#374151'
+                            },
+                            grid: {
+                                color: isDarkMode ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.1)'
+                            }
+                        }
+                    },
+                    plugins: {
+                        legend: {
+                            labels: {
+                                color: isDarkMode ? '#e5e7eb' : '#374151'
+                            }
+                        }
+                    }
+                }
+            });
         }
 
         function init() {
@@ -444,6 +542,7 @@
             document.getElementById('dashboard-view').classList.remove('hidden');
             renderDashboard();
             renderProjectList();
+            renderWeeklyChart();
         }
 
         function renderDashboard() {
@@ -497,6 +596,9 @@
                 }
             });
 
+            // Calculate weekly data
+            const weekData = getWeeklyTimeData();
+            
             dashboardView.innerHTML = `
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div class="p-4 bg-white rounded-lg shadow dark:bg-gray-800 dark:text-gray-200">
@@ -517,6 +619,10 @@
                     <h3 class="font-bold mb-2 text-lg">Project Highlights</h3>
                     <p class="mb-2">Most Active Project: ${mostActiveProject.name} (${formatTime(mostActiveProject.time)})</p>
                     <p>Highest Progress: ${highestProgress.name} (${highestProgress.progress}%)</p>
+                </div>
+                <div class="mt-4 p-4 bg-white rounded-lg shadow dark:bg-gray-800 dark:text-gray-200">
+                    <h3 class="font-bold mb-2 text-lg">Weekly Activity</h3>
+                    <canvas id="weeklyChart"></canvas>
                 </div>
             `;
         }
@@ -938,6 +1044,7 @@
                     <path fill-rule="evenodd" d="M5.05 4.05a7 7 0 119.9 9.9 7 7 0 01-9.9-9.9zM10 12a2 2 0 100-4 2 2 0 000 4z" clip-rule="evenodd" />
                 `;
             }
+            renderWeeklyChart();
         }
 
         function showReport() {
