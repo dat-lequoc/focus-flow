@@ -615,34 +615,26 @@
 
             dashboardView.innerHTML = `
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div class="flex flex-col">
+                    <div class="flex flex-col gap-6">
                         <div class="p-6 bg-white rounded-lg shadow dark:bg-gray-800 dark:text-gray-200">
                             <h3 class="text-xl font-bold mb-4">Total Time Investment</h3>
                             <p class="text-4xl font-bold text-blue-600 dark:text-blue-400">
                                 ${(totalTimeSpent / 3600).toFixed(1)}h
                             </p>
                         </div>
-                        <div class="mt-6 p-6 bg-white rounded-lg shadow dark:bg-gray-800 dark:text-gray-200">
-                            <h3 class="text-xl font-bold mb-4">Today's Tasks</h3>
-                            <div class="space-y-3">
-                                ${projects.flatMap(project => 
-                                    project.tasks.filter(task => !task.isCompleted)
-                                    .map(task => `
-                                        <div class="flex items-center justify-between p-2 bg-gray-50 rounded dark:bg-gray-700">
-                                            <span class="text-sm">${task.title}</span>
-                                            <span class="text-xs text-gray-500 dark:text-gray-400">${project.name}</span>
-                                        </div>
-                                    `)
-                                ).join('')}
+                        <div class="p-6 bg-white rounded-lg shadow dark:bg-gray-800 dark:text-gray-200">
+                            <h3 class="font-bold mb-2 text-lg">Weekly Activity</h3>
+                            <div style="height: 400px;">
+                                <canvas id="weeklyChart"></canvas>
                             </div>
                         </div>
                     </div>
-                <div class="p-6 bg-white rounded-lg shadow dark:bg-gray-800 dark:text-gray-200">
-                    <h3 class="font-bold mb-2 text-lg">Weekly Activity</h3>
-                    <div style="height: 400px;">
-                        <canvas id="weeklyChart"></canvas>
+                    <div class="p-6 bg-white rounded-lg shadow dark:bg-gray-800 dark:text-gray-200">
+                        <h3 class="text-xl font-bold mb-4">Today's Tasks</h3>
+                        <div class="space-y-3">
+                            <!-- Tasks will be added dynamically -->
+                        </div>
                     </div>
-                </div>
             `;
         }
 
