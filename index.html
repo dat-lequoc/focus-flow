@@ -582,6 +582,7 @@
             toggleTaskProperty(selectedProject.tasks, taskId, 'isCompleted');
             saveData();
             renderTaskList();
+            renderProjectList(); // Update progress bars
         }
 
         // Toggle Task Expand/Collapse
