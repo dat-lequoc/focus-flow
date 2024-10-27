@@ -525,7 +525,8 @@
             rightDiv.className = 'flex items-center space-x-2';
 
             const timeSpan = document.createElement('span');
-            timeSpan.textContent = formatTime(task.timeSpent);
+            const totalTime = calculateTaskTotalTime(task);
+            timeSpan.textContent = formatTime(totalTime);
             rightDiv.appendChild(timeSpan);
 
             // Edit button
@@ -748,6 +749,15 @@
                     updateTaskTimers(task.subtasks);
                 }
             });
+        }
+
+        // Calculate total time for a task including subtasks
+        function calculateTaskTotalTime(task) {
+            let total = task.timeSpent;
+            task.subtasks.forEach(subtask => {
+                total += calculateTaskTotalTime(subtask);
+            });
+            return total;
         }
 
         // Format Time
