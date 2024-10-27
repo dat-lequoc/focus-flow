@@ -82,14 +82,22 @@
                             </svg>
                         </button>
                     </div>
-                    <!-- Report button -->
-                    <button id="report-btn" class="p-2 border rounded">
-                        <!-- Bar chart icon -->
-                        <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3v18h18" />
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12h18" />
-                        </svg>
-                    </button>
+                    <!-- Report buttons -->
+                    <div class="flex gap-2">
+                        <button id="global-stats-btn" class="p-2 border rounded" title="Global Statistics">
+                            <!-- Globe icon -->
+                            <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                            </svg>
+                        </button>
+                        <button id="report-btn" class="p-2 border rounded" title="Project Report">
+                            <!-- Bar chart icon -->
+                            <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3v18h18" />
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12h18" />
+                            </svg>
+                        </button>
+                    </div>
                 </div>
             </div>
             <div id="task-input" class="mb-4">
@@ -123,6 +131,17 @@
                 <!-- Report content will be added here -->
             </div>
             <button id="close-report-btn" class="mt-4 bg-blue-500 text-white p-2 rounded">Close</button>
+        </div>
+    </div>
+
+    <!-- Global Stats Modal -->
+    <div id="global-stats-modal" class="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 hidden">
+        <div class="bg-white p-6 rounded max-w-2xl w-full">
+            <h2 class="text-xl font-bold mb-4">Global Statistics</h2>
+            <div id="global-stats-content" class="space-y-4">
+                <!-- Global stats content will be added here -->
+            </div>
+            <button id="close-global-stats-btn" class="mt-4 bg-blue-500 text-white p-2 rounded">Close</button>
         </div>
     </div>
 
@@ -243,6 +262,8 @@
             document.getElementById('dark-mode-toggle').addEventListener('change', toggleDarkMode);
             document.getElementById('report-btn').addEventListener('click', showReport);
             document.getElementById('close-report-btn').addEventListener('click', hideReport);
+            document.getElementById('global-stats-btn').addEventListener('click', showGlobalStats);
+            document.getElementById('close-global-stats-btn').addEventListener('click', hideGlobalStats);
             document.getElementById('search-input').addEventListener('input', (e) => {
                 searchTerm = e.target.value.toLowerCase();
                 renderTaskList();
@@ -868,6 +889,87 @@
         function hideReport() {
             const reportModal = document.getElementById('report-modal');
             reportModal.classList.add('hidden');
+        }
+
+        // Show Global Stats
+        function showGlobalStats() {
+            const modal = document.getElementById('global-stats-modal');
+            const content = document.getElementById('global-stats-content');
+            
+            // Calculate global statistics
+            let totalProjects = projects.length;
+            let totalTasks = 0;
+            let totalCompletedTasks = 0;
+            let totalTimeSpent = 0;
+            let mostActiveProject = { name: '-', time: 0 };
+            let highestProgress = { name: '-', progress: 0 };
+
+            projects.forEach(project => {
+                const projectTotalTime = calculateProjectTotalTime(project.tasks);
+                const projectProgress = calculateProjectProgress(project.tasks);
+                const completedTasks = countTasks(project.tasks, true);
+                const ongoingTasks = countTasks(project.tasks, false);
+
+                totalTasks += completedTasks + ongoingTasks;
+                totalCompletedTasks += completedTasks;
+                totalTimeSpent += projectTotalTime;
+
+                if (projectTotalTime > mostActiveProject.time) {
+                    mostActiveProject = { name: project.name, time: projectTotalTime };
+                }
+                if (projectProgress > highestProgress.progress) {
+                    highestProgress = { name: project.name, progress: projectProgress };
+                }
+            });
+
+            // Create HTML content
+            content.innerHTML = `
+                <div class="grid grid-cols-2 gap-4">
+                    <div class="p-4 bg-gray-50 rounded">
+                        <h3 class="font-bold mb-2">Overview</h3>
+                        <p>Total Projects: ${totalProjects}</p>
+                        <p>Total Tasks: ${totalTasks}</p>
+                        <p>Completed Tasks: ${totalCompletedTasks}</p>
+                        <p>Completion Rate: ${totalTasks ? Math.round((totalCompletedTasks / totalTasks) * 100) : 0}%</p>
+                    </div>
+                    <div class="p-4 bg-gray-50 rounded">
+                        <h3 class="font-bold mb-2">Time Statistics</h3>
+                        <p>Total Time Spent: ${formatTime(totalTimeSpent)}</p>
+                        <p>Average Time per Project: ${formatTime(Math.round(totalTimeSpent / totalProjects))}</p>
+                    </div>
+                </div>
+                <div class="mt-4 p-4 bg-gray-50 rounded">
+                    <h3 class="font-bold mb-2">Project Highlights</h3>
+                    <p>Most Active Project: ${mostActiveProject.name} (${formatTime(mostActiveProject.time)})</p>
+                    <p>Highest Progress: ${highestProgress.name} (${highestProgress.progress}%)</p>
+                </div>
+                <div class="mt-4 p-4 bg-gray-50 rounded">
+                    <h3 class="font-bold mb-2">Project Details</h3>
+                    <div class="space-y-2">
+                        ${projects.map(project => {
+                            const progress = calculateProjectProgress(project.tasks);
+                            const time = calculateProjectTotalTime(project.tasks);
+                            return `
+                                <div class="flex items-center justify-between">
+                                    <span class="font-medium">${project.name}</span>
+                                    <div class="flex items-center gap-4">
+                                        <span>${progress}% complete</span>
+                                        <span>${formatTime(time)}</span>
+                                    </div>
+                                </div>
+                            `;
+                        }).join('')}
+                    </div>
+                </div>
+            `;
+            
+            modal.classList.remove('hidden');
+        }
+
+        // Hide Global Stats
+        function hideGlobalStats() {
+            const modal = document.getElementById('global-stats-modal');
+            modal.classList.add('hidden');
         }
 
         // Calculate Total Time
