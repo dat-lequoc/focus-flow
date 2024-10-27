@@ -518,24 +518,6 @@
                     <p class="mb-2">Most Active Project: ${mostActiveProject.name} (${formatTime(mostActiveProject.time)})</p>
                     <p>Highest Progress: ${highestProgress.name} (${highestProgress.progress}%)</p>
                 </div>
-                <div class="mt-4">
-                    <h3 class="font-bold mb-2 text-lg">Projects</h3>
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        ${projects.map(project => `
-                            <div class="p-4 bg-white rounded-lg shadow dark:bg-gray-800 dark:text-gray-200">
-                                <h4 class="font-bold mb-2">${project.name}</h4>
-                                <div class="mb-2">
-                                    <div class="h-2 bg-gray-200 rounded dark:bg-gray-600">
-                                        <div class="h-full bg-blue-500 rounded" style="width: ${calculateProjectProgress(project.tasks)}%"></div>
-                                    </div>
-                                    <p class="text-sm text-gray-600 dark:text-gray-400 mt-1">${calculateProjectProgress(project.tasks)}% completed</p>
-                                </div>
-                                <p class="text-sm text-gray-600 dark:text-gray-400">Total Time: ${formatTime(calculateProjectTotalTime(project.tasks))}</p>
-                                <button onclick="selectProject('${project.id}')" class="mt-2 bg-blue-500 text-white px-4 py-2 rounded">View Project</button>
-                            </div>
-                        `).join('')}
-                    </div>
-                </div>
             `;
         }
 
