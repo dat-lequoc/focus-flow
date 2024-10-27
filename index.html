@@ -973,7 +973,7 @@
             const modal = document.getElementById('global-stats-modal');
             const content = document.getElementById('global-stats-content');
             
-            // Calculate global statistics
+            // Calculate global statistics across all projects
             let totalProjects = projects.length;
             let totalTasks = 0;
             let totalCompletedTasks = 0;
@@ -981,7 +981,8 @@
             let mostActiveProject = { name: '-', time: 0 };
             let highestProgress = { name: '-', progress: 0 };
 
-            projects.forEach(project => {
+            // Calculate statistics for all projects
+            for (const project of projects) {
                 const projectTotalTime = calculateProjectTotalTime(project.tasks);
                 const projectProgress = calculateProjectProgress(project.tasks);
                 const completedTasks = countTasks(project.tasks, true);
@@ -997,7 +998,7 @@
                 if (projectProgress > highestProgress.progress) {
                     highestProgress = { name: project.name, progress: projectProgress };
                 }
-            });
+            }
 
             // Create HTML content
             content.innerHTML = `
