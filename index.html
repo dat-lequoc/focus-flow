@@ -201,6 +201,11 @@
         // Event Listeners
         function setupEventListeners() {
             document.getElementById('add-project-btn').addEventListener('click', addProject);
+            document.getElementById('new-project-name').addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') {
+                    addProject();
+                }
+            });
             document.getElementById('new-task-title').addEventListener('keypress', (e) => {
                 if (e.key === 'Enter') {
                     const title = e.target.value.trim();
