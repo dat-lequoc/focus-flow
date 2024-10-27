@@ -482,39 +482,55 @@
         // Render Dashboard
         function renderDashboard() {
             const dashboardView = document.getElementById('dashboard-view');
-            dashboardView.innerHTML = '';
+            
+            // Calculate global statistics
+            let totalProjects = projects.length;
+            let totalTasks = 0;
+            let totalCompletedTasks = 0;
+            let totalTimeSpent = 0;
+            let mostActiveProject = { name: '-', time: 0 };
+            let highestProgress = { name: '-', progress: 0 };
 
-            // Create project cards
             projects.forEach(project => {
-                const progress = calculateProjectProgress(project.tasks);
-                const totalTime = calculateProjectTotalTime(project.tasks);
+                const projectTotalTime = calculateProjectTotalTime(project.tasks);
+                const projectProgress = calculateProjectProgress(project.tasks);
                 const completedTasks = countTasks(project.tasks, true);
                 const ongoingTasks = countTasks(project.tasks, false);
 
-                const card = document.createElement('div');
-                card.className = 'bg-white p-6 rounded-lg shadow-md hover:shadow-lg transition-shadow duration-200 cursor-pointer';
-                card.onclick = () => selectProject(project.id);
+                totalTasks += completedTasks + ongoingTasks;
+                totalCompletedTasks += completedTasks;
+                totalTimeSpent += projectTotalTime;
 
-                card.innerHTML = `
-                    <div class="flex justify-between items-start mb-4">
-                        <h3 class="text-lg font-bold text-gray-800">${project.name}</h3>
-                        <span class="text-sm font-medium ${progress === 100 ? 'text-green-500' : 'text-blue-500'}">
-                            ${progress}%
-                        </span>
-                    </div>
-                    <div class="space-y-2">
-                        <div class="w-full bg-gray-200 rounded-full h-2">
-                            <div class="bg-blue-500 rounded-full h-2" style="width: ${progress}%"></div>
-                        </div>
-                        <div class="flex justify-between text-sm text-gray-600">
-                            <span>Tasks: ${completedTasks}/${completedTasks + ongoingTasks}</span>
-                            <span>${formatTime(totalTime)}</span>
-                        </div>
-                    </div>
-                `;
-
-                dashboardView.appendChild(card);
+                if (projectTotalTime > mostActiveProject.time) {
+                    mostActiveProject = { name: project.name, time: projectTotalTime };
+                }
+                if (projectProgress > highestProgress.progress) {
+                    highestProgress = { name: project.name, progress: projectProgress };
+                }
             });
+
+            // Create dashboard content
+            dashboardView.innerHTML = `
+                <div class="grid grid-cols-2 gap-4">
+                    <div class="p-4 bg-white rounded-lg shadow">
+                        <h3 class="font-bold mb-2 text-lg">Overview</h3>
+                        <p class="mb-2">Total Projects: ${totalProjects}</p>
+                        <p class="mb-2">Total Tasks: ${totalTasks}</p>
+                        <p class="mb-2">Completed Tasks: ${totalCompletedTasks}</p>
+                        <p>Completion Rate: ${totalTasks ? Math.round((totalCompletedTasks / totalTasks) * 100) : 0}%</p>
+                    </div>
+                    <div class="p-4 bg-white rounded-lg shadow">
+                        <h3 class="font-bold mb-2 text-lg">Time Statistics</h3>
+                        <p class="mb-2">Total Time Spent: ${formatTime(totalTimeSpent)}</p>
+                        <p>Average Time per Project: ${formatTime(Math.round(totalTimeSpent / totalProjects))}</p>
+                    </div>
+                </div>
+                <div class="mt-4 p-4 bg-white rounded-lg shadow">
+                    <h3 class="font-bold mb-2 text-lg">Project Highlights</h3>
+                    <p class="mb-2">Most Active Project: ${mostActiveProject.name} (${formatTime(mostActiveProject.time)})</p>
+                    <p>Highest Progress: ${highestProgress.name} (${highestProgress.progress}%)</p>
+                </div>
+            `;
         }
 
         // Add Task
