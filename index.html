@@ -330,10 +330,15 @@
             setupEventListeners();
             
             // Initialize dark mode icon
+            isDarkMode = document.documentElement.classList.contains('dark');
             const icon = document.getElementById('dark-mode-icon');
-            icon.innerHTML = isDarkMode ? 
-                '<i class="fas fa-moon"></i>' : 
-                '<i class="fas fa-sun"></i>';
+            if (isDarkMode) {
+                icon.classList.remove('fa-sun');
+                icon.classList.add('fa-moon');
+            } else {
+                icon.classList.remove('fa-moon');
+                icon.classList.add('fa-sun');
+            }
         }
 
         function setupEventListeners() {
@@ -1043,9 +1048,15 @@
             isDarkMode = !isDarkMode;
             document.documentElement.classList.toggle('dark');
             const icon = document.getElementById('dark-mode-icon');
-            icon.innerHTML = isDarkMode ? 
-                '<i class="fas fa-moon"></i>' : 
-                '<i class="fas fa-sun"></i>';
+            
+            if (isDarkMode) {
+                icon.classList.remove('fa-sun');
+                icon.classList.add('fa-moon');
+            } else {
+                icon.classList.remove('fa-moon');
+                icon.classList.add('fa-sun');
+            }
+            
             renderWeeklyChart();
         }
 
