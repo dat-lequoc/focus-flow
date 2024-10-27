@@ -53,11 +53,10 @@
             <div class="flex justify-between items-center mb-6">
                 <h1 id="project-title" class="text-2xl font-bold"></h1>
                 <div class="flex items-center space-x-4">
-                    <!-- Dark mode toggle -->
-                    <div class="flex items-center space-x-2">
-                        <input type="checkbox" id="dark-mode-toggle">
-                        <label for="dark-mode-toggle" id="dark-mode-label">🌙</label>
-                    </div>
+                    <!-- Dark mode button -->
+                    <button id="dark-mode-toggle" class="p-2 border rounded" title="Toggle Dark Mode">
+                        <span id="dark-mode-label">🌙</span>
+                    </button>
                     <!-- Home button -->
                     <button id="home-btn" class="p-2 border rounded" title="Home" onclick="showDashboard()">
                         <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -270,7 +269,7 @@
                     }
                 }
             });
-            document.getElementById('dark-mode-toggle').addEventListener('change', toggleDarkMode);
+            document.getElementById('dark-mode-toggle').addEventListener('click', toggleDarkMode);
             document.getElementById('report-btn').addEventListener('click', showReport);
             document.getElementById('close-report-btn').addEventListener('click', hideReport);
             document.getElementById('global-stats-btn').addEventListener('click', showGlobalStats);
@@ -934,8 +933,8 @@
         }
 
         // Toggle Dark Mode
-        function toggleDarkMode(e) {
-            isDarkMode = e.target.checked;
+        function toggleDarkMode() {
+            isDarkMode = !isDarkMode;
             const body = document.body;
             if (isDarkMode) {
                 body.classList.add('dark-mode');
