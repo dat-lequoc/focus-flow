@@ -614,27 +614,30 @@
             const weekData = getWeeklyTimeData();
 
             dashboardView.innerHTML = `
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div class="p-4 bg-white rounded-lg shadow dark:bg-gray-800 dark:text-gray-200">
-                        <h3 class="font-bold mb-2 text-lg">Overview</h3>
-                        <p class="mb-2">Total Projects: ${totalProjects}</p>
-                        <p class="mb-2">Total Tasks: ${totalTasks}</p>
-                        <p class="mb-2">Completed Tasks: ${totalCompletedTasks}</p>
-                        <p>Completion Rate: ${totalTasks ? Math.round((totalCompletedTasks / totalTasks) * 100) : 0}%</p>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div class="flex flex-col">
+                        <div class="p-6 bg-white rounded-lg shadow dark:bg-gray-800 dark:text-gray-200">
+                            <h3 class="text-xl font-bold mb-4">Total Time Investment</h3>
+                            <p class="text-4xl font-bold text-blue-600 dark:text-blue-400">
+                                ${(totalTimeSpent / 3600).toFixed(1)}h
+                            </p>
+                        </div>
+                        <div class="mt-6 p-6 bg-white rounded-lg shadow dark:bg-gray-800 dark:text-gray-200">
+                            <h3 class="text-xl font-bold mb-4">Today's Tasks</h3>
+                            <div class="space-y-3">
+                                ${projects.flatMap(project => 
+                                    project.tasks.filter(task => !task.isCompleted)
+                                    .map(task => `
+                                        <div class="flex items-center justify-between p-2 bg-gray-50 rounded dark:bg-gray-700">
+                                            <span class="text-sm">${task.title}</span>
+                                            <span class="text-xs text-gray-500 dark:text-gray-400">${project.name}</span>
+                                        </div>
+                                    `)
+                                ).join('')}
+                            </div>
+                        </div>
                     </div>
-                    <div class="p-4 bg-white rounded-lg shadow dark:bg-gray-800 dark:text-gray-200">
-                        <h3 class="font-bold mb-2 text-lg">Time Statistics</h3>
-                        <p class="mb-2">Total Time Spent: ${formatTime(totalTimeSpent)}</p>
-                        <p>Average Time per Project: ${formatTime(totalProjects ? Math.round(totalTimeSpent / totalProjects) : 0)}</p>
-                        <p>Time Spent Today: ${formatTime(todayTimeSpent)}</p>
-                    </div>
-                </div>
-                <div class="mt-4 p-4 bg-white rounded-lg shadow dark:bg-gray-800 dark:text-gray-200">
-                    <h3 class="font-bold mb-2 text-lg">Project Highlights</h3>
-                    <p class="mb-2">Most Active Project: ${mostActiveProject.name} (${formatTime(mostActiveProject.time)})</p>
-                    <p>Highest Progress: ${highestProgress.name} (${highestProgress.progress}%)</p>
-                </div>
-                <div class="mt-4 p-4 bg-white rounded-lg shadow dark:bg-gray-800 dark:text-gray-200">
+                <div class="p-6 bg-white rounded-lg shadow dark:bg-gray-800 dark:text-gray-200">
                     <h3 class="font-bold mb-2 text-lg">Weekly Activity</h3>
                     <div style="height: 400px;">
                         <canvas id="weeklyChart"></canvas>
