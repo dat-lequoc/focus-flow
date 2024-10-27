@@ -180,7 +180,7 @@
             if (projects.length > 0) {
                 selectProject(projects[0].id);
             }
-            setInterval(updateTimers, 60000); // Update every minute
+            setInterval(updateTimers, 1000); // Update every second
             setupEventListeners();
         }
 
@@ -721,7 +721,7 @@
         function updateTaskTimers(tasks) {
             tasks.forEach(task => {
                 if (task.isTimerRunning) {
-                    task.timeSpent += 1;
+                    task.timeSpent += 60; // Add 60 seconds since we're now tracking in seconds
                 }
                 if (task.subtasks.length > 0) {
                     updateTaskTimers(task.subtasks);
@@ -730,10 +730,11 @@
         }
 
         // Format Time
-        function formatTime(minutes) {
-            const hours = Math.floor(minutes / 60);
-            const mins = minutes % 60;
-            return `${hours}h ${mins}m`;
+        function formatTime(seconds) {
+            const hours = Math.floor(seconds / 3600);
+            const minutes = Math.floor((seconds % 3600) / 60);
+            const secs = seconds % 60;
+            return `${hours}h ${minutes}m ${secs}s`;
         }
 
         // Toggle Dark Mode
