@@ -35,8 +35,13 @@
     <div id="app" class="flex h-screen">
         <!-- Left Sidebar -->
         <div id="sidebar" class="w-64 border-r p-4 bg-white shadow-lg">
-            <h2 class="mb-6 text-xl font-bold text-gray-800">Projects</h2>
-            <div id="project-list" class="h-[calc(100vh-12rem)] overflow-y-auto">
+            <div class="flex flex-col space-y-4">
+                <button id="home-btn" class="w-full bg-blue-500 hover:bg-blue-600 text-white p-2 rounded-lg shadow-sm transition-all duration-200">
+                    🏠 Home
+                </button>
+                <h2 class="text-xl font-bold text-gray-800">Projects</h2>
+            </div>
+            <div id="project-list" class="mt-4 h-[calc(100vh-14rem)] overflow-y-auto">
                 <!-- Project buttons will be added here -->
             </div>
             <div class="mt-4">
@@ -100,12 +105,17 @@
                     </div>
                 </div>
             </div>
-            <div id="task-input" class="mb-4">
-                <input id="new-task-title" type="text" placeholder="New task title (Press Enter to add)"
-                    class="mb-4 p-3 border rounded-lg w-full shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all">
+            <div id="dashboard-view" class="grid grid-cols-2 gap-6">
+                <!-- Dashboard content will be added here -->
             </div>
-            <div id="task-list" class="h-[calc(100vh-20rem)] overflow-y-auto">
-                <!-- Tasks will be added here -->
+            <div id="project-view" class="hidden">
+                <div id="task-input" class="mb-4">
+                    <input id="new-task-title" type="text" placeholder="New task title (Press Enter to add)"
+                        class="mb-4 p-3 border rounded-lg w-full shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all">
+                </div>
+                <div id="task-list" class="h-[calc(100vh-20rem)] overflow-y-auto">
+                    <!-- Tasks will be added here -->
+                </div>
             </div>
             <!-- Pomodoro Timer Display -->
             <div id="pomodoro-display" class="fixed bottom-0 left-0 right-0 bg-white border-t p-4 hidden">
@@ -236,14 +246,13 @@
         function init() {
             loadInitialData();
             renderProjectList();
-            if (projects.length > 0) {
-                selectProject(projects[0].id);
-            }
+            showDashboard();
             setupEventListeners();
         }
 
         // Event Listeners
         function setupEventListeners() {
+            document.getElementById('home-btn').addEventListener('click', showDashboard);
             document.getElementById('add-project-btn').addEventListener('click', addProject);
             document.getElementById('new-project-name').addEventListener('keypress', (e) => {
                 if (e.key === 'Enter') {
@@ -452,8 +461,58 @@
         function selectProject(projectId) {
             selectedProject = projects.find(p => p.id === projectId);
             document.getElementById('project-title').textContent = selectedProject.name;
+            document.getElementById('dashboard-view').classList.add('hidden');
+            document.getElementById('project-view').classList.remove('hidden');
             renderProjectList();
             renderTaskList();
+        }
+
+        // Show Dashboard
+        function showDashboard() {
+            selectedProject = null;
+            document.getElementById('project-title').textContent = 'Dashboard';
+            document.getElementById('project-view').classList.add('hidden');
+            document.getElementById('dashboard-view').classList.remove('hidden');
+            renderDashboard();
+            renderProjectList();
+        }
+
+        // Render Dashboard
+        function renderDashboard() {
+            const dashboardView = document.getElementById('dashboard-view');
+            dashboardView.innerHTML = '';
+
+            // Create project cards
+            projects.forEach(project => {
+                const progress = calculateProjectProgress(project.tasks);
+                const totalTime = calculateProjectTotalTime(project.tasks);
+                const completedTasks = countTasks(project.tasks, true);
+                const ongoingTasks = countTasks(project.tasks, false);
+
+                const card = document.createElement('div');
+                card.className = 'bg-white p-6 rounded-lg shadow-md hover:shadow-lg transition-shadow duration-200 cursor-pointer';
+                card.onclick = () => selectProject(project.id);
+
+                card.innerHTML = `
+                    <div class="flex justify-between items-start mb-4">
+                        <h3 class="text-lg font-bold text-gray-800">${project.name}</h3>
+                        <span class="text-sm font-medium ${progress === 100 ? 'text-green-500' : 'text-blue-500'}">
+                            ${progress}%
+                        </span>
+                    </div>
+                    <div class="space-y-2">
+                        <div class="w-full bg-gray-200 rounded-full h-2">
+                            <div class="bg-blue-500 rounded-full h-2" style="width: ${progress}%"></div>
+                        </div>
+                        <div class="flex justify-between text-sm text-gray-600">
+                            <span>Tasks: ${completedTasks}/${completedTasks + ongoingTasks}</span>
+                            <span>${formatTime(totalTime)}</span>
+                        </div>
+                    </div>
+                `;
+
+                dashboardView.appendChild(card);
+            });
         }
 
         // Add Task
