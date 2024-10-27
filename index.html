@@ -492,10 +492,22 @@
         // Create Task Element
         function createTaskElement(task, level = 0) {
             const container = document.createElement('div');
-            container.style.marginLeft = `${level * 16}px`;
+            container.style.marginLeft = `${level * 24}px`;
 
             const taskDiv = document.createElement('div');
-            taskDiv.className = 'flex items-center justify-between py-2';
+            taskDiv.className = 'flex items-center justify-between py-2 relative';
+
+            // Add vertical line for subtasks
+            if (level > 0) {
+                const verticalLine = document.createElement('div');
+                verticalLine.className = 'absolute left-[-20px] top-0 bottom-0 border-l-2 border-gray-300';
+                taskDiv.appendChild(verticalLine);
+
+                // Add horizontal line
+                const horizontalLine = document.createElement('div');
+                horizontalLine.className = 'absolute left-[-20px] top-1/2 w-[12px] border-t-2 border-gray-300';
+                taskDiv.appendChild(horizontalLine);
+            }
 
             const leftDiv = document.createElement('div');
             leftDiv.className = 'flex items-center';
