@@ -1,0 +1,531 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Task Manager</title>
+    <!-- Include Tailwind CSS via CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* Custom styles for dark mode toggle */
+        .dark-mode {
+            background-color: #1a202c;
+            color: #a0aec0;
+        }
+    </style>
+</head>
+<body class="bg-gray-100 text-black">
+    <div id="app" class="flex h-screen">
+        <!-- Left Sidebar -->
+        <div id="sidebar" class="w-64 border-r p-4 bg-white">
+            <h2 class="mb-4 text-lg font-semibold">Projects</h2>
+            <div id="project-list" class="h-[calc(100vh-12rem)] overflow-y-auto">
+                <!-- Project buttons will be added here -->
+            </div>
+            <div class="mt-4">
+                <input id="new-project-name" type="text" placeholder="New project name" class="mb-2 p-2 border rounded w-full">
+                <button id="add-project-btn" class="w-full bg-blue-500 text-white p-2 rounded">Add Project</button>
+            </div>
+        </div>
+
+        <!-- Main Panel -->
+        <div id="main-panel" class="flex-1 p-6">
+            <div class="flex justify-between items-center mb-6">
+                <h1 id="project-title" class="text-2xl font-bold"></h1>
+                <div class="flex items-center space-x-4">
+                    <!-- Dark mode toggle -->
+                    <div class="flex items-center space-x-2">
+                        <input type="checkbox" id="dark-mode-toggle">
+                        <label for="dark-mode-toggle" id="dark-mode-label">🌞</label>
+                    </div>
+                    <!-- Search -->
+                    <div class="relative">
+                        <input id="search-input" type="text" placeholder="Search tasks" class="pl-8 p-2 border rounded">
+                        <svg class="absolute left-2 top-1/2 h-4 w-4 -translate-y-1/2 transform text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-4.35-4.35M17 10a7 7 0 11-14 0 7 7 0 0114 0z" />
+                        </svg>
+                    </div>
+                    <!-- Report button -->
+                    <button id="report-btn" class="p-2 border rounded">
+                        <!-- Bar chart icon -->
+                        <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3v18h18" />
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12h18" />
+                        </svg>
+                    </button>
+                </div>
+            </div>
+            <div id="task-input" class="mb-4">
+                <input id="new-task-title" type="text" placeholder="New task title" class="mb-2 p-2 border rounded w-full">
+                <button id="add-task-btn" class="bg-blue-500 text-white p-2 rounded">Add Task</button>
+            </div>
+            <div id="task-list" class="h-[calc(100vh-16rem)] overflow-y-auto">
+                <!-- Tasks will be added here -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Report Modal -->
+    <div id="report-modal" class="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 hidden">
+        <div class="bg-white p-6 rounded">
+            <h2 class="text-xl font-bold mb-4">Project Report</h2>
+            <div id="report-content">
+                <!-- Report content will be added here -->
+            </div>
+            <button id="close-report-btn" class="mt-4 bg-blue-500 text-white p-2 rounded">Close</button>
+        </div>
+    </div>
+
+    <!-- JavaScript -->
+    <script>
+        // Data Structures
+        let projects = [];
+        let selectedProject = null;
+        let isDarkMode = false;
+        let searchTerm = '';
+
+        // Load initial data from localStorage or default
+        function loadInitialData() {
+            const savedData = localStorage.getItem('taskManagerData');
+            if (savedData) {
+                projects = JSON.parse(savedData);
+            } else {
+                projects = [
+                    {
+                        id: generateId(),
+                        name: "Website Redesign",
+                        tasks: [
+                            {
+                                id: generateId(),
+                                title: "Create Wireframes",
+                                timeSpent: 0,
+                                isTimerRunning: false,
+                                isExpanded: false,
+                                isCompleted: false,
+                                subtasks: [
+                                    { id: generateId(), title: "Homepage Layout", timeSpent: 0, isTimerRunning: false, isExpanded: false, isCompleted: false, subtasks: [] },
+                                    { id: generateId(), title: "Contact Page Design", timeSpent: 0, isTimerRunning: false, isExpanded: false, isCompleted: false, subtasks: [] }
+                                ]
+                            },
+                            {
+                                id: generateId(),
+                                title: "Develop Frontend",
+                                timeSpent: 0,
+                                isTimerRunning: false,
+                                isExpanded: false,
+                                isCompleted: false,
+                                subtasks: [
+                                    { id: generateId(), title: "Implement Navigation Bar", timeSpent: 0, isTimerRunning: false, isExpanded: false, isCompleted: false, subtasks: [] },
+                                    { id: generateId(), title: "Responsive Design", timeSpent: 0, isTimerRunning: false, isExpanded: false, isCompleted: false, subtasks: [] }
+                                ]
+                            }
+                        ]
+                    },
+                    {
+                        id: generateId(),
+                        name: "Marketing Campaign",
+                        tasks: [
+                            {
+                                id: generateId(),
+                                title: "Social Media Strategy",
+                                timeSpent: 0,
+                                isTimerRunning: false,
+                                isExpanded: false,
+                                isCompleted: false,
+                                subtasks: []
+                            },
+                            {
+                                id: generateId(),
+                                title: "Content Creation",
+                                timeSpent: 0,
+                                isTimerRunning: false,
+                                isExpanded: false,
+                                isCompleted: false,
+                                subtasks: []
+                            }
+                        ]
+                    }
+                ];
+            }
+        }
+
+        // Save data to localStorage
+        function saveData() {
+            localStorage.setItem('taskManagerData', JSON.stringify(projects));
+        }
+
+        // Generate unique IDs
+        function generateId() {
+            return Math.random().toString(36).substr(2, 9);
+        }
+
+        // Initialize the app
+        function init() {
+            loadInitialData();
+            renderProjectList();
+            if (projects.length > 0) {
+                selectProject(projects[0].id);
+            }
+            setInterval(updateTimers, 60000); // Update every minute
+            setupEventListeners();
+        }
+
+        // Event Listeners
+        function setupEventListeners() {
+            document.getElementById('add-project-btn').addEventListener('click', addProject);
+            document.getElementById('add-task-btn').addEventListener('click', () => addTask());
+            document.getElementById('dark-mode-toggle').addEventListener('change', toggleDarkMode);
+            document.getElementById('report-btn').addEventListener('click', showReport);
+            document.getElementById('close-report-btn').addEventListener('click', hideReport);
+            document.getElementById('search-input').addEventListener('input', (e) => {
+                searchTerm = e.target.value.toLowerCase();
+                renderTaskList();
+            });
+            document.addEventListener('keydown', handleKeyDown);
+        }
+
+        // Keyboard Shortcuts
+        function handleKeyDown(e) {
+            if (e.ctrlKey || e.metaKey) {
+                switch (e.key) {
+                    case 'n':
+                        e.preventDefault();
+                        document.getElementById('new-task-title').focus();
+                        break;
+                    case 'p':
+                        e.preventDefault();
+                        document.getElementById('new-project-name').focus();
+                        break;
+                    case '/':
+                        e.preventDefault();
+                        document.getElementById('search-input').focus();
+                        break;
+                }
+            }
+        }
+
+        // Add Project
+        function addProject() {
+            const projectNameInput = document.getElementById('new-project-name');
+            const name = projectNameInput.value.trim();
+            if (name) {
+                const newProject = {
+                    id: generateId(),
+                    name: name,
+                    tasks: []
+                };
+                projects.push(newProject);
+                saveData();
+                renderProjectList();
+                projectNameInput.value = '';
+            }
+        }
+
+        // Render Project List
+        function renderProjectList() {
+            const projectList = document.getElementById('project-list');
+            projectList.innerHTML = '';
+            projects.forEach(project => {
+                const btn = document.createElement('button');
+                btn.textContent = project.name;
+                btn.className = `w-full text-left mb-2 p-2 rounded ${selectedProject && selectedProject.id === project.id ? "bg-blue-500 text-white" : "bg-gray-100 text-black"}`;
+                btn.addEventListener('click', () => selectProject(project.id));
+                projectList.appendChild(btn);
+            });
+        }
+
+        // Select Project
+        function selectProject(projectId) {
+            selectedProject = projects.find(p => p.id === projectId);
+            document.getElementById('project-title').textContent = selectedProject.name;
+            renderProjectList();
+            renderTaskList();
+        }
+
+        // Add Task
+        function addTask(parentId = null) {
+            const taskTitleInput = document.getElementById('new-task-title');
+            const title = taskTitleInput.value.trim();
+            if (title && selectedProject) {
+                const newTask = {
+                    id: generateId(),
+                    title: title,
+                    timeSpent: 0,
+                    isTimerRunning: false,
+                    isExpanded: false,
+                    isCompleted: false,
+                    subtasks: []
+                };
+                if (parentId) {
+                    addTaskToList(selectedProject.tasks, newTask, parentId);
+                } else {
+                    selectedProject.tasks.push(newTask);
+                }
+                saveData();
+                renderTaskList();
+                taskTitleInput.value = '';
+            }
+        }
+
+        function addTaskToList(tasks, newTask, parentId) {
+            for (let task of tasks) {
+                if (task.id === parentId) {
+                    task.subtasks.push(newTask);
+                    return true;
+                } else if (task.subtasks.length > 0) {
+                    const found = addTaskToList(task.subtasks, newTask, parentId);
+                    if (found) return true;
+                }
+            }
+            return false;
+        }
+
+        // Render Task List
+        function renderTaskList() {
+            const taskList = document.getElementById('task-list');
+            taskList.innerHTML = '';
+            if (selectedProject) {
+                const filteredTasks = filterTasks(selectedProject.tasks, searchTerm);
+                filteredTasks.forEach(task => {
+                    const taskElement = createTaskElement(task);
+                    taskList.appendChild(taskElement);
+                });
+            }
+        }
+
+        // Filter tasks based on search term
+        function filterTasks(tasks, term) {
+            return tasks.filter(task => {
+                const inTitle = task.title.toLowerCase().includes(term);
+                const inSubtasks = filterTasks(task.subtasks, term).length > 0;
+                return inTitle || inSubtasks;
+            }).map(task => ({
+                ...task,
+                subtasks: filterTasks(task.subtasks, term)
+            }));
+        }
+
+        // Create Task Element
+        function createTaskElement(task, level = 0) {
+            const container = document.createElement('div');
+            container.style.marginLeft = `${level * 16}px`;
+
+            const taskDiv = document.createElement('div');
+            taskDiv.className = 'flex items-center justify-between py-2';
+
+            const leftDiv = document.createElement('div');
+            leftDiv.className = 'flex items-center';
+
+            const checkbox = document.createElement('input');
+            checkbox.type = 'checkbox';
+            checkbox.checked = task.isCompleted;
+            checkbox.className = 'mr-2';
+            checkbox.addEventListener('change', () => toggleTaskCompletion(task.id));
+            leftDiv.appendChild(checkbox);
+
+            if (task.subtasks.length > 0) {
+                const expandBtn = document.createElement('button');
+                expandBtn.className = 'mr-1 p-0';
+                expandBtn.innerHTML = task.isExpanded ? '▼' : '▶';
+                expandBtn.addEventListener('click', () => toggleTaskExpand(task.id));
+                leftDiv.appendChild(expandBtn);
+            }
+
+            const label = document.createElement('label');
+            label.textContent = task.title;
+            label.className = task.isCompleted ? 'line-through text-gray-500' : '';
+            leftDiv.appendChild(label);
+
+            taskDiv.appendChild(leftDiv);
+
+            const rightDiv = document.createElement('div');
+            rightDiv.className = 'flex items-center space-x-2';
+
+            const timeSpan = document.createElement('span');
+            timeSpan.textContent = formatTime(task.timeSpent);
+            rightDiv.appendChild(timeSpan);
+
+            const timerBtn = document.createElement('button');
+            timerBtn.className = 'p-1 border rounded';
+            timerBtn.innerHTML = task.isTimerRunning ? '⏸' : '▶';
+            timerBtn.addEventListener('click', () => toggleTaskTimer(task.id));
+            rightDiv.appendChild(timerBtn);
+
+            taskDiv.appendChild(rightDiv);
+
+            container.appendChild(taskDiv);
+
+            if (task.isExpanded) {
+                const subtasksDiv = document.createElement('div');
+                task.subtasks.forEach(subtask => {
+                    const subtaskElement = createTaskElement(subtask, level + 1);
+                    subtasksDiv.appendChild(subtaskElement);
+                });
+                container.appendChild(subtasksDiv);
+
+                const addSubtaskDiv = document.createElement('div');
+                addSubtaskDiv.style.marginLeft = `${(level + 1) * 16}px`;
+                addSubtaskDiv.className = 'mt-2';
+
+                const subtaskInput = document.createElement('input');
+                subtaskInput.type = 'text';
+                subtaskInput.placeholder = 'New subtask title';
+                subtaskInput.className = 'mb-2 p-2 border rounded w-full';
+                addSubtaskDiv.appendChild(subtaskInput);
+
+                const addSubtaskBtn = document.createElement('button');
+                addSubtaskBtn.className = 'bg-blue-500 text-white p-2 rounded';
+                addSubtaskBtn.textContent = 'Add Subtask';
+                addSubtaskBtn.addEventListener('click', () => {
+                    const title = subtaskInput.value.trim();
+                    if (title) {
+                        const newSubtask = {
+                            id: generateId(),
+                            title: title,
+                            timeSpent: 0,
+                            isTimerRunning: false,
+                            isExpanded: false,
+                            isCompleted: false,
+                            subtasks: []
+                        };
+                        task.subtasks.push(newSubtask);
+                        saveData();
+                        renderTaskList();
+                    }
+                });
+                addSubtaskDiv.appendChild(addSubtaskBtn);
+
+                container.appendChild(addSubtaskDiv);
+            }
+
+            return container;
+        }
+
+        // Toggle Task Completion
+        function toggleTaskCompletion(taskId) {
+            toggleTaskProperty(selectedProject.tasks, taskId, 'isCompleted');
+            saveData();
+            renderTaskList();
+        }
+
+        // Toggle Task Expand/Collapse
+        function toggleTaskExpand(taskId) {
+            toggleTaskProperty(selectedProject.tasks, taskId, 'isExpanded');
+            saveData();
+            renderTaskList();
+        }
+
+        // Toggle Task Timer
+        function toggleTaskTimer(taskId) {
+            toggleTaskProperty(selectedProject.tasks, taskId, 'isTimerRunning');
+            saveData();
+            renderTaskList();
+        }
+
+        // Toggle Task Property
+        function toggleTaskProperty(tasks, taskId, property) {
+            for (let task of tasks) {
+                if (task.id === taskId) {
+                    task[property] = !task[property];
+                    return true;
+                } else if (task.subtasks.length > 0) {
+                    const found = toggleTaskProperty(task.subtasks, taskId, property);
+                    if (found) return true;
+                }
+            }
+            return false;
+        }
+
+        // Update Timers
+        function updateTimers() {
+            if (selectedProject) {
+                updateTaskTimers(selectedProject.tasks);
+                saveData();
+                renderTaskList();
+            }
+        }
+
+        function updateTaskTimers(tasks) {
+            tasks.forEach(task => {
+                if (task.isTimerRunning) {
+                    task.timeSpent += 1;
+                }
+                if (task.subtasks.length > 0) {
+                    updateTaskTimers(task.subtasks);
+                }
+            });
+        }
+
+        // Format Time
+        function formatTime(minutes) {
+            const hours = Math.floor(minutes / 60);
+            const mins = minutes % 60;
+            return `${hours}h ${mins}m`;
+        }
+
+        // Toggle Dark Mode
+        function toggleDarkMode(e) {
+            isDarkMode = e.target.checked;
+            const body = document.body;
+            if (isDarkMode) {
+                body.classList.add('dark-mode');
+                document.getElementById('dark-mode-label').textContent = '🌜';
+            } else {
+                body.classList.remove('dark-mode');
+                document.getElementById('dark-mode-label').textContent = '🌞';
+            }
+        }
+
+        // Show Report
+        function showReport() {
+            const reportModal = document.getElementById('report-modal');
+            const reportContent = document.getElementById('report-content');
+            const totalTime = calculateTotalTime(selectedProject.tasks);
+            const completedTasks = countTasks(selectedProject.tasks, true);
+            const ongoingTasks = countTasks(selectedProject.tasks, false);
+
+            reportContent.innerHTML = `
+                <p>Total time spent on tasks: ${formatTime(totalTime)}</p>
+                <p>Number of completed tasks: ${completedTasks}</p>
+                <p>Number of ongoing tasks: ${ongoingTasks}</p>
+            `;
+            reportModal.classList.remove('hidden');
+        }
+
+        // Hide Report
+        function hideReport() {
+            const reportModal = document.getElementById('report-modal');
+            reportModal.classList.add('hidden');
+        }
+
+        // Calculate Total Time
+        function calculateTotalTime(tasks) {
+            let total = 0;
+            tasks.forEach(task => {
+                total += task.timeSpent;
+                if (task.subtasks.length > 0) {
+                    total += calculateTotalTime(task.subtasks);
+                }
+            });
+            return total;
+        }
+
+        // Count Tasks
+        function countTasks(tasks, isCompleted) {
+            let count = 0;
+            tasks.forEach(task => {
+                if (task.isCompleted === isCompleted) {
+                    count += 1;
+                }
+                if (task.subtasks.length > 0) {
+                    count += countTasks(task.subtasks, isCompleted);
+                }
+            });
+            return count;
+        }
+
+        // Initialize the app
+        init();
+    </script>
+</body>
+</html>
+
