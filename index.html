@@ -394,7 +394,7 @@
         }
 
         // Add Task
-        function addTask(parentId = null, customTitle = null) {
+        async function addTask(parentId = null, customTitle = null) {
             const title = customTitle || document.getElementById('new-task-title').value.trim();
             if (title && selectedProject) {
                 const newTask = {
@@ -413,8 +413,13 @@
                     selectedProject.tasks.push(newTask);
                 }
                 saveData();
-                renderTaskList();
-                renderProjectList();
+                await new Promise(resolve => {
+                    requestAnimationFrame(() => {
+                        renderTaskList();
+                        renderProjectList();
+                        resolve();
+                    });
+                });
                 if (!customTitle) {
                     document.getElementById('new-task-title').value = '';
                 }
