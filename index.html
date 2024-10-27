@@ -269,7 +269,7 @@
 
             const weekData = getWeeklyTimeData();
             const labels = weekData.map(d => d.date.toLocaleDateString('en-US', { weekday: 'short' }));
-            const data = weekData.map(d => Math.round(d.timeSpent / 60)); // Convert to minutes
+            const data = weekData.map(d => (d.timeSpent / 60).toFixed(2)); // Convert to minutes with 2 decimal places
 
             if (window.weeklyChart instanceof Chart) {
                 window.weeklyChart.destroy();
@@ -627,7 +627,9 @@
                 </div>
                 <div class="mt-4 p-4 bg-white rounded-lg shadow dark:bg-gray-800 dark:text-gray-200">
                     <h3 class="font-bold mb-2 text-lg">Weekly Activity</h3>
-                    <canvas id="weeklyChart"></canvas>
+                    <div style="height: 400px;">
+                        <canvas id="weeklyChart"></canvas>
+                    </div>
                 </div>
             `;
         }
