@@ -36,12 +36,9 @@
         <!-- Left Sidebar -->
         <div id="sidebar" class="w-64 border-r p-4 bg-white shadow-lg">
             <div class="flex flex-col space-y-4">
-                <button id="home-btn" class="w-full bg-blue-500 hover:bg-blue-600 text-white p-2 rounded-lg shadow-sm transition-all duration-200">
-                    🏠 Home
-                </button>
-                <h2 class="text-xl font-bold text-gray-800">Projects</h2>
+                <h2 class="text-xl font-bold text-gray-800 cursor-pointer" onclick="showDashboard()">Projects</h2>
             </div>
-            <div id="project-list" class="mt-4 h-[calc(100vh-14rem)] overflow-y-auto">
+            <div id="project-list" class="mt-4 h-[calc(100vh-10rem)] overflow-y-auto">
                 <!-- Project buttons will be added here -->
             </div>
             <div class="mt-4">
@@ -61,6 +58,12 @@
                         <input type="checkbox" id="dark-mode-toggle">
                         <label for="dark-mode-toggle" id="dark-mode-label">🌙</label>
                     </div>
+                    <!-- Home button -->
+                    <button id="home-btn" class="p-2 border rounded" title="Home" onclick="showDashboard()">
+                        <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
+                        </svg>
+                    </button>
                     <!-- Search -->
                     <div class="flex items-center gap-2">
                         <div class="relative">
@@ -252,7 +255,6 @@
 
         // Event Listeners
         function setupEventListeners() {
-            document.getElementById('home-btn').addEventListener('click', showDashboard);
             document.getElementById('add-project-btn').addEventListener('click', addProject);
             document.getElementById('new-project-name').addEventListener('keypress', (e) => {
                 if (e.key === 'Enter') {
