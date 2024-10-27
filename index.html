@@ -20,7 +20,7 @@
         <!-- Left Sidebar -->
         <div id="sidebar" class="w-64 border-r p-4 bg-white shadow-lg dark:bg-gray-800 dark:border-gray-700">
             <div class="flex flex-col space-y-4">
-                <h2 class="text-xl font-bold text-gray-800 cursor-pointer dark:text-gray-200" onclick="showDashboard()">
+                <h2 id="projects-heading" class="text-xl font-bold text-gray-800 cursor-pointer dark:text-gray-200">
                     Projects</h2>
             </div>
             <div id="project-list" class="mt-4 h-[calc(100vh-10rem)] overflow-y-auto">
@@ -41,8 +41,7 @@
                 <h1 id="project-title" class="text-2xl font-bold"></h1>
                 <div class="flex items-center space-x-4">
                     <!-- Home button -->
-                    <button id="home-btn" class="p-2 border rounded dark:border-gray-700" title="Home"
-                        onclick="showDashboard()">
+                    <button id="home-btn" class="p-2 border rounded dark:border-gray-700" title="Home">
                         <svg class="h-5 w-5 text-gray-700 dark:text-gray-200" fill="none" stroke="currentColor"
                             viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -103,7 +102,7 @@
             </div>
             <div id="project-view" class="hidden">
                 <div id="task-input" class="mb-4">
-                    <input id="new-task-title" type="text" placeholder="New task title (Press Enter to add)"
+                    <input id="new-task-title" type="text" placeholder="+ task "
                         class="mb-4 p-3 border rounded-lg w-full shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200 dark:placeholder-gray-400">
                 </div>
                 <div id="task-list" class="h-[calc(100vh-20rem)] overflow-y-auto">
@@ -224,7 +223,7 @@
         function getWeeklyTimeData() {
             const today = new Date();
             today.setHours(0, 0, 0, 0);
-            
+
             // Create array of last 7 days ending with today
             const days = [];
             for (let i = 6; i >= 0; i--) {
@@ -243,11 +242,11 @@
                         task.timeEntries.forEach(entry => {
                             const entryDate = new Date(entry.start);
                             entryDate.setHours(0, 0, 0, 0);
-                            
-                            const dayData = days.find(d => 
+
+                            const dayData = days.find(d =>
                                 d.date.getTime() === entryDate.getTime()
                             );
-                            
+
                             if (dayData) {
                                 dayData.timeSpent += entry.duration;
                             }
@@ -255,7 +254,7 @@
                     }
                     task.subtasks.forEach(processTask);
                 };
-                
+
                 project.tasks.forEach(processTask);
             });
 
@@ -328,7 +327,7 @@
             renderProjectList();
             showDashboard();
             setupEventListeners();
-            
+
             // Initialize dark mode icon
             isDarkMode = document.documentElement.classList.contains('dark');
             const icon = document.getElementById('dark-mode-icon');
@@ -374,6 +373,10 @@
                 renderTaskList();
             });
             document.addEventListener('keydown', handleKeyDown);
+
+            // Add event listeners for elements that previously had inline onclick attributes
+            document.getElementById('projects-heading').addEventListener('click', showDashboard);
+            document.getElementById('home-btn').addEventListener('click', showDashboard);
         }
 
         function handleKeyDown(e) {
@@ -609,7 +612,7 @@
 
             // Calculate weekly data
             const weekData = getWeeklyTimeData();
-            
+
             dashboardView.innerHTML = `
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div class="p-4 bg-white rounded-lg shadow dark:bg-gray-800 dark:text-gray-200">
@@ -654,7 +657,10 @@
                     canHaveSubtasks: true
                 };
                 if (parentId) {
-                    addTaskToList(selectedProject.tasks, newTask, parentId);
+                    const parentTask = findTaskById(selectedProject.tasks, parentId);
+                    if (parentTask) {
+                        parentTask.subtasks.push(newTask);
+                    }
                 } else {
                     selectedProject.tasks.push(newTask);
                 }
@@ -670,19 +676,6 @@
                     document.getElementById('new-task-title').value = '';
                 }
             }
-        }
-
-        function addTaskToList(tasks, newTask, parentId) {
-            for (let task of tasks) {
-                if (task.id === parentId) {
-                    task.subtasks.push(newTask);
-                    return true;
-                } else if (task.subtasks.length > 0) {
-                    const found = addTaskToList(task.subtasks, newTask, parentId);
-                    if (found) return true;
-                }
-            }
-            return false;
         }
 
         function renderTaskList() {
@@ -712,44 +705,19 @@
         }
 
         function editTask(taskId, newTitle) {
-            const updateTaskTitle = (tasks, taskId, newTitle) => {
-                for (let task of tasks) {
-                    if (task.id === taskId) {
-                        task.title = newTitle;
-                        return true;
-                    }
-                    if (task.subtasks.length > 0) {
-                        const found = updateTaskTitle(task.subtasks, taskId, newTitle);
-                        if (found) return true;
-                    }
-                }
-                return false;
-            };
-
-            updateTaskTitle(selectedProject.tasks, taskId, newTitle);
-            saveData();
-            setTimeout(() => {
-                renderTaskList();
-                renderProjectList();
-            }, 50);
+            const task = findTaskById(selectedProject.tasks, taskId);
+            if (task) {
+                task.title = newTitle;
+                saveData();
+                setTimeout(() => {
+                    renderTaskList();
+                    renderProjectList();
+                }, 50);
+            }
         }
 
         function deleteTask(taskId) {
-            const removeTask = (tasks, taskId) => {
-                for (let i = 0; i < tasks.length; i++) {
-                    if (tasks[i].id === taskId) {
-                        tasks.splice(i, 1);
-                        return true;
-                    }
-                    if (tasks[i].subtasks.length > 0) {
-                        const found = removeTask(tasks[i].subtasks, taskId);
-                        if (found) return true;
-                    }
-                }
-                return false;
-            };
-
-            removeTask(selectedProject.tasks, taskId);
+            removeTaskById(selectedProject.tasks, taskId);
             saveData();
             renderTaskList();
         }
@@ -875,7 +843,7 @@
 
                 const subtaskInput = document.createElement('input');
                 subtaskInput.type = 'text';
-                subtaskInput.placeholder = 'New subtask title (Press Enter to add)';
+                subtaskInput.placeholder = '+ subtask';
                 subtaskInput.className = 'mb-2 p-2 border rounded w-full dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200 dark:placeholder-gray-400';
                 subtaskInput.addEventListener('keydown', async (e) => {
                     if (e.key === 'Enter') {
@@ -900,35 +868,25 @@
         }
 
         function toggleTaskCompletion(taskId) {
-            const updateTaskAndSubtasks = (tasks, taskId, newStatus) => {
-                for (let task of tasks) {
-                    if (task.id === taskId) {
-                        task.isCompleted = newStatus !== undefined ? newStatus : !task.isCompleted;
-                        if (task.subtasks.length > 0) {
-                            task.subtasks.forEach(subtask => {
-                                updateTaskAndSubtasks([subtask], subtask.id, task.isCompleted);
-                            });
-                        }
-                        return true;
-                    }
-                    if (task.subtasks.length > 0) {
-                        const found = updateTaskAndSubtasks(task.subtasks, taskId, newStatus);
-                        if (found) return true;
-                    }
-                }
-                return false;
-            };
-
-            updateTaskAndSubtasks(selectedProject.tasks, taskId);
-            saveData();
-            renderTaskList();
-            renderProjectList();
+            const task = findTaskById(selectedProject.tasks, taskId);
+            if (task) {
+                task.isCompleted = !task.isCompleted;
+                traverseTasks(task.subtasks, (subtask) => {
+                    subtask.isCompleted = task.isCompleted;
+                });
+                saveData();
+                renderTaskList();
+                renderProjectList();
+            }
         }
 
         function toggleTaskExpand(taskId) {
-            toggleTaskProperty(selectedProject.tasks, taskId, 'isExpanded');
-            saveData();
-            renderTaskList();
+            const task = findTaskById(selectedProject.tasks, taskId);
+            if (task) {
+                task.isExpanded = !task.isExpanded;
+                saveData();
+                renderTaskList();
+            }
         }
 
         function startPomodoro(task) {
@@ -967,33 +925,22 @@
                 const endTime = new Date();
                 const startTime = new Date(endTime - (elapsedSeconds * 1000));
 
-                const updateTaskTime = (tasks, taskId, timeEntry) => {
-                    for (let task of tasks) {
-                        if (task.id === taskId) {
-                            task.timeSpent += timeEntry.duration;
-                            task.isTimerRunning = false;
-                            if (!task.timeEntries) {
-                                task.timeEntries = [];
-                            }
-                            task.timeEntries.push(timeEntry);
-                            return true;
-                        }
-                        if (task.subtasks.length > 0) {
-                            if (updateTaskTime(task.subtasks, taskId, timeEntry)) {
-                                return true;
-                            }
-                        }
-                    }
-                    return false;
-                };
-
                 const timeEntry = {
                     start: startTime.toISOString(),
                     end: endTime.toISOString(),
                     duration: elapsedSeconds
                 };
 
-                updateTaskTime(selectedProject.tasks, currentPomodoroTask.id, timeEntry);
+                const task = findTaskById(selectedProject.tasks, currentPomodoroTask.id);
+                if (task) {
+                    task.timeSpent += timeEntry.duration;
+                    task.isTimerRunning = false;
+                    if (!task.timeEntries) {
+                        task.timeEntries = [];
+                    }
+                    task.timeEntries.push(timeEntry);
+                }
+
                 currentPomodoroTask = null;
             }
 
@@ -1016,39 +963,11 @@
             document.getElementById('pomodoro-timer').textContent = display;
         }
 
-        function toggleTaskProperty(tasks, taskId, property) {
-            for (let task of tasks) {
-                if (task.id === taskId) {
-                    task[property] = !task[property];
-                    return true;
-                } else if (task.subtasks.length > 0) {
-                    const found = toggleTaskProperty(task.subtasks, taskId, property);
-                    if (found) return true;
-                }
-            }
-            return false;
-        }
-
-        function calculateTaskTotalTime(task) {
-            let total = task.timeSpent;
-            task.subtasks.forEach(subtask => {
-                total += calculateTaskTotalTime(subtask);
-            });
-            return total;
-        }
-
-        function formatTime(seconds) {
-            const hours = Math.floor(seconds / 3600);
-            const minutes = Math.floor((seconds % 3600) / 60);
-            const secs = seconds % 60;
-            return `${hours}h ${minutes}m ${secs}s`;
-        }
-
         function toggleDarkMode() {
             isDarkMode = !isDarkMode;
             document.documentElement.classList.toggle('dark');
             const icon = document.getElementById('dark-mode-icon');
-            
+
             if (isDarkMode) {
                 icon.classList.remove('fa-sun');
                 icon.classList.add('fa-moon');
@@ -1056,7 +975,7 @@
                 icon.classList.remove('fa-moon');
                 icon.classList.add('fa-sun');
             }
-            
+
             renderWeeklyChart();
         }
 
@@ -1082,23 +1001,17 @@
 
         function calculateTotalTime(tasks) {
             let total = 0;
-            tasks.forEach(task => {
+            traverseTasks(tasks, task => {
                 total += task.timeSpent;
-                if (task.subtasks.length > 0) {
-                    total += calculateTotalTime(task.subtasks);
-                }
             });
             return total;
         }
 
         function countTasks(tasks, isCompleted) {
             let count = 0;
-            tasks.forEach(task => {
+            traverseTasks(tasks, task => {
                 if (task.isCompleted === isCompleted) {
                     count += 1;
-                }
-                if (task.subtasks.length > 0) {
-                    count += countTasks(task.subtasks, isCompleted);
                 }
             });
             return count;
@@ -1112,6 +1025,57 @@
 
         function calculateProjectTotalTime(tasks) {
             return calculateTotalTime(tasks);
+        }
+
+        function calculateTaskTotalTime(task) {
+            let total = task.timeSpent;
+            if (task.subtasks && task.subtasks.length > 0) {
+                total += calculateTotalTime(task.subtasks);
+            }
+            return total;
+        }
+
+        function formatTime(seconds) {
+            const hours = Math.floor(seconds / 3600);
+            const minutes = Math.floor((seconds % 3600) / 60);
+            const secs = seconds % 60;
+            return `${hours}h ${minutes}m ${secs}s`;
+        }
+
+        function findTaskById(tasks, taskId) {
+            for (let task of tasks) {
+                if (task.id === taskId) {
+                    return task;
+                }
+                if (task.subtasks && task.subtasks.length > 0) {
+                    let result = findTaskById(task.subtasks, taskId);
+                    if (result) return result;
+                }
+            }
+            return null;
+        }
+
+        function removeTaskById(tasks, taskId) {
+            for (let i = 0; i < tasks.length; i++) {
+                if (tasks[i].id === taskId) {
+                    tasks.splice(i, 1);
+                    return true;
+                }
+                if (tasks[i].subtasks && tasks[i].subtasks.length > 0) {
+                    const found = removeTaskById(tasks[i].subtasks, taskId);
+                    if (found) return true;
+                }
+            }
+            return false;
+        }
+
+        function traverseTasks(tasks, callback) {
+            for (let task of tasks) {
+                callback(task);
+                if (task.subtasks && task.subtasks.length > 0) {
+                    traverseTasks(task.subtasks, callback);
+                }
+            }
         }
 
         init();
