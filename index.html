@@ -609,20 +609,20 @@
                 subtaskInput.type = 'text';
                 subtaskInput.placeholder = 'New subtask title (Press Enter to add)';
                 subtaskInput.className = 'mb-2 p-2 border rounded w-full';
-                subtaskInput.addEventListener('keydown', (e) => {
+                subtaskInput.addEventListener('keydown', async (e) => {
                     if (e.key === 'Enter') {
                         e.preventDefault(); // Prevent form submission
                         e.stopPropagation(); // Stop event bubbling
                         const title = subtaskInput.value.trim();
                         if (title) {
-                            const currentValue = subtaskInput.value; // Store current value
-                            addTask(task.id, title);
-                            // Restore the input value after a short delay
-                            setTimeout(() => {
-                                if (!title) { // Only clear if task was actually added
-                                    subtaskInput.value = currentValue;
-                                }
-                            }, 10);
+                            // Keep reference to input element
+                            const input = e.target;
+                            // Add task without clearing input
+                            await addTask(task.id, title);
+                            // Only clear if still focused and value hasn't changed
+                            if (document.activeElement === input && input.value === title) {
+                                input.value = '';
+                            }
                         }
                     }
                 });
