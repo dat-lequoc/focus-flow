@@ -242,9 +242,8 @@
         }
 
         // Add Task
-        function addTask(parentId = null) {
-            const taskTitleInput = document.getElementById('new-task-title');
-            const title = taskTitleInput.value.trim();
+        function addTask(parentId = null, customTitle = null) {
+            const title = customTitle || document.getElementById('new-task-title').value.trim();
             if (title && selectedProject) {
                 const newTask = {
                     id: generateId(),
@@ -262,7 +261,9 @@
                 }
                 saveData();
                 renderTaskList();
-                taskTitleInput.value = '';
+                if (!customTitle) {
+                    document.getElementById('new-task-title').value = '';
+                }
             }
         }
 
@@ -378,18 +379,8 @@
                 addSubtaskBtn.addEventListener('click', () => {
                     const title = subtaskInput.value.trim();
                     if (title) {
-                        const newSubtask = {
-                            id: generateId(),
-                            title: title,
-                            timeSpent: 0,
-                            isTimerRunning: false,
-                            isExpanded: false,
-                            isCompleted: false,
-                            subtasks: []
-                        };
-                        task.subtasks.push(newSubtask);
-                        saveData();
-                        renderTaskList();
+                        addTask(task.id, title);
+                        subtaskInput.value = '';
                     }
                 });
                 addSubtaskDiv.appendChild(addSubtaskBtn);
