@@ -481,8 +481,13 @@
             let totalTasks = 0;
             let totalCompletedTasks = 0;
             let totalTimeSpent = 0;
+            let todayTimeSpent = 0;
             let mostActiveProject = { name: '-', time: 0 };
             let highestProgress = { name: '-', progress: 0 };
+
+            // Get start of today
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
 
             projects.forEach(project => {
                 const projectTotalTime = calculateProjectTotalTime(project.tasks);
@@ -493,6 +498,26 @@
                 totalTasks += completedTasks + ongoingTasks;
                 totalCompletedTasks += completedTasks;
                 totalTimeSpent += projectTotalTime;
+                
+                // Calculate today's time from time entries
+                project.tasks.forEach(task => {
+                    const calculateTodayTime = (task) => {
+                        let time = 0;
+                        if (task.timeEntries) {
+                            task.timeEntries.forEach(entry => {
+                                const entryDate = new Date(entry.start);
+                                if (entryDate >= today) {
+                                    time += entry.duration;
+                                }
+                            });
+                        }
+                        task.subtasks.forEach(subtask => {
+                            time += calculateTodayTime(subtask);
+                        });
+                        return time;
+                    };
+                    todayTimeSpent += calculateTodayTime(task);
+                });
 
                 if (projectTotalTime > mostActiveProject.time) {
                     mostActiveProject = { name: project.name, time: projectTotalTime };
@@ -516,6 +541,7 @@
                         <h3 class="font-bold mb-2 text-lg">Time Statistics</h3>
                         <p class="mb-2">Total Time Spent: ${formatTime(totalTimeSpent)}</p>
                         <p>Average Time per Project: ${formatTime(Math.round(totalTimeSpent / totalProjects))}</p>
+                        <p>Time Spent Today: ${formatTime(todayTimeSpent)}</p>
                     </div>
                 </div>
                 <div class="mt-4 p-4 bg-white rounded-lg shadow">
@@ -853,17 +879,24 @@
             if (currentPomodoroTask) {
                 // Calculate elapsed time (25 minutes - remaining time)
                 const elapsedSeconds = (25 * 60) - pomodoroTimeLeft;
+                const endTime = new Date();
+                const startTime = new Date(endTime - (elapsedSeconds * 1000));
 
                 // Find and update the task in the project structure
-                const updateTaskTime = (tasks, taskId, timeToAdd) => {
+                const updateTaskTime = (tasks, taskId, timeEntry) => {
                     for (let task of tasks) {
                         if (task.id === taskId) {
-                            task.timeSpent += timeToAdd;
+                            task.timeSpent += timeEntry.duration;
                             task.isTimerRunning = false;
+                            // Initialize timeEntries array if it doesn't exist
+                            if (!task.timeEntries) {
+                                task.timeEntries = [];
+                            }
+                            task.timeEntries.push(timeEntry);
                             return true;
                         }
                         if (task.subtasks.length > 0) {
-                            if (updateTaskTime(task.subtasks, taskId, timeToAdd)) {
+                            if (updateTaskTime(task.subtasks, taskId, timeEntry)) {
                                 return true;
                             }
                         }
@@ -871,7 +904,13 @@
                     return false;
                 };
 
-                updateTaskTime(selectedProject.tasks, currentPomodoroTask.id, elapsedSeconds);
+                const timeEntry = {
+                    start: startTime.toISOString(),
+                    end: endTime.toISOString(),
+                    duration: elapsedSeconds
+                };
+
+                updateTaskTime(selectedProject.tasks, currentPomodoroTask.id, timeEntry);
                 currentPomodoroTask = null;
             }
 
