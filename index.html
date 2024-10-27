@@ -672,6 +672,9 @@
 
         function stopPomodoro() {
             if (currentPomodoroTask) {
+                // Calculate elapsed time (25 minutes - remaining time)
+                const elapsedSeconds = (25 * 60) - pomodoroTimeLeft;
+                currentPomodoroTask.timeSpent += elapsedSeconds;
                 currentPomodoroTask.isTimerRunning = false;
                 currentPomodoroTask = null;
             }
