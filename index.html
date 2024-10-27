@@ -366,13 +366,12 @@
             checkbox.addEventListener('change', () => toggleTaskCompletion(task.id));
             leftDiv.appendChild(checkbox);
 
-            if (task.subtasks.length > 0) {
-                const expandBtn = document.createElement('button');
-                expandBtn.className = 'mr-1 p-0';
-                expandBtn.innerHTML = task.isExpanded ? '▼' : '▶';
-                expandBtn.addEventListener('click', () => toggleTaskExpand(task.id));
-                leftDiv.appendChild(expandBtn);
-            }
+            // Always show expand button for all tasks
+            const expandBtn = document.createElement('button');
+            expandBtn.className = 'mr-1 p-0';
+            expandBtn.innerHTML = task.isExpanded ? '▼' : '▶';
+            expandBtn.addEventListener('click', () => toggleTaskExpand(task.id));
+            leftDiv.appendChild(expandBtn);
 
             const label = document.createElement('label');
             label.textContent = task.title;
@@ -424,10 +423,12 @@
 
             if (task.isExpanded) {
                 const subtasksDiv = document.createElement('div');
-                task.subtasks.forEach(subtask => {
-                    const subtaskElement = createTaskElement(subtask, level + 1);
-                    subtasksDiv.appendChild(subtaskElement);
-                });
+                if (task.subtasks && task.subtasks.length > 0) {
+                    task.subtasks.forEach(subtask => {
+                        const subtaskElement = createTaskElement(subtask, level + 1);
+                        subtasksDiv.appendChild(subtaskElement);
+                    });
+                }
                 container.appendChild(subtasksDiv);
 
                 const addSubtaskDiv = document.createElement('div');
