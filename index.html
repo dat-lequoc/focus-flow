@@ -7,6 +7,7 @@
     <!-- Include Tailwind CSS via CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <script>
         tailwind.config = {
             darkMode: 'class',
@@ -82,9 +83,7 @@
                         <!-- Dark mode button -->
                         <button id="dark-mode-toggle" class="p-2 border rounded dark:border-gray-700"
                             title="Toggle Dark Mode">
-                            <svg id="dark-mode-icon" class="h-5 w-5 text-gray-700 dark:text-gray-200"
-                                fill="currentColor" viewBox="0 0 20 20">
-                            </svg>
+                            <i id="dark-mode-icon" class="fas fa-sun text-gray-700 dark:text-gray-200"></i>
                         </button>
                         <button id="report-btn" class="p-2 border rounded dark:border-gray-700" title="Project Report">
                             <!-- Chart icon -->
@@ -449,11 +448,7 @@
 
                 const menuBtn = document.createElement('button');
                 menuBtn.className = 'p-1 hover:bg-gray-100 rounded dark:hover:bg-gray-700';
-                menuBtn.innerHTML = `
-                    <svg class="h-5 w-5 text-gray-700 dark:text-gray-200" fill="currentColor" viewBox="0 0 20 20">
-                        <path d="M10 6a2 2 0 11-4 0 2 2 0 014 0zM10 10a2 2 0 11-4 0 2 2 0 014 0zM10 14a2 2 0 11-4 0 2 2 0 014 0z" />
-                    </svg>
-                `;
+                menuBtn.innerHTML = `<i class="fas fa-ellipsis-v text-gray-700 dark:text-gray-200"></i>`;
                 menuBtn.addEventListener('click', (e) => {
                     e.stopPropagation();
                     const dropdown = menuBtn.nextElementSibling;
@@ -1042,14 +1037,10 @@
             isDarkMode = !isDarkMode;
             if (isDarkMode) {
                 document.documentElement.classList.add('dark');
-                document.getElementById('dark-mode-icon').innerHTML = `
-                    <path d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
-                `;
+                document.getElementById('dark-mode-icon').innerHTML = `<i class="fas fa-moon"></i>`;
             } else {
                 document.documentElement.classList.remove('dark');
-                document.getElementById('dark-mode-icon').innerHTML = `
-                    <path d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
-                `;
+                document.getElementById('dark-mode-icon').innerHTML = `<i class="fas fa-sun"></i>`;
             }
             renderWeeklyChart();
         }
