@@ -252,7 +252,8 @@
                     isTimerRunning: false,
                     isExpanded: false,
                     isCompleted: false,
-                    subtasks: []
+                    subtasks: [],
+                    canHaveSubtasks: true  // All tasks can have subtasks
                 };
                 if (parentId) {
                     addTaskToList(selectedProject.tasks, newTask, parentId);
@@ -305,6 +306,48 @@
             }));
         }
 
+        // Edit Task
+        function editTask(taskId, newTitle) {
+            const updateTaskTitle = (tasks, taskId, newTitle) => {
+                for (let task of tasks) {
+                    if (task.id === taskId) {
+                        task.title = newTitle;
+                        return true;
+                    }
+                    if (task.subtasks.length > 0) {
+                        const found = updateTaskTitle(task.subtasks, taskId, newTitle);
+                        if (found) return true;
+                    }
+                }
+                return false;
+            };
+            
+            updateTaskTitle(selectedProject.tasks, taskId, newTitle);
+            saveData();
+            renderTaskList();
+        }
+
+        // Delete Task
+        function deleteTask(taskId) {
+            const removeTask = (tasks, taskId) => {
+                for (let i = 0; i < tasks.length; i++) {
+                    if (tasks[i].id === taskId) {
+                        tasks.splice(i, 1);
+                        return true;
+                    }
+                    if (tasks[i].subtasks.length > 0) {
+                        const found = removeTask(tasks[i].subtasks, taskId);
+                        if (found) return true;
+                    }
+                }
+                return false;
+            };
+
+            removeTask(selectedProject.tasks, taskId);
+            saveData();
+            renderTaskList();
+        }
+
         // Create Task Element
         function createTaskElement(task, level = 0) {
             const container = document.createElement('div');
@@ -345,11 +388,35 @@
             timeSpan.textContent = formatTime(task.timeSpent);
             rightDiv.appendChild(timeSpan);
 
+            // Edit button
+            const editBtn = document.createElement('button');
+            editBtn.className = 'p-1 border rounded';
+            editBtn.innerHTML = '✏️';
+            editBtn.addEventListener('click', () => {
+                const newTitle = prompt('Edit task title:', task.title);
+                if (newTitle && newTitle.trim()) {
+                    editTask(task.id, newTitle.trim());
+                }
+            });
+            rightDiv.appendChild(editBtn);
+
+            // Timer button
             const timerBtn = document.createElement('button');
             timerBtn.className = 'p-1 border rounded';
             timerBtn.innerHTML = task.isTimerRunning ? '⏸' : '▶';
             timerBtn.addEventListener('click', () => toggleTaskTimer(task.id));
             rightDiv.appendChild(timerBtn);
+
+            // Delete button
+            const deleteBtn = document.createElement('button');
+            deleteBtn.className = 'p-1 border rounded text-red-500';
+            deleteBtn.innerHTML = '🗑️';
+            deleteBtn.addEventListener('click', () => {
+                if (confirm('Are you sure you want to delete this task?')) {
+                    deleteTask(task.id);
+                }
+            });
+            rightDiv.appendChild(deleteBtn);
 
             taskDiv.appendChild(rightDiv);
 
