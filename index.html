@@ -477,8 +477,11 @@
             
             updateTaskTitle(selectedProject.tasks, taskId, newTitle);
             saveData();
-            renderTaskList();
-            renderProjectList();
+            // Delay the re-render slightly to prevent input clearing
+            setTimeout(() => {
+                renderTaskList();
+                renderProjectList();
+            }, 50);
         }
 
         // Delete Task
@@ -612,8 +615,14 @@
                         e.stopPropagation(); // Stop event bubbling
                         const title = subtaskInput.value.trim();
                         if (title) {
+                            const currentValue = subtaskInput.value; // Store current value
                             addTask(task.id, title);
-                            subtaskInput.value = '';
+                            // Restore the input value after a short delay
+                            setTimeout(() => {
+                                if (!title) { // Only clear if task was actually added
+                                    subtaskInput.value = currentValue;
+                                }
+                            }, 10);
                         }
                     }
                 });
