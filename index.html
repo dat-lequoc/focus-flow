@@ -593,9 +593,10 @@
                 subtaskInput.type = 'text';
                 subtaskInput.placeholder = 'New subtask title (Press Enter to add)';
                 subtaskInput.className = 'mb-2 p-2 border rounded w-full';
-                subtaskInput.addEventListener('keypress', (e) => {
+                subtaskInput.addEventListener('keydown', (e) => {
                     if (e.key === 'Enter') {
                         e.preventDefault(); // Prevent form submission
+                        e.stopPropagation(); // Stop event bubbling
                         const title = subtaskInput.value.trim();
                         if (title) {
                             addTask(task.id, title);
