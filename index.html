@@ -233,27 +233,48 @@
                 btn.className = `flex-grow text-left p-2 rounded mr-2 ${selectedProject && selectedProject.id === project.id ? "bg-blue-500 text-white" : "bg-gray-100 text-black"}`;
                 btn.addEventListener('click', () => selectProject(project.id));
 
-                const buttonsDiv = document.createElement('div');
-                buttonsDiv.className = 'flex space-x-1';
+                const menuDiv = document.createElement('div');
+                menuDiv.className = 'relative';
+
+                const menuBtn = document.createElement('button');
+                menuBtn.innerHTML = '⋮';
+                menuBtn.className = 'p-1 hover:bg-gray-100 rounded';
+                menuBtn.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    const dropdown = menuBtn.nextElementSibling;
+                    dropdown.classList.toggle('hidden');
+                });
+
+                const dropdownDiv = document.createElement('div');
+                dropdownDiv.className = 'absolute right-0 mt-1 w-32 bg-white border rounded shadow-lg hidden z-10';
 
                 const editBtn = document.createElement('button');
-                editBtn.innerHTML = '✏️';
-                editBtn.className = 'p-1 border rounded';
+                editBtn.innerHTML = '✏️ Edit';
+                editBtn.className = 'w-full text-left px-4 py-2 hover:bg-gray-100';
                 editBtn.addEventListener('click', (e) => {
                     e.stopPropagation();
+                    dropdownDiv.classList.add('hidden');
                     editProject(project.id);
                 });
 
                 const deleteBtn = document.createElement('button');
-                deleteBtn.innerHTML = '🗑️';
-                deleteBtn.className = 'p-1 border rounded text-red-500';
+                deleteBtn.innerHTML = '🗑️ Delete';
+                deleteBtn.className = 'w-full text-left px-4 py-2 hover:bg-gray-100 text-red-500';
                 deleteBtn.addEventListener('click', (e) => {
                     e.stopPropagation();
+                    dropdownDiv.classList.add('hidden');
                     deleteProject(project.id);
                 });
 
-                buttonsDiv.appendChild(editBtn);
-                buttonsDiv.appendChild(deleteBtn);
+                dropdownDiv.appendChild(editBtn);
+                dropdownDiv.appendChild(deleteBtn);
+                menuDiv.appendChild(menuBtn);
+                menuDiv.appendChild(dropdownDiv);
+
+                // Close dropdown when clicking outside
+                document.addEventListener('click', () => {
+                    dropdownDiv.classList.add('hidden');
+                });
                 projectDiv.appendChild(btn);
                 projectDiv.appendChild(buttonsDiv);
                 projectList.appendChild(projectDiv);
