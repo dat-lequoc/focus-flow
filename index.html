@@ -711,23 +711,9 @@
 
                 taskHeader.appendChild(leftDiv);
 
-                // Right side container for goal input and action buttons
+                // Right side container for action buttons
                 const rightDiv = document.createElement('div');
                 rightDiv.className = 'flex items-center space-x-2';
-
-                // Goal input
-                const goalInput = document.createElement('input');
-                goalInput.type = 'number';
-                goalInput.min = 0;
-                goalInput.value = task.dailyGoal || 0;
-                goalInput.placeholder = 'Daily Goal';
-                goalInput.className = 'w-8 text-center border rounded dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none';
-                goalInput.addEventListener('change', () => {
-                    task.dailyGoal = parseInt(goalInput.value) || 0;
-                    saveData();
-                    renderDashboard();
-                });
-                rightDiv.appendChild(goalInput);
 
                 // Today button
                 const todayBtn = document.createElement('button');
@@ -768,6 +754,20 @@
                 rightDiv.appendChild(timerBtn);
 
                 taskHeader.appendChild(rightDiv);
+
+                // Goal input (furthest right)
+                const goalInput = document.createElement('input');
+                goalInput.type = 'number';
+                goalInput.min = 0;
+                goalInput.value = task.dailyGoal || 0;
+                goalInput.placeholder = 'Daily Goal';
+                goalInput.className = 'w-8 text-center border rounded dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200 ml-2 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none';
+                goalInput.addEventListener('change', () => {
+                    task.dailyGoal = parseInt(goalInput.value) || 0;
+                    saveData();
+                    renderDashboard();
+                });
+                taskHeader.appendChild(goalInput);
 
                 // Progress section
                 const progressSection = document.createElement('div');
