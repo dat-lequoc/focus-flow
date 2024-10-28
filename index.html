@@ -819,19 +819,6 @@
                 progressBarContainer.className = 'flex-grow h-2 bg-gray-200 rounded dark:bg-gray-700';
 
                 const progressBar = document.createElement('div');
-                const today = new Date();
-                today.setHours(0, 0, 0, 0);
-                let todayTimeSpent = 0;
-                
-                if (task.timeEntries) {
-                    task.timeEntries.forEach(entry => {
-                        const entryDate = new Date(entry.start);
-                        if (entryDate >= today) {
-                            todayTimeSpent += entry.duration;
-                        }
-                    });
-                }
-                
                 const pomodorosCompleted = Math.floor(todayTimeSpent / 60 / 25);
                 const progressPercentage = task.dailyGoal > 0 ? (pomodorosCompleted / task.dailyGoal) * 100 : 0;
                 progressBar.className = `h-full rounded transition-all duration-300 ${progressPercentage >= 100 ? 'bg-green-500' : 'bg-blue-500'}`;
