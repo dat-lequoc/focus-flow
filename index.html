@@ -85,6 +85,14 @@
                                     d="M5 21h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v14a2 2 0 002 2z" />
                             </svg>
                         </button>
+                        <button id="settings-btn" class="p-2 border rounded dark:border-gray-700" title="Settings">
+                            <svg class="h-5 w-5 text-gray-700 dark:text-gray-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+                                    d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+                                    d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                            </svg>
+                        </button>
                     </div>
                 </div>
             </div>
@@ -140,12 +148,53 @@
         </div>
     </div>
 
+    <audio id="timer-sound" src="https://www.soundjay.com/buttons/sounds/beep-07a.mp3" preload="auto" loop></audio>
+
     <div id="report-modal" class="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 hidden">
         <div class="bg-white p-6 rounded dark:bg-gray-800 dark:text-gray-200">
             <h2 class="text-xl font-bold mb-4">Project Report</h2>
             <div id="report-content">
             </div>
             <button id="close-report-btn" class="mt-4 bg-blue-500 text-white p-2 rounded">Close</button>
+        </div>
+    </div>
+
+    <div id="settings-modal" class="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 hidden">
+        <div class="bg-white p-6 rounded-lg shadow-lg dark:bg-gray-800 dark:text-gray-200">
+            <h2 class="text-xl font-bold mb-4">Settings</h2>
+            <div class="space-y-4">
+                <div>
+                    <label class="block mb-2">Timer Sound</label>
+                    <select id="sound-select" class="w-full p-2 border rounded dark:bg-gray-700 dark:border-gray-600">
+                        <option value="default">Default Beep</option>
+                        <option value="custom">Custom Sound</option>
+                    </select>
+                </div>
+                <div id="custom-sound-input" class="hidden">
+                    <input type="file" accept="audio/*" id="custom-sound-file" 
+                           class="w-full p-2 border rounded dark:bg-gray-700 dark:border-gray-600">
+                </div>
+                <div class="mt-4">
+                    <button id="test-sound-btn" class="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600">
+                        Test Sound
+                    </button>
+                </div>
+            </div>
+            <div class="mt-6 flex justify-end space-x-3">
+                <button id="close-settings" class="px-4 py-2 border rounded hover:bg-gray-100 dark:border-gray-600 dark:hover:bg-gray-700">
+                    Close
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <div id="timer-complete-modal" class="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 hidden">
+        <div class="bg-white p-6 rounded-lg shadow-lg dark:bg-gray-800 dark:text-gray-200">
+            <h2 class="text-xl font-bold mb-4">Time's Up!</h2>
+            <p class="mb-4">Your pomodoro session is complete.</p>
+            <button id="close-timer-complete" class="w-full px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600">
+                Close
+            </button>
         </div>
     </div>
 
@@ -158,6 +207,7 @@
         let currentPomodoroTask = null;
         let pomodoroTimer = null;
         let pomodoroTimeLeft = 25 * 60;
+        let timerSound = document.getElementById('timer-sound');
 
         function loadInitialData() {
             const savedData = localStorage.getItem('taskManagerData');
@@ -1166,11 +1216,15 @@
                 pomodoroTimeLeft--;
                 updatePomodoroDisplay();
                 if (pomodoroTimeLeft <= 0) {
-                    stopPomodoro();
-                    alert('Pomodoro completed!');
+                    pomodoroComplete();
                 }
             }, 1000);
             document.getElementById('stop-pomodoro').onclick = stopPomodoro;
+            document.getElementById('settings-btn').addEventListener('click', showSettings);
+            document.getElementById('close-settings').addEventListener('click', hideSettings);
+            document.getElementById('sound-select').addEventListener('change', handleSoundSelection);
+            document.getElementById('test-sound-btn').addEventListener('click', testSound);
+            document.getElementById('close-timer-complete').addEventListener('click', closeTimerComplete);
             saveData();
             renderTaskList();
         }
@@ -1369,6 +1423,57 @@
                     traverseTasks(task.subtasks, callback);
                 }
             }
+        }
+
+        function showSettings() {
+            document.getElementById('settings-modal').classList.remove('hidden');
+        }
+
+        function hideSettings() {
+            document.getElementById('settings-modal').classList.add('hidden');
+        }
+
+        function handleSoundSelection(e) {
+            const customSoundInput = document.getElementById('custom-sound-input');
+            if (e.target.value === 'custom') {
+                customSoundInput.classList.remove('hidden');
+            } else {
+                customSoundInput.classList.add('hidden');
+                timerSound.src = 'https://www.soundjay.com/buttons/sounds/beep-07a.mp3';
+            }
+        }
+
+        function testSound() {
+            timerSound.currentTime = 0;
+            timerSound.play().catch(error => {
+                console.error("Error playing sound:", error);
+            });
+            setTimeout(() => {
+                timerSound.pause();
+                timerSound.currentTime = 0;
+            }, 2000);
+        }
+
+        document.getElementById('custom-sound-file').addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (file) {
+                const url = URL.createObjectURL(file);
+                timerSound.src = url;
+            }
+        });
+
+        function pomodoroComplete() {
+            stopPomodoro();
+            document.getElementById('timer-complete-modal').classList.remove('hidden');
+            timerSound.play().catch(error => {
+                console.error("Error playing sound:", error);
+            });
+        }
+
+        function closeTimerComplete() {
+            document.getElementById('timer-complete-modal').classList.add('hidden');
+            timerSound.pause();
+            timerSound.currentTime = 0;
         }
 
         init();
