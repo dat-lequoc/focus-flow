@@ -18,7 +18,8 @@
     <div id="app" class="flex h-screen">
         <div id="sidebar" class="w-64 border-r p-4 bg-white shadow-lg dark:bg-gray-800 dark:border-gray-700">
             <div class="flex flex-col space-y-4">
-                <h2 id="projects-heading" class="text-xl font-bold text-gray-800 cursor-pointer dark:text-gray-200" onclick="showDashboard()">
+                <h2 id="projects-heading" class="text-xl font-bold text-gray-800 cursor-pointer dark:text-gray-200"
+                    onclick="showDashboard()">
                     Projects</h2>
             </div>
             <div id="project-list" class="mt-4 h-[calc(100vh-10rem)] overflow-y-auto">
@@ -36,7 +37,8 @@
             <div class="flex justify-between items-center mb-6">
                 <h1 id="project-title" class="text-2xl font-bold"></h1>
                 <div class="flex items-center space-x-4">
-                    <button id="home-btn" class="p-2 border rounded dark:border-gray-700" title="Home" onclick="showDashboard()">
+                    <button id="home-btn" class="p-2 border rounded dark:border-gray-700" title="Home"
+                        onclick="showDashboard()">
                         <svg class="h-5 w-5 text-gray-700 dark:text-gray-200" fill="none" stroke="currentColor"
                             viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -94,10 +96,11 @@
                             </svg>
                         </button>
                         <button id="settings-btn" class="p-2 border rounded dark:border-gray-700" title="Settings">
-                            <svg class="h-5 w-5 text-gray-700 dark:text-gray-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+                            <svg class="h-5 w-5 text-gray-700 dark:text-gray-200" fill="none" stroke="currentColor"
+                                viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                     d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                     d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
                             </svg>
                         </button>
@@ -130,23 +133,24 @@
         </div>
     </div>
 
-    <div id="time-entry-modal" class="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 hidden">
-        <div class="bg-white p-6 rounded-lg shadow-lg dark:bg-gray-800 dark:text-gray-200">
+    <div id="time-entry-modal" class="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 hidden z-40">
+        <div class="bg-white p-6 rounded-lg shadow-lg dark:bg-gray-800 dark:text-gray-200 z-50">
             <h2 class="text-xl font-bold mb-4">Add Time Entry</h2>
             <div class="space-y-4">
                 <div>
                     <label class="block mb-1">Duration (minutes)</label>
-                    <input type="number" id="manual-time-minutes" min="1" 
-                           class="w-full p-2 border rounded dark:bg-gray-700 dark:border-gray-600">
+                    <input type="number" id="manual-time-minutes" min="1"
+                        class="w-full p-2 border rounded dark:bg-gray-700 dark:border-gray-600">
                 </div>
                 <div>
                     <label class="block mb-1">Date</label>
-                    <input type="date" id="manual-time-date" 
-                           class="w-full p-2 border rounded dark:bg-gray-700 dark:border-gray-600">
+                    <input type="date" id="manual-time-date"
+                        class="w-full p-2 border rounded dark:bg-gray-700 dark:border-gray-600">
                 </div>
             </div>
             <div class="mt-6 flex justify-end space-x-3">
-                <button id="cancel-time-entry" class="px-4 py-2 border rounded hover:bg-gray-100 dark:border-gray-600 dark:hover:bg-gray-700">
+                <button id="cancel-time-entry"
+                    class="px-4 py-2 border rounded hover:bg-gray-100 dark:border-gray-600 dark:hover:bg-gray-700">
                     Cancel
                 </button>
                 <button id="save-time-entry" class="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600">
@@ -174,7 +178,7 @@
                 <div>
                     <label class="block mb-2">Pomodoro Duration (minutes)</label>
                     <input type="number" id="pomodoro-duration" min="1" max="60" value="25"
-                           class="w-full p-2 border rounded dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200">
+                        class="w-full p-2 border rounded dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200">
                 </div>
                 <div class="mt-4">
                     <label class="block mb-2">Timer Sound</label>
@@ -184,8 +188,8 @@
                     </select>
                 </div>
                 <div id="custom-sound-input" class="hidden">
-                    <input type="file" accept="audio/*" id="custom-sound-file" 
-                           class="w-full p-2 border rounded dark:bg-gray-700 dark:border-gray-600">
+                    <input type="file" accept="audio/*" id="custom-sound-file"
+                        class="w-full p-2 border rounded dark:bg-gray-700 dark:border-gray-600">
                 </div>
                 <div class="mt-4">
                     <button id="test-sound-btn" class="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600">
@@ -194,7 +198,8 @@
                 </div>
             </div>
             <div class="mt-6 flex justify-end space-x-3">
-                <button id="close-settings" class="px-4 py-2 border rounded hover:bg-gray-100 dark:border-gray-600 dark:hover:bg-gray-700">
+                <button id="close-settings"
+                    class="px-4 py-2 border rounded hover:bg-gray-100 dark:border-gray-600 dark:hover:bg-gray-700">
                     Close
                 </button>
             </div>
@@ -222,6 +227,43 @@
         let pomodoroDuration = 25;
         let pomodoroTimeLeft = pomodoroDuration * 60;
         let timerSound = document.getElementById('timer-sound');
+
+        function createElement(tag, options = {}) {
+            const element = document.createElement(tag);
+            for (let [key, value] of Object.entries(options)) {
+                if (key === 'className') {
+                    element.className = value;
+                } else if (key === 'innerHTML') {
+                    element.innerHTML = value;
+                } else if (key.startsWith('on')) {
+                    element.addEventListener(key.substring(2).toLowerCase(), value);
+                } else {
+                    element.setAttribute(key, value);
+                }
+            }
+            return element;
+        }
+
+        function createButton(options = {}) {
+            return createElement('button', options);
+        }
+
+        function createSVGIcon(pathData, className = '') {
+            const svg = createElement('svg', {
+                className: `h-5 w-5 ${className}`,
+                fill: 'none',
+                stroke: 'currentColor',
+                viewBox: '0 0 24 24'
+            });
+            const path = createElement('path', {
+                d: pathData,
+                'stroke-linecap': 'round',
+                'stroke-linejoin': 'round',
+                'stroke-width': '2'
+            });
+            svg.appendChild(path);
+            return svg;
+        }
 
         function loadInitialData() {
             const savedData = localStorage.getItem('taskManagerData');
@@ -469,7 +511,7 @@
             showDashboard();
             setupEventListeners();
             setupTimeEntryModal();
-            
+
             // Setup settings modal listeners
             document.getElementById('settings-btn').addEventListener('click', showSettings);
             document.getElementById('close-settings').addEventListener('click', hideSettings);
@@ -502,7 +544,7 @@
 
         function importData(file) {
             const reader = new FileReader();
-            reader.onload = function(e) {
+            reader.onload = function (e) {
                 try {
                     const importedData = JSON.parse(e.target.result);
                     if (Array.isArray(importedData)) {
@@ -571,18 +613,22 @@
         }
 
         function setupTimeEntryModal() {
-            document.getElementById('cancel-time-entry').addEventListener('click', closeTimeEntryModal);
-            document.getElementById('save-time-entry').addEventListener('click', saveTimeEntry);
-            
-            // Set today as default date
-            const today = new Date().toISOString().split('T')[0];
-            document.getElementById('manual-time-date').value = today;
+            document.getElementById('cancel-time-entry').addEventListener('click', () => {
+                closeTimeEntryModal();
+            });
+            document.getElementById('save-time-entry').addEventListener('click', () => {
+                saveTimeEntry();
+            });
+
         }
 
         function openTimeEntryModal(task) {
             currentTimeEntryTask = task;
             document.getElementById('time-entry-modal').classList.remove('hidden');
             document.getElementById('manual-time-minutes').value = '';
+            // Set today as default date when opening modal
+            const today = new Date().toISOString().split('T')[0];
+            document.getElementById('manual-time-date').value = today;
             document.getElementById('manual-time-minutes').focus();
         }
 
@@ -594,7 +640,7 @@
         function saveTimeEntry() {
             const minutes = parseInt(document.getElementById('manual-time-minutes').value);
             const dateStr = document.getElementById('manual-time-date').value;
-            
+
             if (!minutes || minutes <= 0 || !dateStr) {
                 alert('Please enter valid duration and date');
                 return;
@@ -602,6 +648,10 @@
 
             const date = new Date(dateStr);
             date.setHours(12, 0, 0, 0); // Set to noon to avoid timezone issues
+
+            // Create start date from input date at current time
+            const now = new Date();
+            date.setHours(now.getHours(), now.getMinutes(), now.getSeconds());
             
             const timeEntry = {
                 start: date.toISOString(),
@@ -1516,7 +1566,7 @@
             }, 2000);
         }
 
-        document.getElementById('custom-sound-file').addEventListener('change', function(e) {
+        document.getElementById('custom-sound-file').addEventListener('change', function (e) {
             const file = e.target.files[0];
             if (file) {
                 const url = URL.createObjectURL(file);
