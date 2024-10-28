@@ -701,10 +701,13 @@
                 todayBtn.innerHTML = '☀️';
                 todayBtn.title = 'Remove from Today\'s Tasks';
                 todayBtn.addEventListener('click', () => {
-                    task.inToday = false;
-                    saveData();
-                    renderDashboard();
-                    renderTaskList();
+                    const originalTask = findTaskByIdGlobal(task.id);
+                    if (originalTask) {
+                        originalTask.inToday = false;
+                        saveData();
+                        renderDashboard();
+                        renderTaskList();
+                    }
                 });
                 rightDiv.appendChild(todayBtn);
 
@@ -804,10 +807,7 @@
                 const inTitle = task.title.toLowerCase().includes(term);
                 const inSubtasks = filterTasks(task.subtasks, term).length > 0;
                 return inTitle || inSubtasks;
-            }).map(task => ({
-                ...task,
-                subtasks: filterTasks(task.subtasks, term)
-            }));
+            });
         }
 
         function editTask(taskId, newTitle) {
@@ -858,14 +858,14 @@
             const expandBtn = document.createElement('button');
             expandBtn.className = 'mr-1 p-1 text-lg w-6 h-6 hover:bg-gray-100 rounded cursor-pointer flex items-center justify-center dark:hover:bg-gray-700';
             expandBtn.innerHTML = task.isExpanded ? `
-                <svg class="h-4 w-4 text-gray-700 dark:text-gray-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
-                </svg>
-            ` : `
-                <svg class="h-4 w-4 text-gray-700 dark:text-gray-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 15l7-7 7 7" />
-                </svg>
-            `;
+                    <svg class="h-4 w-4 text-gray-700 dark:text-gray-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                    </svg>
+                ` : `
+                    <svg class="h-4 w-4 text-gray-700 dark:text-gray-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 15l7-7 7 7" />
+                    </svg>
+                `;
             expandBtn.addEventListener('click', () => toggleTaskExpand(task.id));
             leftDiv.appendChild(expandBtn);
 
@@ -893,13 +893,16 @@
             todayBtn.addEventListener('click', (e) => {
                 e.stopPropagation();
                 e.preventDefault();
-                task.inToday = !task.inToday;
-                todayBtn.innerHTML = task.inToday ? '🌞' : '☀️';
-                todayBtn.classList.toggle('bg-yellow-100', task.inToday);
-                saveData();
-                renderTaskList();
-                renderDashboard();
-                renderProjectList();
+                const originalTask = findTaskByIdGlobal(task.id);
+                if (originalTask) {
+                    originalTask.inToday = !originalTask.inToday;
+                    todayBtn.innerHTML = originalTask.inToday ? '🌞' : '☀️';
+                    todayBtn.classList.toggle('bg-yellow-100', originalTask.inToday);
+                    saveData();
+                    renderTaskList();
+                    renderDashboard();
+                    renderProjectList();
+                }
             });
             rightDiv.appendChild(todayBtn);
 
@@ -1181,6 +1184,15 @@
                     let result = findTaskById(task.subtasks, taskId);
                     if (result) return result;
                 }
+            }
+            return null;
+        }
+
+        // New function to find a task globally
+        function findTaskByIdGlobal(taskId) {
+            for (let project of projects) {
+                const task = findTaskById(project.tasks, taskId);
+                if (task) return task;
             }
             return null;
         }
