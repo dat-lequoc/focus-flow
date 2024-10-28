@@ -18,7 +18,7 @@
     <div id="app" class="flex h-screen">
         <div id="sidebar" class="w-64 border-r p-4 bg-white shadow-lg dark:bg-gray-800 dark:border-gray-700">
             <div class="flex flex-col space-y-4">
-                <h2 id="projects-heading" class="text-xl font-bold text-gray-800 cursor-pointer dark:text-gray-200">
+                <h2 id="projects-heading" class="text-xl font-bold text-gray-800 cursor-pointer dark:text-gray-200" onclick="showDashboard()">
                     Projects</h2>
             </div>
             <div id="project-list" class="mt-4 h-[calc(100vh-10rem)] overflow-y-auto">
@@ -568,8 +568,6 @@
                 renderTaskList();
             });
             document.addEventListener('keydown', handleKeyDown);
-            document.getElementById('projects-heading').addEventListener('click', showDashboard);
-            document.getElementById('home-btn').addEventListener('click', showDashboard);
         }
 
         function setupTimeEntryModal() {
