@@ -3,8 +3,7 @@
 
 <head>
     <meta charset="UTF-8">
-    <title>Task Manager</title>
-    <!-- Include Tailwind CSS via CDN -->
+    <title>Focus Flow</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
@@ -17,14 +16,12 @@
 
 <body class="bg-gray-100 text-black dark:bg-gray-900 dark:text-white">
     <div id="app" class="flex h-screen">
-        <!-- Left Sidebar -->
         <div id="sidebar" class="w-64 border-r p-4 bg-white shadow-lg dark:bg-gray-800 dark:border-gray-700">
             <div class="flex flex-col space-y-4">
                 <h2 id="projects-heading" class="text-xl font-bold text-gray-800 cursor-pointer dark:text-gray-200">
                     Projects</h2>
             </div>
             <div id="project-list" class="mt-4 h-[calc(100vh-10rem)] overflow-y-auto">
-                <!-- Project buttons will be added here -->
             </div>
             <div class="mt-4">
                 <input id="new-project-name" type="text" placeholder="New project name"
@@ -35,12 +32,10 @@
             </div>
         </div>
 
-        <!-- Main Panel -->
         <div id="main-panel" class="flex-1 p-6 bg-gray-50 dark:bg-gray-900 overflow-y-auto">
             <div class="flex justify-between items-center mb-6">
                 <h1 id="project-title" class="text-2xl font-bold"></h1>
                 <div class="flex items-center space-x-4">
-                    <!-- Home button -->
                     <button id="home-btn" class="p-2 border rounded dark:border-gray-700" title="Home">
                         <svg class="h-5 w-5 text-gray-700 dark:text-gray-200" fill="none" stroke="currentColor"
                             viewBox="0 0 24 24">
@@ -48,7 +43,6 @@
                                 d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
                         </svg>
                     </button>
-                    <!-- Search -->
                     <div class="flex items-center gap-2">
                         <div class="relative">
                             <input id="search-input" type="text" placeholder="Search tasks"
@@ -77,15 +71,12 @@
                             </svg>
                         </button>
                     </div>
-                    <!-- Report buttons -->
                     <div class="flex gap-2">
-                        <!-- Dark mode button -->
                         <button id="dark-mode-toggle" class="p-2 border rounded dark:border-gray-700"
                             title="Toggle Dark Mode">
                             <i id="dark-mode-icon" class="fas fa-moon text-gray-700 dark:text-gray-200"></i>
                         </button>
                         <button id="report-btn" class="p-2 border rounded dark:border-gray-700" title="Project Report">
-                            <!-- Chart icon -->
                             <svg class="h-5 w-5 text-gray-700 dark:text-gray-200" fill="none" stroke="currentColor"
                                 viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -98,7 +89,6 @@
                 </div>
             </div>
             <div id="dashboard-view">
-                <!-- Dashboard content will be added here -->
             </div>
             <div id="project-view" class="hidden">
                 <div id="task-input" class="mb-4">
@@ -106,10 +96,8 @@
                         class="mb-4 p-3 border rounded-lg w-full shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200 dark:placeholder-gray-400">
                 </div>
                 <div id="task-list" class="h-[calc(100vh-20rem)] overflow-y-auto">
-                    <!-- Tasks will be added here -->
                 </div>
             </div>
-            <!-- Pomodoro Timer Display -->
             <div id="pomodoro-display"
                 class="fixed bottom-0 left-0 right-0 bg-white border-t p-4 hidden dark:bg-gray-800 dark:border-gray-700">
                 <div class="container mx-auto flex justify-between items-center">
@@ -126,18 +114,15 @@
         </div>
     </div>
 
-    <!-- Report Modal -->
     <div id="report-modal" class="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 hidden">
         <div class="bg-white p-6 rounded dark:bg-gray-800 dark:text-gray-200">
             <h2 class="text-xl font-bold mb-4">Project Report</h2>
             <div id="report-content">
-                <!-- Report content will be added here -->
             </div>
             <button id="close-report-btn" class="mt-4 bg-blue-500 text-white p-2 rounded">Close</button>
         </div>
     </div>
 
-    <!-- JavaScript -->
     <script>
         let projects = [];
         let selectedProject = null;
@@ -210,7 +195,6 @@
                     }
                 ];
             }
-            // Initialize task properties
             projects.forEach(project => {
                 project.tasks.forEach(task => {
                     initializeTaskProperties(task);
@@ -241,8 +225,6 @@
         function getWeeklyTimeData() {
             const today = new Date();
             today.setHours(0, 0, 0, 0);
-
-            // Create array of last 7 days ending with today
             const days = [];
             for (let i = 6; i >= 0; i--) {
                 const date = new Date(today);
@@ -252,19 +234,15 @@
                     timeSpent: 0
                 });
             }
-
-            // Calculate time spent for each day
             projects.forEach(project => {
                 const processTask = (task) => {
                     if (task.timeEntries) {
                         task.timeEntries.forEach(entry => {
                             const entryDate = new Date(entry.start);
                             entryDate.setHours(0, 0, 0, 0);
-
                             const dayData = days.find(d =>
                                 d.date.getTime() === entryDate.getTime()
                             );
-
                             if (dayData) {
                                 dayData.timeSpent += entry.duration;
                             }
@@ -272,25 +250,20 @@
                     }
                     task.subtasks.forEach(processTask);
                 };
-
                 project.tasks.forEach(processTask);
             });
-
             return days;
         }
 
         function renderWeeklyChart() {
             const ctx = document.getElementById('weeklyChart');
             if (!ctx) return;
-
             const weekData = getWeeklyTimeData();
             const labels = weekData.map(d => d.date.toLocaleDateString('en-US', { weekday: 'short' }));
-            const data = weekData.map(d => (d.timeSpent / 60).toFixed(2)); // Convert to minutes with 2 decimal places
-
+            const data = weekData.map(d => (d.timeSpent / 60).toFixed(2));
             if (window.weeklyChart instanceof Chart) {
                 window.weeklyChart.destroy();
             }
-
             window.weeklyChart = new Chart(ctx, {
                 type: 'line',
                 data: {
@@ -363,8 +336,6 @@
             renderProjectList();
             showDashboard();
             setupEventListeners();
-
-            // Initialize dark mode icon
             isDarkMode = document.documentElement.classList.contains('dark');
             const icon = document.getElementById('dark-mode-icon');
             if (isDarkMode) {
@@ -410,8 +381,6 @@
                 renderTaskList();
             });
             document.addEventListener('keydown', handleKeyDown);
-
-            // Add event listeners for elements that previously had inline onclick attributes
             document.getElementById('projects-heading').addEventListener('click', showDashboard);
             document.getElementById('home-btn').addEventListener('click', showDashboard);
         }
@@ -457,46 +426,35 @@
             projects.forEach(project => {
                 const projectDiv = document.createElement('div');
                 projectDiv.className = 'mb-4';
-
                 const headerDiv = document.createElement('div');
                 headerDiv.className = 'flex items-center justify-between mb-1';
-
                 const btn = document.createElement('button');
                 btn.textContent = project.name;
                 btn.className = `flex-grow text-left p-2 rounded mr-2 ${selectedProject && selectedProject.id === project.id ? "bg-blue-500 text-white" : "bg-gray-100 text-black dark:bg-gray-700 dark:text-gray-200"}`;
                 btn.addEventListener('click', () => selectProject(project.id));
-
                 const statsDiv = document.createElement('div');
                 statsDiv.className = 'mt-1 px-2';
-
                 const progressContainer = document.createElement('div');
                 progressContainer.className = 'flex items-center gap-2';
-
                 const progress = calculateProjectProgress(project.tasks);
                 const totalTime = calculateProjectTotalTime(project.tasks);
-
                 const progressBar = document.createElement('div');
                 progressBar.className = 'flex-grow h-2 bg-gray-200 rounded dark:bg-gray-600';
                 progressBar.innerHTML = `
                     <div class="h-full bg-green-500 rounded" style="width: ${progress}%"></div>
                 `;
-
                 const progressText = document.createElement('span');
                 progressText.className = 'text-sm text-gray-600 dark:text-gray-400';
                 progressText.textContent = `${progress}%`;
-
                 const timeText = document.createElement('span');
                 timeText.className = 'text-sm text-gray-600 ml-4 dark:text-gray-400';
                 timeText.textContent = `Total: ${formatTime(totalTime)}`;
-
                 progressContainer.appendChild(progressBar);
                 progressContainer.appendChild(progressText);
                 progressContainer.appendChild(timeText);
                 statsDiv.appendChild(progressContainer);
-
                 const menuDiv = document.createElement('div');
                 menuDiv.className = 'relative';
-
                 const menuBtn = document.createElement('button');
                 menuBtn.className = 'p-1 hover:bg-gray-100 rounded dark:hover:bg-gray-700';
                 menuBtn.innerHTML = `<i class="fas fa-ellipsis-v text-gray-700 dark:text-gray-200"></i>`;
@@ -505,10 +463,8 @@
                     const dropdown = menuBtn.nextElementSibling;
                     dropdown.classList.toggle('hidden');
                 });
-
                 const dropdownDiv = document.createElement('div');
                 dropdownDiv.className = 'absolute right-0 mt-1 w-32 bg-white border rounded shadow-lg hidden z-10 dark:bg-gray-800 dark:border-gray-700';
-
                 const editBtn = document.createElement('button');
                 editBtn.innerHTML = 'Edit';
                 editBtn.className = 'w-full text-left px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-700';
@@ -517,7 +473,6 @@
                     dropdownDiv.classList.add('hidden');
                     editProject(project.id);
                 });
-
                 const deleteBtn = document.createElement('button');
                 deleteBtn.innerHTML = 'Delete';
                 deleteBtn.className = 'w-full text-left px-4 py-2 hover:bg-gray-100 text-red-500 dark:hover:bg-gray-700';
@@ -526,12 +481,10 @@
                     dropdownDiv.classList.add('hidden');
                     deleteProject(project.id);
                 });
-
                 dropdownDiv.appendChild(editBtn);
                 dropdownDiv.appendChild(deleteBtn);
                 menuDiv.appendChild(menuBtn);
                 menuDiv.appendChild(dropdownDiv);
-
                 document.addEventListener('click', () => {
                     dropdownDiv.classList.add('hidden');
                 });
@@ -598,7 +551,6 @@
 
         function renderDashboard() {
             const dashboardView = document.getElementById('dashboard-view');
-
             let totalProjects = projects.length;
             let totalTasks = 0;
             let totalCompletedTasks = 0;
@@ -606,20 +558,16 @@
             let todayTimeSpent = 0;
             let mostActiveProject = { name: '-', time: 0 };
             let highestProgress = { name: '-', progress: 0 };
-
             const today = new Date();
             today.setHours(0, 0, 0, 0);
-
             projects.forEach(project => {
                 const projectTotalTime = calculateProjectTotalTime(project.tasks);
                 const projectProgress = calculateProjectProgress(project.tasks);
                 const completedTasks = countTasks(project.tasks, true);
                 const ongoingTasks = countTasks(project.tasks, false);
-
                 totalTasks += completedTasks + ongoingTasks;
                 totalCompletedTasks += completedTasks;
                 totalTimeSpent += projectTotalTime;
-
                 project.tasks.forEach(task => {
                     const calculateTodayTime = (task) => {
                         let time = 0;
@@ -638,7 +586,6 @@
                     };
                     todayTimeSpent += calculateTodayTime(task);
                 });
-
                 if (projectTotalTime > mostActiveProject.time) {
                     mostActiveProject = { name: project.name, time: projectTotalTime };
                 }
@@ -646,10 +593,7 @@
                     highestProgress = { name: project.name, progress: projectProgress };
                 }
             });
-
-            // Calculate weekly data
             const weekData = getWeeklyTimeData();
-
             dashboardView.innerHTML = `
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div class="p-6 bg-white rounded-lg shadow dark:bg-gray-800 dark:text-gray-200">
@@ -673,73 +617,30 @@
                                     display: none;
                                 }
                             </style>
-                            <!-- Today's tasks will be added here -->
                         </div>
                     </div>
                 </div>
             `;
-
             const todayTasksContainer = document.getElementById('today-tasks-container');
             const todayTasks = getTodayTasks();
-
-            // Clear previous content
             todayTasksContainer.innerHTML = '';
-
-            // For each task in todayTasks
             todayTasks.forEach(task => {
                 const taskDiv = document.createElement('div');
                 taskDiv.className = 'bg-white rounded-lg shadow-sm hover:shadow-md transition-shadow duration-200 dark:bg-gray-800 overflow-hidden';
-
-                // Task header
                 const taskHeader = document.createElement('div');
                 taskHeader.className = 'flex items-center justify-between p-3 border-b dark:border-gray-700';
-
                 const leftDiv = document.createElement('div');
                 leftDiv.className = 'flex items-center space-x-3 flex-grow';
-
-                // Status indicator
                 const statusDiv = document.createElement('div');
                 statusDiv.className = `w-2 h-2 rounded-full ${task.isCompleted ? 'bg-green-500' : (task.dailyProgress >= task.dailyGoal && task.dailyGoal > 0 ? 'bg-blue-500' : 'bg-yellow-500')}`;
                 leftDiv.appendChild(statusDiv);
-
-                // Task title
-                const label = document.createElement('label');
                 const taskPath = getTaskPath(task.id);
-                // Create label content with clickable URLs for task path
-                const pathText = taskPath.join(' > ');
-                const urlPattern = /(https?:\/\/[^\s]+)/g;
-                const parts = pathText.split(urlPattern);
-                
-                parts.forEach(part => {
-                    if (part.match(urlPattern)) {
-                        // If it's a URL, create a link
-                        const link = document.createElement('a');
-                        link.href = part;
-                        link.textContent = part;
-                        link.target = '_blank';
-                        link.className = 'text-blue-500 hover:text-blue-600 underline';
-                        label.appendChild(link);
-                    } else if (part) {
-                        // If it's text, add it directly
-                        const text = document.createTextNode(part);
-                        label.appendChild(text);
-                    }
-                });
-                label.className = 'font-medium dark:text-gray-200';
+                const label = createLabelWithLinks(taskPath.join(' > '), 'font-medium dark:text-gray-200');
                 leftDiv.appendChild(label);
-
                 taskHeader.appendChild(leftDiv);
-
-                // Right side container for action buttons
                 const rightDiv = document.createElement('div');
                 rightDiv.className = 'flex items-center space-x-2';
-
-                // Today button
-                const todayBtn = document.createElement('button');
-                todayBtn.className = 'p-1 border rounded-lg hover:bg-gray-100 transition-colors duration-200 dark:border-gray-700 dark:hover:bg-gray-700';
-                todayBtn.innerHTML = '🌞';
-                todayBtn.title = 'Remove from Today\'s Tasks';
-                todayBtn.addEventListener('click', () => {
+                const todayBtn = createTodayButton(task, () => {
                     const originalTask = findTaskByIdGlobal(task.id);
                     if (originalTask) {
                         originalTask.inToday = false;
@@ -748,21 +649,9 @@
                         renderTaskList();
                     }
                 });
+                todayBtn.title = 'Remove from Today\'s Tasks';
                 rightDiv.appendChild(todayBtn);
-
-                // Timer button
-                const timerBtn = document.createElement('button');
-                timerBtn.className = 'p-1 border rounded-lg hover:bg-gray-100 transition-colors duration-200 dark:border-gray-700 dark:hover:bg-gray-700';
-                timerBtn.innerHTML = task.isTimerRunning ? `
-                    <svg class="h-4 w-4 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <rect x="6" y="6" width="12" height="12" rx="2" ry="2"></rect>
-                    </svg>
-                ` : `
-                    <svg class="h-4 w-4 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <polygon points="5 3 19 12 5 21 5 3"></polygon>
-                    </svg>
-                `;
-                timerBtn.addEventListener('click', () => {
+                const timerBtn = createTimerButton(task, () => {
                     const currentTask = findTaskByIdGlobal(task.id);
                     if (currentTask.isTimerRunning) {
                         stopPomodoro();
@@ -771,10 +660,7 @@
                     }
                 });
                 rightDiv.appendChild(timerBtn);
-
                 taskHeader.appendChild(rightDiv);
-
-                // Goal input (furthest right)
                 const goalInput = document.createElement('input');
                 goalInput.type = 'number';
                 goalInput.min = 0;
@@ -787,22 +673,15 @@
                     renderDashboard();
                 });
                 taskHeader.appendChild(goalInput);
-
-                // Progress section
                 const progressSection = document.createElement('div');
                 progressSection.className = 'p-3';
-
-                // Progress bar
-                // Progress text and bar in same line
                 const progressContainer = document.createElement('div');
                 progressContainer.className = 'flex items-center gap-4';
-
                 const progressText = document.createElement('div');
                 progressText.className = 'text-sm text-gray-600 dark:text-gray-400 min-w-fit';
                 const today = new Date();
                 today.setHours(0, 0, 0, 0);
                 let todayTimeSpent = 0;
-            
                 if (task.timeEntries) {
                     task.timeEntries.forEach(entry => {
                         const entryDate = new Date(entry.start);
@@ -811,23 +690,18 @@
                         }
                     });
                 }
-            
                 const pomodorosCompleted = Math.floor(todayTimeSpent / 60 / 25);
                 progressText.textContent = `${pomodorosCompleted} / ${task.dailyGoal} pomodoros`;
-
                 const progressBarContainer = document.createElement('div');
                 progressBarContainer.className = 'flex-grow h-2 bg-gray-200 rounded dark:bg-gray-700';
-
                 const progressBar = document.createElement('div');
                 const progressPercentage = task.dailyGoal > 0 ? (pomodorosCompleted / task.dailyGoal) * 100 : 0;
                 progressBar.className = `h-full rounded transition-all duration-300 ${progressPercentage >= 100 ? 'bg-green-500' : 'bg-blue-500'}`;
                 progressBar.style.width = `${Math.min(progressPercentage, 100)}%`;
-
                 progressBarContainer.appendChild(progressBar);
                 progressContainer.appendChild(progressText);
                 progressContainer.appendChild(progressBarContainer);
                 progressSection.appendChild(progressContainer);
-
                 taskDiv.appendChild(taskHeader);
                 taskDiv.appendChild(progressSection);
                 todayTasksContainer.appendChild(taskDiv);
@@ -925,33 +799,76 @@
             renderTaskList();
         }
 
+        function createLabelWithLinks(text, className) {
+            const label = document.createElement('label');
+            const urlPattern = /(https?:\/\/[^\s]+)/g;
+            const parts = text.split(urlPattern);
+            parts.forEach(part => {
+                if (part.match(urlPattern)) {
+                    const link = document.createElement('a');
+                    link.href = part;
+                    link.textContent = part;
+                    link.target = '_blank';
+                    link.className = 'text-blue-500 hover:text-blue-600 underline';
+                    label.appendChild(link);
+                } else if (part) {
+                    const textNode = document.createTextNode(part);
+                    label.appendChild(textNode);
+                }
+            });
+            if (className) {
+                label.className = className;
+            }
+            return label;
+        }
+
+        function createTimerButton(task, onClick) {
+            const timerBtn = document.createElement('button');
+            timerBtn.className = 'p-1.5 border rounded-lg hover:bg-gray-100 transition-colors duration-200 dark:border-gray-700 dark:hover:bg-gray-700';
+            timerBtn.innerHTML = task.isTimerRunning ? `
+                <svg class="h-4 w-4 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <rect x="6" y="6" width="12" height="12" rx="2" ry="2"></rect>
+                </svg>
+            ` : `
+                <svg class="h-4 w-4 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <polygon points="5 3 19 12 5 21 5 3"></polygon>
+                </svg>
+            `;
+            timerBtn.addEventListener('click', onClick);
+            return timerBtn;
+        }
+
+        function createTodayButton(task, onClick) {
+            const todayBtn = document.createElement('button');
+            todayBtn.className = 'p-1.5 border rounded-lg hover:bg-gray-100 transition-colors duration-200 dark:border-gray-700 dark:hover:bg-gray-700';
+            todayBtn.innerHTML = task.inToday ? '🌞' : '☀️';
+            todayBtn.classList.toggle('bg-yellow-100', task.inToday);
+            todayBtn.title = task.inToday ? 'Remove from Today\'s Tasks' : 'Add to Today\'s Tasks';
+            todayBtn.addEventListener('click', onClick);
+            return todayBtn;
+        }
+
         function createTaskElement(task, level = 0) {
             const container = document.createElement('div');
             container.style.marginLeft = `${level * 24}px`;
-
             const taskDiv = document.createElement('div');
             taskDiv.className = 'flex items-center justify-between p-3 relative bg-white rounded-lg shadow-sm mb-2 hover:shadow-md transition-shadow duration-200 dark:bg-gray-800';
-
             if (level > 0) {
                 const verticalLine = document.createElement('div');
                 verticalLine.className = 'absolute left-[-20px] top-0 bottom-0 border-l-2 border-gray-300 dark:border-gray-600';
                 taskDiv.appendChild(verticalLine);
-
                 const horizontalLine = document.createElement('div');
                 horizontalLine.className = 'absolute left-[-20px] top-1/2 w-[12px] border-t-2 border-gray-300 dark:border-gray-600';
                 taskDiv.appendChild(horizontalLine);
             }
-
             const leftDiv = document.createElement('div');
             leftDiv.className = 'flex items-center';
-
             const checkbox = document.createElement('input');
             checkbox.type = 'checkbox';
             checkbox.checked = task.isCompleted;
             checkbox.className = 'mr-2 w-5 h-5 cursor-pointer';
             checkbox.addEventListener('change', () => toggleTaskCompletion(task.id));
             leftDiv.appendChild(checkbox);
-
             const expandBtn = document.createElement('button');
             expandBtn.className = 'mr-1 p-1 text-lg w-6 h-6 hover:bg-gray-100 rounded cursor-pointer flex items-center justify-center dark:hover:bg-gray-700';
             expandBtn.innerHTML = task.isExpanded ? `
@@ -965,51 +882,17 @@
                 `;
             expandBtn.addEventListener('click', () => toggleTaskExpand(task.id));
             leftDiv.appendChild(expandBtn);
-
-            const label = document.createElement('label');
-            // URL regex pattern
-            const urlPattern = /(https?:\/\/[^\s]+)/g;
-            
-            // Split the title into text and URLs
-            const parts = task.title.split(urlPattern);
-            
-            // Create the label content
-            parts.forEach((part, index) => {
-                if (part.match(urlPattern)) {
-                    // If it's a URL, create a link
-                    const link = document.createElement('a');
-                    link.href = part;
-                    link.textContent = part;
-                    link.target = '_blank';
-                    link.className = 'text-blue-500 hover:text-blue-600 underline';
-                    label.appendChild(link);
-                } else if (part) {
-                    // If it's text, add it directly
-                    const text = document.createTextNode(part);
-                    label.appendChild(text);
-                }
-            });
-            
-            label.className = task.isCompleted ? 'line-through text-gray-500 dark:text-gray-400' : 'dark:text-gray-200';
+            const labelClass = task.isCompleted ? 'line-through text-gray-500 dark:text-gray-400' : 'dark:text-gray-200';
+            const label = createLabelWithLinks(task.title, labelClass);
             leftDiv.appendChild(label);
-
             taskDiv.appendChild(leftDiv);
-
             const rightDiv = document.createElement('div');
             rightDiv.className = 'flex items-center space-x-2';
-
             const timeSpan = document.createElement('span');
             const totalTime = calculateTaskTotalTime(task);
             timeSpan.textContent = formatTime(totalTime);
             rightDiv.appendChild(timeSpan);
-
-            // Today button
-            const todayBtn = document.createElement('button');
-            todayBtn.className = 'p-1.5 border rounded-lg hover:bg-gray-100 transition-colors duration-200 dark:border-gray-700 dark:hover:bg-gray-700';
-            todayBtn.innerHTML = task.inToday ? '🌞' : '🌞';
-            todayBtn.classList.toggle('bg-yellow-100', task.inToday);
-            todayBtn.title = task.inToday ? 'Remove from Today\'s Tasks' : 'Add to Today\'s Tasks';
-            todayBtn.addEventListener('click', (e) => {
+            const todayBtn = createTodayButton(task, (e) => {
                 e.stopPropagation();
                 e.preventDefault();
                 const originalTask = findTaskByIdGlobal(task.id);
@@ -1024,7 +907,6 @@
                 }
             });
             rightDiv.appendChild(todayBtn);
-
             const editBtn = document.createElement('button');
             editBtn.className = 'p-1.5 border rounded-lg hover:bg-gray-100 transition-colors duration-200 dark:border-gray-700 dark:hover:bg-gray-700';
             editBtn.innerHTML = `
@@ -1040,20 +922,8 @@
                 }
             });
             rightDiv.appendChild(editBtn);
-
-            const timerBtn = document.createElement('button');
-            timerBtn.className = 'p-1.5 border rounded-lg hover:bg-gray-100 transition-colors duration-200 dark:border-gray-700 dark:hover:bg-gray-700';
-            timerBtn.innerHTML = task.isTimerRunning ? `
-                <svg class="h-4 w-4 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <rect x="6" y="6" width="12" height="12" rx="2" ry="2"></rect>
-                </svg>
-            ` : `
-                <svg class="h-4 w-4 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <polygon points="5 3 19 12 5 21 5 3"></polygon>
-                `;
-            timerBtn.addEventListener('click', () => startPomodoro(task));
+            const timerBtn = createTimerButton(task, () => startPomodoro(task));
             rightDiv.appendChild(timerBtn);
-
             const deleteBtn = document.createElement('button');
             deleteBtn.className = 'p-1.5 border rounded-lg text-red-500 hover:bg-red-50 transition-colors duration-200 dark:border-gray-700 dark:hover:bg-gray-700';
             deleteBtn.innerHTML = `
@@ -1068,11 +938,8 @@
                 }
             });
             rightDiv.appendChild(deleteBtn);
-
             taskDiv.appendChild(rightDiv);
-
             container.appendChild(taskDiv);
-
             if (task.isExpanded) {
                 const subtasksDiv = document.createElement('div');
                 if (task.subtasks && task.subtasks.length > 0) {
@@ -1082,11 +949,9 @@
                     });
                 }
                 container.appendChild(subtasksDiv);
-
                 const addSubtaskDiv = document.createElement('div');
                 addSubtaskDiv.style.marginLeft = `${(level + 1) * 16}px`;
                 addSubtaskDiv.className = 'mt-2';
-
                 const subtaskInput = document.createElement('input');
                 subtaskInput.type = 'text';
                 subtaskInput.placeholder = '+ subtask';
@@ -1106,10 +971,8 @@
                     }
                 });
                 addSubtaskDiv.appendChild(subtaskInput);
-
                 container.appendChild(addSubtaskDiv);
             }
-
             return container;
         }
 
@@ -1139,28 +1002,22 @@
             if (currentPomodoroTask) {
                 stopPomodoro();
             }
-
             currentPomodoroTask = task;
             task.isTimerRunning = true;
             pomodoroTimeLeft = 25 * 60;
-
             const pomodoroDisplay = document.getElementById('pomodoro-display');
             pomodoroDisplay.classList.remove('hidden');
             document.getElementById('current-task-title').textContent = task.title;
-
             updatePomodoroDisplay();
             pomodoroTimer = setInterval(() => {
                 pomodoroTimeLeft--;
                 updatePomodoroDisplay();
-
                 if (pomodoroTimeLeft <= 0) {
                     stopPomodoro();
                     alert('Pomodoro completed!');
                 }
             }, 1000);
-
             document.getElementById('stop-pomodoro').onclick = stopPomodoro;
-
             saveData();
             renderTaskList();
         }
@@ -1170,13 +1027,11 @@
                 const elapsedSeconds = (25 * 60) - pomodoroTimeLeft;
                 const endTime = new Date();
                 const startTime = new Date(endTime - (elapsedSeconds * 1000));
-
                 const timeEntry = {
                     start: startTime.toISOString(),
                     end: endTime.toISOString(),
                     duration: elapsedSeconds
                 };
-
                 const task = findTaskByIdGlobal(currentPomodoroTask.id);
                 if (task) {
                     task.timeSpent += timeEntry.duration;
@@ -1185,37 +1040,28 @@
                         task.timeEntries = [];
                     }
                     task.timeEntries.push(timeEntry);
-                    
-                    // Calculate today's total time spent
                     if (task.inToday) {
                         const today = new Date();
                         today.setHours(0, 0, 0, 0);
                         let todayTimeSpent = 0;
-                        
                         task.timeEntries.forEach(entry => {
                             const entryDate = new Date(entry.start);
                             if (entryDate >= today) {
                                 todayTimeSpent += entry.duration;
                             }
                         });
-                        
-                        // Calculate progress based on total time spent today (in minutes)
                         task.dailyProgress = Math.floor(todayTimeSpent / 60 / 25);
                         saveData();
                         renderDashboard();
                     }
                 }
-
                 currentPomodoroTask = null;
             }
-
             if (pomodoroTimer) {
                 clearInterval(pomodoroTimer);
                 pomodoroTimer = null;
             }
-
             document.getElementById('pomodoro-display').classList.add('hidden');
-
             saveData();
             renderTaskList();
             renderProjectList();
@@ -1232,7 +1078,6 @@
             isDarkMode = !isDarkMode;
             document.documentElement.classList.toggle('dark');
             const icon = document.getElementById('dark-mode-icon');
-
             if (isDarkMode) {
                 icon.classList.remove('fa-sun');
                 icon.classList.add('fa-moon');
@@ -1240,7 +1085,6 @@
                 icon.classList.remove('fa-moon');
                 icon.classList.add('fa-sun');
             }
-
             renderWeeklyChart();
         }
 
@@ -1250,7 +1094,6 @@
             const totalTime = calculateTotalTime(selectedProject.tasks);
             const completedTasks = countTasks(selectedProject.tasks, true);
             const ongoingTasks = countTasks(selectedProject.tasks, false);
-
             reportContent.innerHTML = `
                 <p>Total time spent on tasks: ${formatTime(totalTime)}</p>
                 <p>Number of completed tasks: ${completedTasks}</p>
@@ -1320,7 +1163,6 @@
             return null;
         }
 
-        // New function to find a task globally
         function findTaskByIdGlobal(taskId) {
             for (let project of projects) {
                 const task = findTaskById(project.tasks, taskId);
@@ -1343,7 +1185,6 @@
                 }
                 return null;
             }
-
             for (let project of projects) {
                 const result = findPath(project.tasks, taskId);
                 if (result) {
