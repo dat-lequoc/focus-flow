@@ -326,7 +326,7 @@
             if (!ctx) return;
             const weekData = getWeeklyTimeData();
             const labels = weekData.map(d => d.date.toLocaleDateString('en-US', { weekday: 'short' }));
-            const data = weekData.map(d => (d.timeSpent / 60).toFixed(2));
+            const data = weekData.map(d => (d.timeSpent / 3600).toFixed(2));
             if (window.weeklyChart instanceof Chart) {
                 window.weeklyChart.destroy();
             }
@@ -335,7 +335,7 @@
                 data: {
                     labels: labels,
                     datasets: [{
-                        label: 'Time Spent (minutes)',
+                        label: 'Time Spent (hours)',
                         data: data,
                         backgroundColor: isDarkMode ? 'rgba(59, 130, 246, 0.5)' : 'rgba(59, 130, 246, 0.8)',
                         borderColor: isDarkMode ? 'rgba(59, 130, 246, 0.8)' : 'rgba(59, 130, 246, 1)',
