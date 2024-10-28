@@ -705,7 +705,26 @@
                 // Task title
                 const label = document.createElement('label');
                 const taskPath = getTaskPath(task.id);
-                label.textContent = taskPath.join(' > ');
+                // Create label content with clickable URLs for task path
+                const pathText = taskPath.join(' > ');
+                const urlPattern = /(https?:\/\/[^\s]+)/g;
+                const parts = pathText.split(urlPattern);
+                
+                parts.forEach(part => {
+                    if (part.match(urlPattern)) {
+                        // If it's a URL, create a link
+                        const link = document.createElement('a');
+                        link.href = part;
+                        link.textContent = part;
+                        link.target = '_blank';
+                        link.className = 'text-blue-500 hover:text-blue-600 underline';
+                        label.appendChild(link);
+                    } else if (part) {
+                        // If it's text, add it directly
+                        const text = document.createTextNode(part);
+                        label.appendChild(text);
+                    }
+                });
                 label.className = 'font-medium dark:text-gray-200';
                 leftDiv.appendChild(label);
 
