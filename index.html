@@ -934,7 +934,29 @@
             leftDiv.appendChild(expandBtn);
 
             const label = document.createElement('label');
-            label.textContent = task.title;
+            // URL regex pattern
+            const urlPattern = /(https?:\/\/[^\s]+)/g;
+            
+            // Split the title into text and URLs
+            const parts = task.title.split(urlPattern);
+            
+            // Create the label content
+            parts.forEach((part, index) => {
+                if (part.match(urlPattern)) {
+                    // If it's a URL, create a link
+                    const link = document.createElement('a');
+                    link.href = part;
+                    link.textContent = part;
+                    link.target = '_blank';
+                    link.className = 'text-blue-500 hover:text-blue-600 underline';
+                    label.appendChild(link);
+                } else if (part) {
+                    // If it's text, add it directly
+                    const text = document.createTextNode(part);
+                    label.appendChild(text);
+                }
+            });
+            
             label.className = task.isCompleted ? 'line-through text-gray-500 dark:text-gray-400' : 'dark:text-gray-200';
             leftDiv.appendChild(label);
 
