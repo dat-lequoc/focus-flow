@@ -771,17 +771,6 @@
                 progressSection.className = 'p-3';
 
                 // Progress bar
-                const progressBarContainer = document.createElement('div');
-                progressBarContainer.className = 'h-2 bg-gray-200 rounded dark:bg-gray-700';
-
-                const progressPercentage = task.dailyGoal > 0 ? (task.dailyProgress / task.dailyGoal) * 100 : 0;
-                const progressBar = document.createElement('div');
-                progressBar.className = `h-full rounded transition-all duration-300 ${progressPercentage >= 100 ? 'bg-green-500' : 'bg-blue-500'}`;
-                progressBar.style.width = `${Math.min(progressPercentage, 100)}%`;
-
-                progressBarContainer.appendChild(progressBar);
-                progressSection.appendChild(progressBarContainer);
-
                 // Progress text and bar in same line
                 const progressContainer = document.createElement('div');
                 progressContainer.className = 'flex items-center gap-4';
