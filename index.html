@@ -641,7 +641,12 @@
                     </div>
                     <div class="p-6 bg-white rounded-lg shadow dark:bg-gray-800 dark:text-gray-200">
                         <h3 class="text-xl font-bold mb-4">Today's Tasks</h3>
-                        <div id="today-tasks-container" class="space-y-3" style="max-height: 600px; overflow-y: auto;">
+                        <div id="today-tasks-container" class="space-y-3" style="max-height: 600px; overflow-y: auto; scrollbar-width: none; -ms-overflow-style: none;">
+                            <style>
+                                #today-tasks-container::-webkit-scrollbar {
+                                    display: none;
+                                }
+                            </style>
                             <!-- Today's tasks will be added here -->
                         </div>
                     </div>
