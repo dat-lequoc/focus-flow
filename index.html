@@ -373,12 +373,17 @@
                 });
             });
 
+            // Initialize projectDropdowns array
+            let projectDropdowns = [];
+            
             // Remove multiple event listeners and add a single one
             if (!window.dropdownClickListenerAdded) {
                 document.addEventListener('click', () => {
-                    projectDropdowns.forEach(dropdown => {
-                        dropdown.classList.add('hidden');
-                    });
+                    if (projectDropdowns) {
+                        projectDropdowns.forEach(dropdown => {
+                            dropdown.classList.add('hidden');
+                        });
+                    }
                 });
                 window.dropdownClickListenerAdded = true;
             }
