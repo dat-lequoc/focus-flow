@@ -690,8 +690,9 @@
                         }
                     });
                 }
-                const pomodorosCompleted = Math.floor(todayTimeSpent / 60 / 25);
-                progressText.textContent = `${pomodorosCompleted} / ${task.dailyGoal} pomodoros`;
+                const pomodorosCompleted = todayTimeSpent / 60 / 25;
+                const formattedPomodoros = todayTimeSpent > 0 ? pomodorosCompleted.toFixed(1) : Math.floor(pomodorosCompleted);
+                progressText.textContent = `${formattedPomodoros} / ${task.dailyGoal} pomodoros`;
                 const progressBarContainer = document.createElement('div');
                 progressBarContainer.className = 'flex-grow h-2 bg-gray-200 rounded dark:bg-gray-700';
                 const progressBar = document.createElement('div');
