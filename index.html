@@ -819,7 +819,6 @@
                 progressBarContainer.className = 'flex-grow h-2 bg-gray-200 rounded dark:bg-gray-700';
 
                 const progressBar = document.createElement('div');
-                const pomodorosCompleted = Math.floor(todayTimeSpent / 60 / 25);
                 const progressPercentage = task.dailyGoal > 0 ? (pomodorosCompleted / task.dailyGoal) * 100 : 0;
                 progressBar.className = `h-full rounded transition-all duration-300 ${progressPercentage >= 100 ? 'bg-green-500' : 'bg-blue-500'}`;
                 progressBar.style.width = `${Math.min(progressPercentage, 100)}%`;
