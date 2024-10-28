@@ -455,6 +455,13 @@
             showDashboard();
             setupEventListeners();
             setupTimeEntryModal();
+            
+            // Setup settings modal listeners
+            document.getElementById('settings-btn').addEventListener('click', showSettings);
+            document.getElementById('close-settings').addEventListener('click', hideSettings);
+            document.getElementById('sound-select').addEventListener('change', handleSoundSelection);
+            document.getElementById('test-sound-btn').addEventListener('click', testSound);
+            document.getElementById('close-timer-complete').addEventListener('click', closeTimerComplete);
             isDarkMode = document.documentElement.classList.contains('dark');
             const icon = document.getElementById('dark-mode-icon');
             if (isDarkMode) {
@@ -1220,11 +1227,6 @@
                 }
             }, 1000);
             document.getElementById('stop-pomodoro').onclick = stopPomodoro;
-            document.getElementById('settings-btn').addEventListener('click', showSettings);
-            document.getElementById('close-settings').addEventListener('click', hideSettings);
-            document.getElementById('sound-select').addEventListener('change', handleSoundSelection);
-            document.getElementById('test-sound-btn').addEventListener('click', testSound);
-            document.getElementById('close-timer-complete').addEventListener('click', closeTimerComplete);
             saveData();
             renderTaskList();
         }
