@@ -36,7 +36,7 @@
         </div>
 
         <!-- Main Panel -->
-        <div id="main-panel" class="flex-1 p-6 bg-gray-50 dark:bg-gray-900">
+        <div id="main-panel" class="flex-1 p-6 bg-gray-50 dark:bg-gray-900 overflow-y-auto">
             <div class="flex justify-between items-center mb-6">
                 <h1 id="project-title" class="text-2xl font-bold"></h1>
                 <div class="flex items-center space-x-4">
@@ -82,7 +82,7 @@
                         <!-- Dark mode button -->
                         <button id="dark-mode-toggle" class="p-2 border rounded dark:border-gray-700"
                             title="Toggle Dark Mode">
-                            <i id="dark-mode-icon" class="fas fa-sun text-gray-700 dark:text-gray-200"></i>
+                            <i id="dark-mode-icon" class="fas fa-moon text-gray-700 dark:text-gray-200"></i>
                         </button>
                         <button id="report-btn" class="p-2 border rounded dark:border-gray-700" title="Project Report">
                             <!-- Chart icon -->
@@ -97,7 +97,7 @@
                     </div>
                 </div>
             </div>
-            <div id="dashboard-view" class="grid grid-cols-2 gap-6">
+            <div id="dashboard-view">
                 <!-- Dashboard content will be added here -->
             </div>
             <div id="project-view" class="hidden">
@@ -210,6 +210,24 @@
                     }
                 ];
             }
+            // Initialize task properties
+            projects.forEach(project => {
+                project.tasks.forEach(task => {
+                    initializeTaskProperties(task);
+                });
+            });
+        }
+
+        function initializeTaskProperties(task) {
+            if (task.inToday === undefined) task.inToday = false;
+            if (task.dailyGoal === undefined) task.dailyGoal = 0;
+            if (task.dailyProgress === undefined) task.dailyProgress = 0;
+            if (task.isExpanded === undefined) task.isExpanded = false;
+            if (task.isTimerRunning === undefined) task.isTimerRunning = false;
+            if (task.isCompleted === undefined) task.isCompleted = false;
+            if (task.timeSpent === undefined) task.timeSpent = 0;
+            if (task.subtasks === undefined) task.subtasks = [];
+            task.subtasks.forEach(subtask => initializeTaskProperties(subtask));
         }
 
         function saveData() {
@@ -615,27 +633,117 @@
 
             dashboardView.innerHTML = `
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div class="flex flex-col gap-6">
-                        <div class="p-6 bg-white rounded-lg shadow dark:bg-gray-800 dark:text-gray-200">
-                            <h3 class="text-xl font-bold mb-4">Total Time Investment</h3>
-                            <p class="text-4xl font-bold text-blue-600 dark:text-blue-400">
-                                ${(totalTimeSpent / 3600).toFixed(1)}h
-                            </p>
-                        </div>
-                        <div class="p-6 bg-white rounded-lg shadow dark:bg-gray-800 dark:text-gray-200">
-                            <h3 class="font-bold mb-2 text-lg">Weekly Activity</h3>
-                            <div style="height: 400px;">
-                                <canvas id="weeklyChart"></canvas>
-                            </div>
+                    <div class="p-6 bg-white rounded-lg shadow dark:bg-gray-800 dark:text-gray-200">
+                        <h3 class="font-bold mb-2 text-lg">Weekly Activity</h3>
+                        <div style="height: 600px;">
+                            <canvas id="weeklyChart"></canvas>
                         </div>
                     </div>
                     <div class="p-6 bg-white rounded-lg shadow dark:bg-gray-800 dark:text-gray-200">
                         <h3 class="text-xl font-bold mb-4">Today's Tasks</h3>
-                        <div class="space-y-3">
-                            <!-- Tasks will be added dynamically -->
+                        <div id="today-tasks-container" class="space-y-3" style="max-height: 600px; overflow-y: auto;">
+                            <!-- Today's tasks will be added here -->
                         </div>
                     </div>
+                </div>
             `;
+
+            const todayTasksContainer = document.getElementById('today-tasks-container');
+            const todayTasks = getTodayTasks();
+
+            // Clear previous content
+            todayTasksContainer.innerHTML = '';
+
+            // For each task in todayTasks
+            todayTasks.forEach(task => {
+                const taskDiv = document.createElement('div');
+                taskDiv.className = 'flex items-center justify-between p-3 bg-white rounded-lg shadow-sm hover:shadow-md transition-shadow duration-200 dark:bg-gray-800';
+
+                const leftDiv = document.createElement('div');
+                leftDiv.className = 'flex items-center';
+
+                // Task title
+                const label = document.createElement('label');
+                label.textContent = task.title;
+                label.className = 'dark:text-gray-200';
+                leftDiv.appendChild(label);
+
+                // Goal input
+                const goalInput = document.createElement('input');
+                goalInput.type = 'number';
+                goalInput.min = 0;
+                goalInput.value = task.dailyGoal || 0;
+                goalInput.className = 'ml-4 w-16 p-1 border rounded dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200';
+                goalInput.addEventListener('change', () => {
+                    task.dailyGoal = parseInt(goalInput.value) || 0;
+                    saveData();
+                    renderDashboard();
+                });
+                leftDiv.appendChild(goalInput);
+
+                // Progress display
+                const progressSpan = document.createElement('span');
+                progressSpan.textContent = `${task.dailyProgress}/${task.dailyGoal}`;
+                progressSpan.className = 'ml-2';
+                if (task.dailyProgress >= task.dailyGoal && task.dailyGoal > 0) {
+                    progressSpan.classList.add('text-green-500');
+                }
+                leftDiv.appendChild(progressSpan);
+
+                taskDiv.appendChild(leftDiv);
+
+                const rightDiv = document.createElement('div');
+                rightDiv.className = 'flex items-center space-x-2';
+
+                // Remove from today's tasks button
+                const todayBtn = document.createElement('button');
+                todayBtn.className = 'p-1.5 border rounded-lg hover:bg-gray-100 transition-colors duration-200 dark:border-gray-700 dark:hover:bg-gray-700';
+                todayBtn.innerHTML = '☀️';
+                todayBtn.title = 'Remove from Today\'s Tasks';
+                todayBtn.addEventListener('click', () => {
+                    task.inToday = false;
+                    saveData();
+                    renderDashboard();
+                    renderTaskList();
+                });
+                rightDiv.appendChild(todayBtn);
+
+                // Start pomodoro button
+                const timerBtn = document.createElement('button');
+                timerBtn.className = 'p-1.5 border rounded-lg hover:bg-gray-100 transition-colors duration-200 dark:border-gray-700 dark:hover:bg-gray-700';
+                timerBtn.innerHTML = task.isTimerRunning ? `
+                    <svg class="h-4 w-4 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <rect x="6" y="6" width="12" height="12" rx="2" ry="2"></rect>
+                    </svg>
+                ` : `
+                    <svg class="h-4 w-4 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <polygon points="5 3 19 12 5 21 5 3"></polygon>
+                    </svg>
+                `;
+                timerBtn.addEventListener('click', () => {
+                    if (task.isTimerRunning) {
+                        stopPomodoro();
+                    } else {
+                        startPomodoro(task);
+                    }
+                });
+                rightDiv.appendChild(timerBtn);
+
+                taskDiv.appendChild(rightDiv);
+                todayTasksContainer.appendChild(taskDiv);
+            });
+        }
+
+        function getTodayTasks() {
+            let todayTasks = [];
+            projects.forEach(project => {
+                traverseTasks(project.tasks, task => {
+                    if (task.inToday) {
+                        todayTasks.push(task);
+                    }
+                });
+            });
+            return todayTasks;
         }
 
         async function addTask(parentId = null, customTitle = null) {
@@ -649,7 +757,10 @@
                     isExpanded: false,
                     isCompleted: false,
                     subtasks: [],
-                    canHaveSubtasks: true
+                    canHaveSubtasks: true,
+                    inToday: false,
+                    dailyGoal: 0,
+                    dailyProgress: 0
                 };
                 if (parentId) {
                     const parentTask = findTaskById(selectedProject.tasks, parentId);
@@ -773,6 +884,25 @@
             timeSpan.textContent = formatTime(totalTime);
             rightDiv.appendChild(timeSpan);
 
+            // Today button
+            const todayBtn = document.createElement('button');
+            todayBtn.className = 'p-1.5 border rounded-lg hover:bg-gray-100 transition-colors duration-200 dark:border-gray-700 dark:hover:bg-gray-700';
+            todayBtn.innerHTML = task.inToday ? '🌞' : '☀️';
+            todayBtn.classList.toggle('bg-yellow-100', task.inToday);
+            todayBtn.title = task.inToday ? 'Remove from Today\'s Tasks' : 'Add to Today\'s Tasks';
+            todayBtn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                e.preventDefault();
+                task.inToday = !task.inToday;
+                todayBtn.innerHTML = task.inToday ? '🌞' : '☀️';
+                todayBtn.classList.toggle('bg-yellow-100', task.inToday);
+                saveData();
+                renderTaskList();
+                renderDashboard();
+                renderProjectList();
+            });
+            rightDiv.appendChild(todayBtn);
+
             const editBtn = document.createElement('button');
             editBtn.className = 'p-1.5 border rounded-lg hover:bg-gray-100 transition-colors duration-200 dark:border-gray-700 dark:hover:bg-gray-700';
             editBtn.innerHTML = `
@@ -798,8 +928,7 @@
             ` : `
                 <svg class="h-4 w-4 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <polygon points="5 3 19 12 5 21 5 3"></polygon>
-                </svg>
-            `;
+                `;
             timerBtn.addEventListener('click', () => startPomodoro(task));
             rightDiv.appendChild(timerBtn);
 
@@ -926,7 +1055,7 @@
                     duration: elapsedSeconds
                 };
 
-                const task = findTaskById(selectedProject.tasks, currentPomodoroTask.id);
+                const task = findTaskById(selectedProject ? selectedProject.tasks : [], currentPomodoroTask.id);
                 if (task) {
                     task.timeSpent += timeEntry.duration;
                     task.isTimerRunning = false;
@@ -934,6 +1063,12 @@
                         task.timeEntries = [];
                     }
                     task.timeEntries.push(timeEntry);
+                    // Increment daily progress if task is in today's tasks
+                    if (task.inToday) {
+                        task.dailyProgress = (task.dailyProgress || 0) + 1;
+                        saveData();
+                        renderDashboard();
+                    }
                 }
 
                 currentPomodoroTask = null;
