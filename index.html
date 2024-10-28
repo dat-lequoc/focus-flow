@@ -657,40 +657,75 @@
             // For each task in todayTasks
             todayTasks.forEach(task => {
                 const taskDiv = document.createElement('div');
-                taskDiv.className = 'flex items-center justify-between p-3 bg-white rounded-lg shadow-sm hover:shadow-md transition-shadow duration-200 dark:bg-gray-800';
+                taskDiv.className = 'bg-white rounded-lg shadow-sm hover:shadow-md transition-shadow duration-200 dark:bg-gray-800 overflow-hidden';
+
+                // Task header
+                const taskHeader = document.createElement('div');
+                taskHeader.className = 'flex items-center justify-between p-4 border-b dark:border-gray-700';
 
                 const leftDiv = document.createElement('div');
-                leftDiv.className = 'flex items-center';
+                leftDiv.className = 'flex items-center space-x-3';
+
+                // Status indicator
+                const statusDiv = document.createElement('div');
+                statusDiv.className = `w-2 h-2 rounded-full ${task.isCompleted ? 'bg-green-500' : (task.dailyProgress >= task.dailyGoal && task.dailyGoal > 0 ? 'bg-blue-500' : 'bg-yellow-500')}`;
+                leftDiv.appendChild(statusDiv);
 
                 // Task title
                 const label = document.createElement('label');
                 label.textContent = task.title;
-                label.className = 'dark:text-gray-200';
+                label.className = 'font-medium dark:text-gray-200';
                 leftDiv.appendChild(label);
 
-                // Goal input
+                taskHeader.appendChild(leftDiv);
+
+                // Progress section
+                const progressSection = document.createElement('div');
+                progressSection.className = 'p-4';
+
+                // Goal and progress display
+                const goalDiv = document.createElement('div');
+                goalDiv.className = 'flex items-center justify-between mb-2';
+
+                const goalLabel = document.createElement('label');
+                goalLabel.className = 'text-sm text-gray-600 dark:text-gray-400';
+                goalLabel.textContent = 'Daily Goal:';
+
                 const goalInput = document.createElement('input');
                 goalInput.type = 'number';
                 goalInput.min = 0;
                 goalInput.value = task.dailyGoal || 0;
-                goalInput.className = 'ml-4 w-16 p-1 border rounded dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200';
+                goalInput.className = 'w-20 p-1 text-right border rounded dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200';
                 goalInput.addEventListener('change', () => {
                     task.dailyGoal = parseInt(goalInput.value) || 0;
                     saveData();
                     renderDashboard();
                 });
-                leftDiv.appendChild(goalInput);
 
-                // Progress display
-                const progressSpan = document.createElement('span');
-                progressSpan.textContent = `${task.dailyProgress}/${task.dailyGoal}`;
-                progressSpan.className = 'ml-2';
-                if (task.dailyProgress >= task.dailyGoal && task.dailyGoal > 0) {
-                    progressSpan.classList.add('text-green-500');
-                }
-                leftDiv.appendChild(progressSpan);
+                goalDiv.appendChild(goalLabel);
+                goalDiv.appendChild(goalInput);
+                progressSection.appendChild(goalDiv);
 
-                taskDiv.appendChild(leftDiv);
+                // Progress bar
+                const progressBarContainer = document.createElement('div');
+                progressBarContainer.className = 'h-2 bg-gray-200 rounded dark:bg-gray-700';
+
+                const progressPercentage = task.dailyGoal > 0 ? (task.dailyProgress / task.dailyGoal) * 100 : 0;
+                const progressBar = document.createElement('div');
+                progressBar.className = `h-full rounded transition-all duration-300 ${progressPercentage >= 100 ? 'bg-green-500' : 'bg-blue-500'}`;
+                progressBar.style.width = `${Math.min(progressPercentage, 100)}%`;
+
+                progressBarContainer.appendChild(progressBar);
+                progressSection.appendChild(progressBarContainer);
+
+                // Progress text
+                const progressText = document.createElement('div');
+                progressText.className = 'text-sm text-gray-600 dark:text-gray-400 mt-1';
+                progressText.textContent = `${task.dailyProgress} / ${task.dailyGoal} pomodoros completed`;
+                progressSection.appendChild(progressText);
+
+                taskDiv.appendChild(taskHeader);
+                taskDiv.appendChild(progressSection);
 
                 const rightDiv = document.createElement('div');
                 rightDiv.className = 'flex items-center space-x-2';
