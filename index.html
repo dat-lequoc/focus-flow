@@ -813,7 +813,7 @@
                 }
             
                 const pomodorosCompleted = Math.floor(todayTimeSpent / 60 / 25);
-                progressText.textContent = `${pomodorosCompleted} / ${task.dailyGoal} pomodoros (${Math.floor(todayTimeSpent / 60)}min)`;
+                progressText.textContent = `${pomodorosCompleted} / ${task.dailyGoal} pomodoros`;
 
                 const progressBarContainer = document.createElement('div');
                 progressBarContainer.className = 'flex-grow h-2 bg-gray-200 rounded dark:bg-gray-700';
