@@ -709,10 +709,27 @@
                 label.className = 'font-medium dark:text-gray-200';
                 leftDiv.appendChild(label);
 
-                // Today button and timer button
-                const actionButtons = document.createElement('div');
-                actionButtons.className = 'flex items-center space-x-2 ml-4';
+                taskHeader.appendChild(leftDiv);
 
+                // Right side container for goal input and action buttons
+                const rightDiv = document.createElement('div');
+                rightDiv.className = 'flex items-center space-x-2';
+
+                // Goal input
+                const goalInput = document.createElement('input');
+                goalInput.type = 'number';
+                goalInput.min = 0;
+                goalInput.value = task.dailyGoal || 0;
+                goalInput.placeholder = 'Daily Goal';
+                goalInput.className = 'w-8 text-center border rounded dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none';
+                goalInput.addEventListener('change', () => {
+                    task.dailyGoal = parseInt(goalInput.value) || 0;
+                    saveData();
+                    renderDashboard();
+                });
+                rightDiv.appendChild(goalInput);
+
+                // Today button
                 const todayBtn = document.createElement('button');
                 todayBtn.className = 'p-1 border rounded-lg hover:bg-gray-100 transition-colors duration-200 dark:border-gray-700 dark:hover:bg-gray-700';
                 todayBtn.innerHTML = '☀️';
@@ -726,8 +743,9 @@
                         renderTaskList();
                     }
                 });
-                actionButtons.appendChild(todayBtn);
+                rightDiv.appendChild(todayBtn);
 
+                // Timer button
                 const timerBtn = document.createElement('button');
                 timerBtn.className = 'p-1 border rounded-lg hover:bg-gray-100 transition-colors duration-200 dark:border-gray-700 dark:hover:bg-gray-700';
                 timerBtn.innerHTML = task.isTimerRunning ? `
@@ -747,25 +765,9 @@
                         startPomodoro(currentTask);
                     }
                 });
-                actionButtons.appendChild(timerBtn);
-                leftDiv.appendChild(actionButtons);
+                rightDiv.appendChild(timerBtn);
 
-                // Goal input
-                const goalInput = document.createElement('input');
-                goalInput.type = 'number';
-                goalInput.min = 0;
-                goalInput.value = task.dailyGoal || 0;
-                goalInput.placeholder = 'Daily Goal';
-                // goalInput.className = 'w-8 text-right border rounded dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200 ml-auto';
-                goalInput.className = 'w-8 text-center border rounded dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200 ml-auto [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none';
-                goalInput.addEventListener('change', () => {
-                    task.dailyGoal = parseInt(goalInput.value) || 0;
-                    saveData();
-                    renderDashboard();
-                });
-
-                taskHeader.appendChild(leftDiv);
-                taskHeader.appendChild(goalInput);
+                taskHeader.appendChild(rightDiv);
 
                 // Progress section
                 const progressSection = document.createElement('div');
