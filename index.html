@@ -488,7 +488,7 @@
                 progressText.textContent = `${progress}%`;
                 const timeText = document.createElement('span');
                 timeText.className = 'text-sm text-gray-600 ml-4 dark:text-gray-400';
-                timeText.textContent = `Total: ${formatTime(totalTime)}`;
+                timeText.textContent = `Total: ${(totalTime / 3600).toFixed(1)}h`;
                 progressContainer.appendChild(progressBar);
                 progressContainer.appendChild(progressText);
                 progressContainer.appendChild(timeText);
