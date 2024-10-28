@@ -799,7 +799,21 @@
 
                 const progressText = document.createElement('div');
                 progressText.className = 'text-sm text-gray-600 dark:text-gray-400 min-w-fit';
-                progressText.textContent = `${task.dailyProgress} / ${task.dailyGoal} pomodoros`;
+                const today = new Date();
+                today.setHours(0, 0, 0, 0);
+                let todayTimeSpent = 0;
+            
+                if (task.timeEntries) {
+                    task.timeEntries.forEach(entry => {
+                        const entryDate = new Date(entry.start);
+                        if (entryDate >= today) {
+                            todayTimeSpent += entry.duration;
+                        }
+                    });
+                }
+            
+                const pomodorosCompleted = Math.floor(todayTimeSpent / 60 / 25);
+                progressText.textContent = `${pomodorosCompleted} / ${task.dailyGoal} pomodoros (${Math.floor(todayTimeSpent / 60)}min)`;
 
                 const progressBarContainer = document.createElement('div');
                 progressBarContainer.className = 'flex-grow h-2 bg-gray-200 rounded dark:bg-gray-700';
@@ -1171,9 +1185,22 @@
                         task.timeEntries = [];
                     }
                     task.timeEntries.push(timeEntry);
-                    // Only increment daily progress if full pomodoro (25 mins) was completed
-                    if (task.inToday && elapsedSeconds >= 25 * 60) {
-                        task.dailyProgress = (task.dailyProgress || 0) + 1;
+                    
+                    // Calculate today's total time spent
+                    if (task.inToday) {
+                        const today = new Date();
+                        today.setHours(0, 0, 0, 0);
+                        let todayTimeSpent = 0;
+                        
+                        task.timeEntries.forEach(entry => {
+                            const entryDate = new Date(entry.start);
+                            if (entryDate >= today) {
+                                todayTimeSpent += entry.duration;
+                            }
+                        });
+                        
+                        // Calculate progress based on total time spent today (in minutes)
+                        task.dailyProgress = Math.floor(todayTimeSpent / 60 / 25);
                         saveData();
                         renderDashboard();
                     }
