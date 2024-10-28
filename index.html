@@ -718,7 +718,7 @@
                 // Today button
                 const todayBtn = document.createElement('button');
                 todayBtn.className = 'p-1 border rounded-lg hover:bg-gray-100 transition-colors duration-200 dark:border-gray-700 dark:hover:bg-gray-700';
-                todayBtn.innerHTML = '☀️';
+                todayBtn.innerHTML = '🌞';
                 todayBtn.title = 'Remove from Today\'s Tasks';
                 todayBtn.addEventListener('click', () => {
                     const originalTask = findTaskByIdGlobal(task.id);
@@ -951,7 +951,7 @@
             // Today button
             const todayBtn = document.createElement('button');
             todayBtn.className = 'p-1.5 border rounded-lg hover:bg-gray-100 transition-colors duration-200 dark:border-gray-700 dark:hover:bg-gray-700';
-            todayBtn.innerHTML = task.inToday ? '🌞' : '☀️';
+            todayBtn.innerHTML = task.inToday ? '🌞' : '🌞';
             todayBtn.classList.toggle('bg-yellow-100', task.inToday);
             todayBtn.title = task.inToday ? 'Remove from Today\'s Tasks' : 'Add to Today\'s Tasks';
             todayBtn.addEventListener('click', (e) => {
