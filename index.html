@@ -756,13 +756,14 @@
                 goalInput.min = 0;
                 goalInput.value = task.dailyGoal || 0;
                 goalInput.placeholder = 'Daily Goal';
-                goalInput.className = 'w-16 p-1 text-right border rounded dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200 ml-auto';
+                // goalInput.className = 'w-8 text-right border rounded dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200 ml-auto';
+                goalInput.className = 'w-8 text-center border rounded dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200 ml-auto [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none';
                 goalInput.addEventListener('change', () => {
                     task.dailyGoal = parseInt(goalInput.value) || 0;
                     saveData();
                     renderDashboard();
                 });
-                
+
                 taskHeader.appendChild(leftDiv);
                 taskHeader.appendChild(goalInput);
 
