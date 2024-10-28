@@ -134,7 +134,7 @@
     </div>
 
     <div id="time-entry-modal" class="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 hidden z-40">
-        <div class="bg-white p-6 rounded-lg shadow-lg dark:bg-gray-800 dark:text-gray-200 z-50">
+        <div id="time-entry-modal-content" class="bg-white p-6 rounded-lg shadow-lg dark:bg-gray-800 dark:text-gray-200 z-50">
             <h2 class="text-xl font-bold mb-4">Add Time Entry</h2>
             <div class="space-y-4">
                 <div>
@@ -372,6 +372,16 @@
                     initializeTaskProperties(task);
                 });
             });
+
+            // Remove multiple event listeners and add a single one
+            if (!window.dropdownClickListenerAdded) {
+                document.addEventListener('click', () => {
+                    projectDropdowns.forEach(dropdown => {
+                        dropdown.classList.add('hidden');
+                    });
+                });
+                window.dropdownClickListenerAdded = true;
+            }
         }
 
         function initializeTaskProperties(task) {
@@ -620,6 +630,15 @@
                 saveTimeEntry();
             });
 
+            // Close modal when clicking outside the content
+            document.getElementById('time-entry-modal').addEventListener('click', function() {
+                closeTimeEntryModal();
+            });
+
+            // Prevent clicks inside the content from closing the modal
+            document.getElementById('time-entry-modal-content').addEventListener('click', function(e) {
+                e.stopPropagation();
+            });
         }
 
         function openTimeEntryModal(task) {
@@ -726,6 +745,7 @@
         function renderProjectList() {
             const projectList = document.getElementById('project-list');
             projectList.innerHTML = '';
+            let projectDropdowns = [];
             projects.forEach(project => {
                 const projectDiv = document.createElement('div');
                 projectDiv.className = 'mb-4';
@@ -764,10 +784,13 @@
                 menuBtn.addEventListener('click', (e) => {
                     e.stopPropagation();
                     const dropdown = menuBtn.nextElementSibling;
+                    projectDropdowns.forEach(d => {
+                        if (d !== dropdown) d.classList.add('hidden');
+                    });
                     dropdown.classList.toggle('hidden');
                 });
                 const dropdownDiv = document.createElement('div');
-                dropdownDiv.className = 'absolute right-0 mt-1 w-32 bg-white border rounded shadow-lg hidden z-10 dark:bg-gray-800 dark:border-gray-700';
+                dropdownDiv.className = 'dropdown-content absolute right-0 mt-1 w-32 bg-white border rounded shadow-lg hidden z-10 dark:bg-gray-800 dark:border-gray-700';
                 const editBtn = document.createElement('button');
                 editBtn.innerHTML = 'Edit';
                 editBtn.className = 'w-full text-left px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-700';
@@ -788,9 +811,7 @@
                 dropdownDiv.appendChild(deleteBtn);
                 menuDiv.appendChild(menuBtn);
                 menuDiv.appendChild(dropdownDiv);
-                document.addEventListener('click', () => {
-                    dropdownDiv.classList.add('hidden');
-                });
+                projectDropdowns.push(dropdownDiv);
                 headerDiv.appendChild(btn);
                 headerDiv.appendChild(menuDiv);
                 projectDiv.appendChild(headerDiv);
