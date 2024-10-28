@@ -340,6 +340,24 @@
             });
         }
 
+        function resetTodayTasks() {
+            if (confirm('Are you sure you want to reset all today\'s tasks? This will clear all goals and remove tasks from today\'s list.')) {
+                projects.forEach(project => {
+                    traverseTasks(project.tasks, task => {
+                        if (task.inToday) {
+                            task.inToday = false;
+                            task.dailyGoal = 0;
+                            task.dailyProgress = 0;
+                        }
+                    });
+                });
+                saveData();
+                renderDashboard();
+                renderTaskList();
+                renderProjectList();
+            }
+        }
+
         function init() {
             loadInitialData();
             renderProjectList();
@@ -359,6 +377,7 @@
         }
 
         function setupEventListeners() {
+            document.getElementById('reset-today-btn').addEventListener('click', resetTodayTasks);
             document.getElementById('add-project-btn').addEventListener('click', addProject);
             document.getElementById('new-project-name').addEventListener('keypress', (e) => {
                 if (e.key === 'Enter') {
@@ -640,7 +659,14 @@
                         </div>
                     </div>
                     <div class="p-6 bg-white rounded-lg shadow dark:bg-gray-800 dark:text-gray-200">
-                        <h3 class="text-xl font-bold mb-4">Today's Tasks</h3>
+                        <div class="flex justify-between items-center mb-4">
+                            <h3 class="text-xl font-bold">Today's Tasks</h3>
+                            <button id="reset-today-btn" class="p-2 border rounded dark:border-gray-700 hover:bg-gray-100 dark:hover:bg-gray-700" title="Reset Today's Tasks">
+                                <svg class="h-5 w-5 text-gray-700 dark:text-gray-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                                </svg>
+                            </button>
+                        </div>
                         <div id="today-tasks-container" class="space-y-3" style="max-height: 600px; overflow-y: auto; scrollbar-width: none; -ms-overflow-style: none;">
                             <style>
                                 #today-tasks-container::-webkit-scrollbar {
