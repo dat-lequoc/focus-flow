@@ -588,7 +588,7 @@
 
         function showDashboard() {
             selectedProject = null;
-            document.getElementById('project-title').textContent = 'Dashboard';
+            document.getElementById('project-title').textContent = 'Focus Flow';
             document.getElementById('project-view').classList.add('hidden');
             document.getElementById('dashboard-view').classList.remove('hidden');
             renderDashboard();
@@ -1279,7 +1279,7 @@
                 }
                 return null;
             }
-            
+
             for (let project of projects) {
                 const result = findPath(project.tasks, taskId);
                 if (result) {
