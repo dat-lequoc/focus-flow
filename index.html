@@ -610,10 +610,6 @@
                 searchTerm = e.target.value.toLowerCase();
                 renderTaskList();
             });
-            document.getElementById('refresh-btn').addEventListener('click', () => {
-                renderTaskList();
-                renderProjectList();
-            });
             document.getElementById('hide-completed-btn').addEventListener('click', () => {
                 hideCompleted = !hideCompleted;
                 document.getElementById('hide-completed-btn').classList.toggle('bg-gray-200');
