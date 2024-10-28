@@ -898,6 +898,9 @@
                 const originalTask = findTaskByIdGlobal(task.id);
                 if (originalTask) {
                     originalTask.inToday = !originalTask.inToday;
+                    if (originalTask.inToday && originalTask.dailyGoal === 0) {
+                        originalTask.dailyGoal = 1;
+                    }
                     todayBtn.innerHTML = originalTask.inToday ? '🌞' : '☀️';
                     todayBtn.classList.toggle('bg-yellow-100', originalTask.inToday);
                     saveData();
