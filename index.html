@@ -692,10 +692,10 @@
 
                 // Task header
                 const taskHeader = document.createElement('div');
-                taskHeader.className = 'flex items-center justify-between p-4 border-b dark:border-gray-700';
+                taskHeader.className = 'flex items-center justify-between p-3 border-b dark:border-gray-700';
 
                 const leftDiv = document.createElement('div');
-                leftDiv.className = 'flex items-center space-x-3';
+                leftDiv.className = 'flex items-center space-x-3 flex-grow';
 
                 // Status indicator
                 const statusDiv = document.createElement('div');
@@ -709,62 +709,12 @@
                 label.className = 'font-medium dark:text-gray-200';
                 leftDiv.appendChild(label);
 
-                taskHeader.appendChild(leftDiv);
+                // Today button and timer button
+                const actionButtons = document.createElement('div');
+                actionButtons.className = 'flex items-center space-x-2 ml-4';
 
-                // Progress section
-                const progressSection = document.createElement('div');
-                progressSection.className = 'p-4';
-
-                // Goal and progress display
-                const goalDiv = document.createElement('div');
-                goalDiv.className = 'flex items-center justify-between mb-2';
-
-                const goalLabel = document.createElement('label');
-                goalLabel.className = 'text-sm text-gray-600 dark:text-gray-400';
-                goalLabel.textContent = 'Daily Goal:';
-
-                const goalInput = document.createElement('input');
-                goalInput.type = 'number';
-                goalInput.min = 0;
-                goalInput.value = task.dailyGoal || 0;
-                goalInput.className = 'w-20 p-1 text-right border rounded dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200';
-                goalInput.addEventListener('change', () => {
-                    task.dailyGoal = parseInt(goalInput.value) || 0;
-                    saveData();
-                    renderDashboard();
-                });
-
-                goalDiv.appendChild(goalLabel);
-                goalDiv.appendChild(goalInput);
-                progressSection.appendChild(goalDiv);
-
-                // Progress bar
-                const progressBarContainer = document.createElement('div');
-                progressBarContainer.className = 'h-2 bg-gray-200 rounded dark:bg-gray-700';
-
-                const progressPercentage = task.dailyGoal > 0 ? (task.dailyProgress / task.dailyGoal) * 100 : 0;
-                const progressBar = document.createElement('div');
-                progressBar.className = `h-full rounded transition-all duration-300 ${progressPercentage >= 100 ? 'bg-green-500' : 'bg-blue-500'}`;
-                progressBar.style.width = `${Math.min(progressPercentage, 100)}%`;
-
-                progressBarContainer.appendChild(progressBar);
-                progressSection.appendChild(progressBarContainer);
-
-                // Progress text
-                const progressText = document.createElement('div');
-                progressText.className = 'text-sm text-gray-600 dark:text-gray-400 mt-1';
-                progressText.textContent = `${task.dailyProgress} / ${task.dailyGoal} pomodoros completed`;
-                progressSection.appendChild(progressText);
-
-                taskDiv.appendChild(taskHeader);
-                taskDiv.appendChild(progressSection);
-
-                const rightDiv = document.createElement('div');
-                rightDiv.className = 'flex items-center space-x-2';
-
-                // Remove from today's tasks button
                 const todayBtn = document.createElement('button');
-                todayBtn.className = 'p-1.5 border rounded-lg hover:bg-gray-100 transition-colors duration-200 dark:border-gray-700 dark:hover:bg-gray-700';
+                todayBtn.className = 'p-1 border rounded-lg hover:bg-gray-100 transition-colors duration-200 dark:border-gray-700 dark:hover:bg-gray-700';
                 todayBtn.innerHTML = '☀️';
                 todayBtn.title = 'Remove from Today\'s Tasks';
                 todayBtn.addEventListener('click', () => {
@@ -776,11 +726,10 @@
                         renderTaskList();
                     }
                 });
-                rightDiv.appendChild(todayBtn);
+                actionButtons.appendChild(todayBtn);
 
-                // Start pomodoro button
                 const timerBtn = document.createElement('button');
-                timerBtn.className = 'p-1.5 border rounded-lg hover:bg-gray-100 transition-colors duration-200 dark:border-gray-700 dark:hover:bg-gray-700';
+                timerBtn.className = 'p-1 border rounded-lg hover:bg-gray-100 transition-colors duration-200 dark:border-gray-700 dark:hover:bg-gray-700';
                 timerBtn.innerHTML = task.isTimerRunning ? `
                     <svg class="h-4 w-4 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <rect x="6" y="6" width="12" height="12" rx="2" ry="2"></rect>
@@ -798,9 +747,64 @@
                         startPomodoro(currentTask);
                     }
                 });
-                rightDiv.appendChild(timerBtn);
+                actionButtons.appendChild(timerBtn);
+                leftDiv.appendChild(actionButtons);
 
-                taskDiv.appendChild(rightDiv);
+                // Goal input
+                const goalInput = document.createElement('input');
+                goalInput.type = 'number';
+                goalInput.min = 0;
+                goalInput.value = task.dailyGoal || 0;
+                goalInput.placeholder = 'Daily Goal';
+                goalInput.className = 'w-20 p-1 text-right border rounded dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200 ml-auto';
+                goalInput.addEventListener('change', () => {
+                    task.dailyGoal = parseInt(goalInput.value) || 0;
+                    saveData();
+                    renderDashboard();
+                });
+                
+                taskHeader.appendChild(leftDiv);
+                taskHeader.appendChild(goalInput);
+
+                // Progress section
+                const progressSection = document.createElement('div');
+                progressSection.className = 'p-3';
+
+                // Progress bar
+                const progressBarContainer = document.createElement('div');
+                progressBarContainer.className = 'h-2 bg-gray-200 rounded dark:bg-gray-700';
+
+                const progressPercentage = task.dailyGoal > 0 ? (task.dailyProgress / task.dailyGoal) * 100 : 0;
+                const progressBar = document.createElement('div');
+                progressBar.className = `h-full rounded transition-all duration-300 ${progressPercentage >= 100 ? 'bg-green-500' : 'bg-blue-500'}`;
+                progressBar.style.width = `${Math.min(progressPercentage, 100)}%`;
+
+                progressBarContainer.appendChild(progressBar);
+                progressSection.appendChild(progressBarContainer);
+
+                // Progress text and bar in same line
+                const progressContainer = document.createElement('div');
+                progressContainer.className = 'flex items-center gap-4';
+
+                const progressText = document.createElement('div');
+                progressText.className = 'text-sm text-gray-600 dark:text-gray-400 min-w-fit';
+                progressText.textContent = `${task.dailyProgress} / ${task.dailyGoal} pomodoros`;
+
+                const progressBarContainer = document.createElement('div');
+                progressBarContainer.className = 'flex-grow h-2 bg-gray-200 rounded dark:bg-gray-700';
+
+                const progressBar = document.createElement('div');
+                const progressPercentage = task.dailyGoal > 0 ? (task.dailyProgress / task.dailyGoal) * 100 : 0;
+                progressBar.className = `h-full rounded transition-all duration-300 ${progressPercentage >= 100 ? 'bg-green-500' : 'bg-blue-500'}`;
+                progressBar.style.width = `${Math.min(progressPercentage, 100)}%`;
+
+                progressBarContainer.appendChild(progressBar);
+                progressContainer.appendChild(progressText);
+                progressContainer.appendChild(progressBarContainer);
+                progressSection.appendChild(progressContainer);
+
+                taskDiv.appendChild(taskHeader);
+                taskDiv.appendChild(progressSection);
                 todayTasksContainer.appendChild(taskDiv);
             });
         }
