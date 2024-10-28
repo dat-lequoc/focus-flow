@@ -673,7 +673,8 @@
 
                 // Task title
                 const label = document.createElement('label');
-                label.textContent = task.title;
+                const taskPath = getTaskPath(task.id);
+                label.textContent = taskPath.join(' > ');
                 label.className = 'font-medium dark:text-gray-200';
                 leftDiv.appendChild(label);
 
@@ -1231,6 +1232,31 @@
                 if (task) return task;
             }
             return null;
+        }
+
+        function getTaskPath(taskId) {
+            const path = [];
+            function findPath(tasks, targetId, currentPath = []) {
+                for (let task of tasks) {
+                    if (task.id === targetId) {
+                        return [...currentPath, task.title];
+                    }
+                    if (task.subtasks && task.subtasks.length > 0) {
+                        const result = findPath(task.subtasks, targetId, [...currentPath, task.title]);
+                        if (result) return result;
+                    }
+                }
+                return null;
+            }
+            
+            for (let project of projects) {
+                const result = findPath(project.tasks, taskId);
+                if (result) {
+                    path.push(...result);
+                    break;
+                }
+            }
+            return path;
         }
 
         function removeTaskById(tasks, taskId) {
