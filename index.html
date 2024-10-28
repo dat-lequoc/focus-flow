@@ -141,55 +141,67 @@
                 projects = [
                     {
                         id: generateId(),
-                        name: "Website Redesign",
+                        name: "Learning AI",
                         tasks: [
                             {
                                 id: generateId(),
-                                title: "Create Wireframes",
+                                title: "Complete Hugging Face Course https://huggingface.co/learn",
                                 timeSpent: 0,
                                 isTimerRunning: false,
-                                isExpanded: false,
+                                isExpanded: true,
                                 isCompleted: false,
+                                inToday: true,
+                                dailyGoal: 2,
                                 subtasks: [
-                                    { id: generateId(), title: "Homepage Layout", timeSpent: 0, isTimerRunning: false, isExpanded: false, isCompleted: false, subtasks: [] },
-                                    { id: generateId(), title: "Contact Page Design", timeSpent: 0, isTimerRunning: false, isExpanded: false, isCompleted: false, subtasks: [] }
+                                    { 
+                                        id: generateId(), 
+                                        title: "NLP with Transformers", 
+                                        timeSpent: 0, 
+                                        isTimerRunning: false, 
+                                        isExpanded: false, 
+                                        isCompleted: false,
+                                        inToday: true,
+                                        dailyGoal: 1,
+                                        subtasks: [] 
+                                    },
+                                    { 
+                                        id: generateId(), 
+                                        title: "Audio Processing Course https://huggingface.co/learn/audio-course", 
+                                        timeSpent: 0, 
+                                        isTimerRunning: false, 
+                                        isExpanded: false, 
+                                        isCompleted: false, 
+                                        subtasks: [] 
+                                    }
                                 ]
                             },
                             {
                                 id: generateId(),
-                                title: "Develop Frontend",
+                                title: "Practice Projects",
                                 timeSpent: 0,
                                 isTimerRunning: false,
-                                isExpanded: false,
+                                isExpanded: true,
                                 isCompleted: false,
                                 subtasks: [
-                                    { id: generateId(), title: "Implement Navigation Bar", timeSpent: 0, isTimerRunning: false, isExpanded: false, isCompleted: false, subtasks: [] },
-                                    { id: generateId(), title: "Responsive Design", timeSpent: 0, isTimerRunning: false, isExpanded: false, isCompleted: false, subtasks: [] }
+                                    { 
+                                        id: generateId(), 
+                                        title: "Build a Chatbot using Transformers", 
+                                        timeSpent: 0, 
+                                        isTimerRunning: false, 
+                                        isExpanded: false, 
+                                        isCompleted: false, 
+                                        subtasks: [] 
+                                    },
+                                    { 
+                                        id: generateId(), 
+                                        title: "Image Generation with Stable Diffusion", 
+                                        timeSpent: 0, 
+                                        isTimerRunning: false, 
+                                        isExpanded: false, 
+                                        isCompleted: false, 
+                                        subtasks: [] 
+                                    }
                                 ]
-                            }
-                        ]
-                    },
-                    {
-                        id: generateId(),
-                        name: "Marketing Campaign",
-                        tasks: [
-                            {
-                                id: generateId(),
-                                title: "Social Media Strategy",
-                                timeSpent: 0,
-                                isTimerRunning: false,
-                                isExpanded: false,
-                                isCompleted: false,
-                                subtasks: []
-                            },
-                            {
-                                id: generateId(),
-                                title: "Content Creation",
-                                timeSpent: 0,
-                                isTimerRunning: false,
-                                isExpanded: false,
-                                isCompleted: false,
-                                subtasks: []
                             }
                         ]
                     }
