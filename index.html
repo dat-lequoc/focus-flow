@@ -164,6 +164,11 @@
             <h2 class="text-xl font-bold mb-4">Settings</h2>
             <div class="space-y-4">
                 <div>
+                    <label class="block mb-2">Pomodoro Duration (minutes)</label>
+                    <input type="number" id="pomodoro-duration" min="1" max="60" value="25"
+                           class="w-full p-2 border rounded dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200">
+                </div>
+                <div class="mt-4">
                     <label class="block mb-2">Timer Sound</label>
                     <select id="sound-select" class="w-full p-2 border rounded dark:bg-gray-700 dark:border-gray-600">
                         <option value="default">Default Beep</option>
@@ -206,7 +211,8 @@
         let hideCompleted = false;
         let currentPomodoroTask = null;
         let pomodoroTimer = null;
-        let pomodoroTimeLeft = 25 * 60;
+        let pomodoroDuration = 25;
+        let pomodoroTimeLeft = pomodoroDuration * 60;
         let timerSound = document.getElementById('timer-sound');
 
         function loadInitialData() {
@@ -1214,7 +1220,8 @@
             }
             currentPomodoroTask = task;
             task.isTimerRunning = true;
-            pomodoroTimeLeft = 25 * 60;
+            pomodoroDuration = parseInt(document.getElementById('pomodoro-duration').value) || 25;
+            pomodoroTimeLeft = pomodoroDuration * 60;
             const pomodoroDisplay = document.getElementById('pomodoro-display');
             pomodoroDisplay.classList.remove('hidden');
             document.getElementById('current-task-title').textContent = task.title;
@@ -1233,7 +1240,7 @@
 
         function stopPomodoro() {
             if (currentPomodoroTask) {
-                const elapsedSeconds = (25 * 60) - pomodoroTimeLeft;
+                const elapsedSeconds = (pomodoroDuration * 60) - pomodoroTimeLeft;
                 const endTime = new Date();
                 const startTime = new Date(endTime - (elapsedSeconds * 1000));
                 const timeEntry = {
