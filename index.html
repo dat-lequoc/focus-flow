@@ -114,6 +114,32 @@
         </div>
     </div>
 
+    <div id="time-entry-modal" class="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 hidden">
+        <div class="bg-white p-6 rounded-lg shadow-lg dark:bg-gray-800 dark:text-gray-200">
+            <h2 class="text-xl font-bold mb-4">Add Time Entry</h2>
+            <div class="space-y-4">
+                <div>
+                    <label class="block mb-1">Duration (minutes)</label>
+                    <input type="number" id="manual-time-minutes" min="1" 
+                           class="w-full p-2 border rounded dark:bg-gray-700 dark:border-gray-600">
+                </div>
+                <div>
+                    <label class="block mb-1">Date</label>
+                    <input type="date" id="manual-time-date" 
+                           class="w-full p-2 border rounded dark:bg-gray-700 dark:border-gray-600">
+                </div>
+            </div>
+            <div class="mt-6 flex justify-end space-x-3">
+                <button id="cancel-time-entry" class="px-4 py-2 border rounded hover:bg-gray-100 dark:border-gray-600 dark:hover:bg-gray-700">
+                    Cancel
+                </button>
+                <button id="save-time-entry" class="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600">
+                    Save
+                </button>
+            </div>
+        </div>
+    </div>
+
     <div id="report-modal" class="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 hidden">
         <div class="bg-white p-6 rounded dark:bg-gray-800 dark:text-gray-200">
             <h2 class="text-xl font-bold mb-4">Project Report</h2>
@@ -300,7 +326,7 @@
             if (!ctx) return;
             const weekData = getWeeklyTimeData();
             const labels = weekData.map(d => d.date.toLocaleDateString('en-US', { weekday: 'short' }));
-            const data = weekData.map(d => (d.timeSpent / 60).toFixed(2));
+            const data = weekData.map(d => (d.timeSpent / 3600).toFixed(2));
             if (window.weeklyChart instanceof Chart) {
                 window.weeklyChart.destroy();
             }
@@ -309,7 +335,7 @@
                 data: {
                     labels: labels,
                     datasets: [{
-                        label: 'Time Spent (minutes)',
+                        label: 'Time Spent (hours)',
                         data: data,
                         backgroundColor: isDarkMode ? 'rgba(59, 130, 246, 0.5)' : 'rgba(59, 130, 246, 0.8)',
                         borderColor: isDarkMode ? 'rgba(59, 130, 246, 0.8)' : 'rgba(59, 130, 246, 1)',
@@ -371,11 +397,14 @@
             }
         }
 
+        let currentTimeEntryTask = null;
+
         function init() {
             loadInitialData();
             renderProjectList();
             showDashboard();
             setupEventListeners();
+            setupTimeEntryModal();
             isDarkMode = document.documentElement.classList.contains('dark');
             const icon = document.getElementById('dark-mode-icon');
             if (isDarkMode) {
@@ -423,6 +452,74 @@
             document.addEventListener('keydown', handleKeyDown);
             document.getElementById('projects-heading').addEventListener('click', showDashboard);
             document.getElementById('home-btn').addEventListener('click', showDashboard);
+        }
+
+        function setupTimeEntryModal() {
+            document.getElementById('cancel-time-entry').addEventListener('click', closeTimeEntryModal);
+            document.getElementById('save-time-entry').addEventListener('click', saveTimeEntry);
+            
+            // Set today as default date
+            const today = new Date().toISOString().split('T')[0];
+            document.getElementById('manual-time-date').value = today;
+        }
+
+        function openTimeEntryModal(task) {
+            currentTimeEntryTask = task;
+            document.getElementById('time-entry-modal').classList.remove('hidden');
+            document.getElementById('manual-time-minutes').value = '';
+            document.getElementById('manual-time-minutes').focus();
+        }
+
+        function closeTimeEntryModal() {
+            document.getElementById('time-entry-modal').classList.add('hidden');
+            currentTimeEntryTask = null;
+        }
+
+        function saveTimeEntry() {
+            const minutes = parseInt(document.getElementById('manual-time-minutes').value);
+            const dateStr = document.getElementById('manual-time-date').value;
+            
+            if (!minutes || minutes <= 0 || !dateStr) {
+                alert('Please enter valid duration and date');
+                return;
+            }
+
+            const date = new Date(dateStr);
+            date.setHours(12, 0, 0, 0); // Set to noon to avoid timezone issues
+            
+            const timeEntry = {
+                start: date.toISOString(),
+                end: new Date(date.getTime() + minutes * 60000).toISOString(),
+                duration: minutes * 60
+            };
+
+            const task = findTaskByIdGlobal(currentTimeEntryTask.id);
+            if (task) {
+                if (!task.timeEntries) {
+                    task.timeEntries = [];
+                }
+                task.timeEntries.push(timeEntry);
+                task.timeSpent += timeEntry.duration;
+
+                if (task.inToday) {
+                    const today = new Date();
+                    today.setHours(0, 0, 0, 0);
+                    let todayTimeSpent = 0;
+                    task.timeEntries.forEach(entry => {
+                        const entryDate = new Date(entry.start);
+                        if (entryDate >= today) {
+                            todayTimeSpent += entry.duration;
+                        }
+                    });
+                    task.dailyProgress = Math.floor(todayTimeSpent / 60 / 25);
+                }
+
+                saveData();
+                renderTaskList();
+                renderProjectList();
+                renderDashboard();
+                closeTimeEntryModal();
+            }
         }
 
         function handleKeyDown(e) {
@@ -488,7 +585,7 @@
                 progressText.textContent = `${progress}%`;
                 const timeText = document.createElement('span');
                 timeText.className = 'text-sm text-gray-600 ml-4 dark:text-gray-400';
-                timeText.textContent = `Total: ${formatTime(totalTime)}`;
+                timeText.textContent = `Total: ${(totalTime / 3600).toFixed(1)}h`;
                 progressContainer.appendChild(progressBar);
                 progressContainer.appendChild(progressText);
                 progressContainer.appendChild(timeText);
@@ -968,6 +1065,18 @@
             rightDiv.appendChild(editBtn);
             const timerBtn = createTimerButton(task, () => startPomodoro(task));
             rightDiv.appendChild(timerBtn);
+
+            const addTimeBtn = document.createElement('button');
+            addTimeBtn.className = 'p-1.5 border rounded-lg hover:bg-gray-100 transition-colors duration-200 dark:border-gray-700 dark:hover:bg-gray-700';
+            addTimeBtn.innerHTML = `
+                <svg class="h-4 w-4 text-gray-700 dark:text-gray-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+                          d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+            `;
+            addTimeBtn.addEventListener('click', () => openTimeEntryModal(task));
+            rightDiv.appendChild(addTimeBtn);
+
             const deleteBtn = document.createElement('button');
             deleteBtn.className = 'p-1.5 border rounded-lg text-red-500 hover:bg-red-50 transition-colors duration-200 dark:border-gray-700 dark:hover:bg-gray-700';
             deleteBtn.innerHTML = `
