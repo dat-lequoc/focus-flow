@@ -759,10 +759,11 @@
                     </svg>
                 `;
                 timerBtn.addEventListener('click', () => {
-                    if (task.isTimerRunning) {
+                    const currentTask = findTaskByIdGlobal(task.id);
+                    if (currentTask.isTimerRunning) {
                         stopPomodoro();
                     } else {
-                        startPomodoro(task);
+                        startPomodoro(currentTask);
                     }
                 });
                 rightDiv.appendChild(timerBtn);
@@ -1093,7 +1094,7 @@
                     duration: elapsedSeconds
                 };
 
-                const task = findTaskById(selectedProject ? selectedProject.tasks : [], currentPomodoroTask.id);
+                const task = findTaskByIdGlobal(currentPomodoroTask.id);
                 if (task) {
                     task.timeSpent += timeEntry.duration;
                     task.isTimerRunning = false;
