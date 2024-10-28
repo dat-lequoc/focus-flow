@@ -1102,8 +1102,8 @@
                         task.timeEntries = [];
                     }
                     task.timeEntries.push(timeEntry);
-                    // Increment daily progress if task is in today's tasks
-                    if (task.inToday) {
+                    // Only increment daily progress if full pomodoro (25 mins) was completed
+                    if (task.inToday && elapsedSeconds >= 25 * 60) {
                         task.dailyProgress = (task.dailyProgress || 0) + 1;
                         saveData();
                         renderDashboard();
