@@ -1354,18 +1354,20 @@
             currentPomodoroTask = task;
             task.isTimerRunning = true;
             pomodoroDuration = parseInt(document.getElementById('pomodoro-duration').value) || 25;
-            pomodoroTimeLeft = pomodoroDuration * 60;
+            const startTime = Date.now();
+            const endTime = startTime + (pomodoroDuration * 60 * 1000);
             const pomodoroDisplay = document.getElementById('pomodoro-display');
             pomodoroDisplay.classList.remove('hidden');
             document.getElementById('current-task-title').textContent = task.title;
-            updatePomodoroDisplay();
+            updatePomodoroDisplay(endTime);
             pomodoroTimer = setInterval(() => {
-                pomodoroTimeLeft--;
-                updatePomodoroDisplay();
-                if (pomodoroTimeLeft <= 0) {
+                const now = Date.now();
+                if (now >= endTime) {
                     pomodoroComplete();
+                } else {
+                    updatePomodoroDisplay(endTime);
                 }
-            }, 1000);
+            }, 100);
             document.getElementById('stop-pomodoro').onclick = stopPomodoro;
             saveData();
             renderTaskList();
@@ -1416,9 +1418,11 @@
             renderProjectList();
         }
 
-        function updatePomodoroDisplay() {
-            const minutes = Math.floor(pomodoroTimeLeft / 60);
-            const seconds = pomodoroTimeLeft % 60;
+        function updatePomodoroDisplay(endTime) {
+            const now = Date.now();
+            const timeLeft = Math.max(0, Math.floor((endTime - now) / 1000));
+            const minutes = Math.floor(timeLeft / 60);
+            const seconds = timeLeft % 60;
             const display = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
             document.getElementById('pomodoro-timer').textContent = display;
         }
