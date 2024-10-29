@@ -526,6 +526,13 @@
             showDashboard();
             setupEventListeners();
             setupTimeEntryModal();
+            
+            // Handle page unload
+            window.addEventListener('beforeunload', () => {
+                if (currentPomodoroTask && pomodoroStartTime) {
+                    stopPomodoro();
+                }
+            });
 
             // Setup settings modal listeners
             document.getElementById('settings-btn').addEventListener('click', showSettings);
