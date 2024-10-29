@@ -1375,8 +1375,8 @@
 
         function stopPomodoro() {
             if (currentPomodoroTask) {
-                const elapsedSeconds = (pomodoroDuration * 60) - pomodoroTimeLeft;
                 const endTime = new Date();
+                const elapsedSeconds = pomodoroDuration * 60; // Full pomodoro duration
                 const startTime = new Date(endTime - (elapsedSeconds * 1000));
                 const timeEntry = {
                     start: startTime.toISOString(),
