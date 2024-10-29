@@ -10,6 +10,8 @@
     <script src="https://d3js.org/d3.v7.min.js"></script>
     <script src="https://unpkg.com/@observablehq/time"></script>
     <script src="https://unpkg.com/cal-heatmap/dist/cal-heatmap.min.js"></script>
+    <script src="https://unpkg.com/@cal-heatmap/tooltip"></script>
+    <script src="https://unpkg.com/@cal-heatmap/legend-lite"></script>
     <link rel="stylesheet" href="https://unpkg.com/cal-heatmap/dist/cal-heatmap.css">
     <script>
         tailwind.config = {
@@ -530,6 +532,10 @@
             setupEventListeners();
             setupTimeEntryModal();
             initializeHeatmap();
+            
+            // Setup heatmap navigation
+            document.getElementById('cal-prev').addEventListener('click', () => cal?.previous());
+            document.getElementById('cal-next').addEventListener('click', () => cal?.next());
 
             // Setup settings modal listeners
             document.getElementById('settings-btn').addEventListener('click', showSettings);
@@ -1551,18 +1557,18 @@
                     domain: {
                         type: 'month',
                         gutter: 4,
-                        label: {
-                            text: 'MMM',
-                            textAlign: 'start',
-                            position: 'top'
+                        label: { 
+                            text: 'MMM', 
+                            textAlign: 'start', 
+                            position: 'top' 
                         }
                     },
                     subDomain: { 
-                        type: 'day',
+                        type: 'ghDay',
                         radius: 2,
-                        width: 10,
-                        height: 10,
-                        gutter: 2
+                        width: 11,
+                        height: 11,
+                        gutter: 4
                     },
                     date: {
                         start: startDate,
@@ -1575,19 +1581,39 @@
                         })),
                         type: 'json',
                         x: 'date',
-                        y: 'value',
+                        y: 'value'
                     },
                     scale: {
                         color: {
                             type: 'threshold',
                             range: isDarkMode ? 
-                                ['#1f2937', '#3b82f6', '#60a5fa', '#93c5fd', '#bfdbfe'] :
-                                ['#f3f4f6', '#3b82f6', '#60a5fa', '#93c5fd', '#bfdbfe'],
-                            domain: [0, 2, 4, 6, 8]
+                                ['#14432a', '#166b34', '#37a446', '#4dd05a'] :
+                                ['#f3f4f6', '#166b34', '#37a446', '#4dd05a'],
+                            domain: [2, 4, 6]
                         }
-                    },
-                    theme: 'light'
-                });
+                    }
+                }, [
+                    [Tooltip, {
+                        text: function(date, value, dayjsDate) {
+                            return (value ? value.toFixed(1) : 'No') + 
+                                   ' hours on ' + 
+                                   new Date(date).toLocaleDateString('en-US', {
+                                       weekday: 'long',
+                                       year: 'numeric',
+                                       month: 'long',
+                                       day: 'numeric'
+                                   });
+                        }
+                    }],
+                    [LegendLite, {
+                        includeBlank: true,
+                        itemSelector: '#cal-heatmap-legend',
+                        radius: 2,
+                        width: 11,
+                        height: 11,
+                        gutter: 4
+                    }]
+                ]);
             } catch (error) {
                 console.error('Error initializing heatmap:', error);
             }
