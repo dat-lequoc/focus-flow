@@ -1509,6 +1509,12 @@
         }
 
         function initializeHeatmap() {
+            // Wait for DOM to be ready
+            if (!document.getElementById('cal-heatmap')) {
+                console.log('Heatmap container not found');
+                return;
+            }
+
             const cal = new CalHeatmap();
             const now = new Date();
             const startDate = new Date(now.getFullYear(), 0, 1);
@@ -1534,33 +1540,40 @@
                     range: 12,
                     domain: {
                         type: 'month',
-                        gutter: 4
+                        gutter: 4,
+                        label: {
+                            text: 'MMM',
+                            textAlign: 'start',
+                            position: 'top'
+                        }
                     },
                     subDomain: { 
                         type: 'day',
                         radius: 2,
-                        width: 15,
-                        height: 15,
+                        width: 10,
+                        height: 10,
                         gutter: 2
                     },
                     date: {
                         start: startDate,
-                        timezone: 'local'
+                        highlight: new Date()
                     },
                     data: {
                         source: data,
                         type: 'map',
                         x: d => d,
-                        y: d => data.get(d) || 0
+                        y: d => data.get(d) || 0,
                     },
                     scale: {
                         color: {
                             type: 'threshold',
-                            range: isDarkMode ? ['#1f2937', '#3b82f6', '#60a5fa', '#93c5fd', '#bfdbfe'] 
-                                            : ['#f3f4f6', '#3b82f6', '#60a5fa', '#93c5fd', '#bfdbfe'],
+                            range: isDarkMode ? 
+                                ['#1f2937', '#3b82f6', '#60a5fa', '#93c5fd', '#bfdbfe'] :
+                                ['#f3f4f6', '#3b82f6', '#60a5fa', '#93c5fd', '#bfdbfe'],
                             domain: [0, 2, 4, 6, 8]
                         }
-                    }
+                    },
+                    theme: 'light'
                 });
             } catch (error) {
                 console.error('Error initializing heatmap:', error);
