@@ -940,6 +940,17 @@
                         <div class="mt-6">
                             <h4 class="font-bold mb-2">Yearly Activity</h4>
                             <div id="cal-heatmap" class="cal-heatmap"></div>
+                            <div class="flex justify-between items-center mt-2">
+                                <div class="flex gap-2">
+                                    <button id="cal-prev" class="px-2 py-1 text-sm border rounded dark:border-gray-700">← Previous</button>
+                                    <button id="cal-next" class="px-2 py-1 text-sm border rounded dark:border-gray-700">Next →</button>
+                                </div>
+                                <div class="flex items-center text-sm">
+                                    <span class="text-gray-500 dark:text-gray-400">Less</span>
+                                    <div id="cal-heatmap-legend" class="inline-block mx-2"></div>
+                                    <span class="text-gray-500 dark:text-gray-400">More</span>
+                                </div>
+                            </div>
                         </div>
                     </div>
                     <div class="p-6 bg-white rounded-lg shadow dark:bg-gray-800 dark:text-gray-200">
