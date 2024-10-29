@@ -947,8 +947,13 @@
             `;
             const todayTasksContainer = document.getElementById('today-tasks-container');
             const todayTasks = getTodayTasks();
+            // Sort tasks - completed tasks go to the end
+            const sortedTasks = [...todayTasks].sort((a, b) => {
+                if (a.isCompleted === b.isCompleted) return 0;
+                return a.isCompleted ? 1 : -1;
+            });
             todayTasksContainer.innerHTML = '';
-            todayTasks.forEach(task => {
+            sortedTasks.forEach(task => {
                 const taskDiv = document.createElement('div');
                 taskDiv.className = 'bg-white rounded-lg shadow-sm hover:shadow-md transition-shadow duration-200 dark:bg-gray-800 overflow-hidden';
                 const taskHeader = document.createElement('div');
