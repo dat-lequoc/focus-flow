@@ -7,6 +7,7 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <script src="https://unpkg.com/@observablehq/time@0.2.0"></script>
     <script src="https://unpkg.com/cal-heatmap/dist/cal-heatmap.min.js"></script>
     <link rel="stylesheet" href="https://unpkg.com/cal-heatmap/dist/cal-heatmap.css">
     <script>
@@ -1527,25 +1528,43 @@
                 });
             });
 
-            cal.paint({
-                itemSelector: '#cal-heatmap',
-                domain: { type: 'month' },
-                subDomain: { type: 'day' },
-                date: { start: startDate },
-                data: {
-                    source: data,
-                    type: 'map',
-                },
-                scale: {
-                    color: {
-                        type: 'threshold',
-                        range: isDarkMode ? ['#1f2937', '#3b82f6', '#60a5fa', '#93c5fd', '#bfdbfe'] 
-                                        : ['#f3f4f6', '#3b82f6', '#60a5fa', '#93c5fd', '#bfdbfe'],
-                        domain: [0, 2, 4, 6, 8], // hours
+            try {
+                cal.paint({
+                    itemSelector: '#cal-heatmap',
+                    range: 12,
+                    domain: {
+                        type: 'month',
+                        gutter: 4
                     },
-                },
-                theme: isDarkMode ? 'dark' : 'light'
-            });
+                    subDomain: { 
+                        type: 'day',
+                        radius: 2,
+                        width: 15,
+                        height: 15,
+                        gutter: 2
+                    },
+                    date: {
+                        start: startDate,
+                        timezone: 'local'
+                    },
+                    data: {
+                        source: data,
+                        type: 'map',
+                        x: d => d,
+                        y: d => data.get(d) || 0
+                    },
+                    scale: {
+                        color: {
+                            type: 'threshold',
+                            range: isDarkMode ? ['#1f2937', '#3b82f6', '#60a5fa', '#93c5fd', '#bfdbfe'] 
+                                            : ['#f3f4f6', '#3b82f6', '#60a5fa', '#93c5fd', '#bfdbfe'],
+                            domain: [0, 2, 4, 6, 8]
+                        }
+                    }
+                });
+            } catch (error) {
+                console.error('Error initializing heatmap:', error);
+            }
         }
 
         function findTaskById(tasks, taskId) {
