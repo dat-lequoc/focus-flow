@@ -1569,10 +1569,13 @@
                         highlight: new Date()
                     },
                     data: {
-                        source: data,
-                        type: 'map',
-                        x: d => d,
-                        y: d => data.get(d) || 0,
+                        source: Array.from(data.entries()).map(([timestamp, value]) => ({
+                            date: timestamp,
+                            value: value
+                        })),
+                        type: 'json',
+                        x: 'date',
+                        y: 'value',
                     },
                     scale: {
                         color: {
