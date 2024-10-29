@@ -133,8 +133,10 @@
         </div>
     </div>
 
-    <div id="time-entry-modal" class="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 hidden z-40">
-        <div id="time-entry-modal-content" class="bg-white p-6 rounded-lg shadow-lg dark:bg-gray-800 dark:text-gray-200 z-50">
+    <div id="time-entry-modal"
+        class="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 hidden z-40">
+        <div id="time-entry-modal-content"
+            class="bg-white p-6 rounded-lg shadow-lg dark:bg-gray-800 dark:text-gray-200 z-50">
             <h2 class="text-xl font-bold mb-4">Add Time Entry</h2>
             <div class="space-y-4">
                 <div>
@@ -227,6 +229,7 @@
         let pomodoroDuration = 25;
         let pomodoroTimeLeft = pomodoroDuration * 60;
         let timerSound = document.getElementById('timer-sound');
+        let projectDropdowns = [];
 
         function createElement(tag, options = {}) {
             const element = document.createElement(tag);
@@ -373,17 +376,13 @@
                 });
             });
 
-            // Initialize projectDropdowns array
-            let projectDropdowns = [];
-            
-            // Remove multiple event listeners and add a single one
+            // Add single global event listener for dropdowns
             if (!window.dropdownClickListenerAdded) {
                 document.addEventListener('click', () => {
-                    if (projectDropdowns) {
-                        projectDropdowns.forEach(dropdown => {
-                            dropdown.classList.add('hidden');
-                        });
-                    }
+                    // Always use global projectDropdowns array
+                    projectDropdowns.forEach(dropdown => {
+                        dropdown.classList.add('hidden');
+                    });
                 });
                 window.dropdownClickListenerAdded = true;
             }
@@ -632,12 +631,12 @@
             });
 
             // Close modal when clicking outside the content
-            document.getElementById('time-entry-modal').addEventListener('click', function() {
+            document.getElementById('time-entry-modal').addEventListener('click', function () {
                 closeTimeEntryModal();
             });
 
             // Prevent clicks inside the content from closing the modal
-            document.getElementById('time-entry-modal-content').addEventListener('click', function(e) {
+            document.getElementById('time-entry-modal-content').addEventListener('click', function (e) {
                 e.stopPropagation();
             });
         }
@@ -672,7 +671,7 @@
             // Create start date from input date at current time
             const now = new Date();
             date.setHours(now.getHours(), now.getMinutes(), now.getSeconds());
-            
+
             const timeEntry = {
                 start: date.toISOString(),
                 end: new Date(date.getTime() + minutes * 60000).toISOString(),
@@ -746,7 +745,7 @@
         function renderProjectList() {
             const projectList = document.getElementById('project-list');
             projectList.innerHTML = '';
-            let projectDropdowns = [];
+            projectDropdowns = []; // Reset global array
             projects.forEach(project => {
                 const projectDiv = document.createElement('div');
                 projectDiv.className = 'mb-4';
@@ -962,7 +961,7 @@
                 const taskPath = getTaskPath(task.id);
                 const labelContainer = document.createElement('div');
                 labelContainer.className = 'overflow-hidden';
-                const label = createLabelWithLinks(taskPath.join(' > '), 'font-medium dark:text-gray-200 break-words');
+                const label = createLabelWithLinks(taskPath.join(' > '), `font-medium dark:text-gray-200 break-words ${task.isCompleted ? 'line-through text-gray-500 dark:text-gray-400' : ''}`);
                 labelContainer.appendChild(label);
                 leftDiv.appendChild(labelContainer);
                 taskHeader.appendChild(leftDiv);
@@ -1211,8 +1210,9 @@
                 `;
             expandBtn.addEventListener('click', () => toggleTaskExpand(task.id));
             leftDiv.appendChild(expandBtn);
-            const labelClass = task.isCompleted ? 'line-through text-gray-500 dark:text-gray-400' : 'dark:text-gray-200';
-            const label = createLabelWithLinks(task.title, labelClass);
+            const labelClass = task.isCompleted ? 'text-gray-500 dark:text-gray-400' : 'dark:text-gray-200';
+            const taskTitle = task.title;
+            const label = createLabelWithLinks(taskTitle, `${labelClass} ${task.isCompleted ? 'line-through' : ''}`);
             leftDiv.appendChild(label);
             taskDiv.appendChild(leftDiv);
             const rightDiv = document.createElement('div');
