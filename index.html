@@ -7,7 +7,8 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-    <script src="https://unpkg.com/@observablehq/time@0.2.0"></script>
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <script src="https://unpkg.com/@observablehq/time"></script>
     <script src="https://unpkg.com/cal-heatmap/dist/cal-heatmap.min.js"></script>
     <link rel="stylesheet" href="https://unpkg.com/cal-heatmap/dist/cal-heatmap.css">
     <script>
@@ -1508,11 +1509,20 @@
             return `${hours}h ${minutes}m ${secs}s`;
         }
 
-        function initializeHeatmap() {
-            // Wait for DOM to be ready
+        async function initializeHeatmap() {
+            // Wait for DOM and dependencies to be ready
             if (!document.getElementById('cal-heatmap')) {
                 console.log('Heatmap container not found');
                 return;
+            }
+
+            if (typeof CalHeatmap === 'undefined') {
+                console.log('Waiting for CalHeatmap to load...');
+                await new Promise(resolve => setTimeout(resolve, 1000));
+                if (typeof CalHeatmap === 'undefined') {
+                    console.error('CalHeatmap failed to load');
+                    return;
+                }
             }
 
             const cal = new CalHeatmap();
