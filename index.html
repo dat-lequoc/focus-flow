@@ -7,6 +7,8 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <script src="https://unpkg.com/cal-heatmap/dist/cal-heatmap.min.js"></script>
+    <link rel="stylesheet" href="https://unpkg.com/cal-heatmap/dist/cal-heatmap.css">
     <script>
         tailwind.config = {
             darkMode: 'class',
@@ -525,6 +527,7 @@
             showDashboard();
             setupEventListeners();
             setupTimeEntryModal();
+            initializeHeatmap();
 
             // Setup settings modal listeners
             document.getElementById('settings-btn').addEventListener('click', showSettings);
@@ -871,6 +874,7 @@
             renderDashboard();
             renderProjectList();
             renderWeeklyChart();
+            initializeHeatmap();
         }
 
         function renderDashboard() {
@@ -922,8 +926,12 @@
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div class="p-6 bg-white rounded-lg shadow dark:bg-gray-800 dark:text-gray-200">
                         <h3 class="font-bold mb-2 text-lg">Weekly Activity</h3>
-                        <div style="height: 600px;">
+                        <div style="height: 300px;">
                             <canvas id="weeklyChart"></canvas>
+                        </div>
+                        <div class="mt-6">
+                            <h4 class="font-bold mb-2">Yearly Activity</h4>
+                            <div id="cal-heatmap" class="cal-heatmap"></div>
                         </div>
                     </div>
                     <div class="p-6 bg-white rounded-lg shadow dark:bg-gray-800 dark:text-gray-200">
@@ -1497,6 +1505,47 @@
             const minutes = Math.floor((seconds % 3600) / 60);
             const secs = seconds % 60;
             return `${hours}h ${minutes}m ${secs}s`;
+        }
+
+        function initializeHeatmap() {
+            const cal = new CalHeatmap();
+            const now = new Date();
+            const startDate = new Date(now.getFullYear(), 0, 1);
+            
+            // Prepare data for the heatmap
+            const data = new Map();
+            projects.forEach(project => {
+                traverseTasks(project.tasks, task => {
+                    if (task.timeEntries) {
+                        task.timeEntries.forEach(entry => {
+                            const date = new Date(entry.start);
+                            const timestamp = date.setHours(0,0,0,0);
+                            const hours = entry.duration / 3600;
+                            data.set(timestamp, (data.get(timestamp) || 0) + hours);
+                        });
+                    }
+                });
+            });
+
+            cal.paint({
+                itemSelector: '#cal-heatmap',
+                domain: { type: 'month' },
+                subDomain: { type: 'day' },
+                date: { start: startDate },
+                data: {
+                    source: data,
+                    type: 'map',
+                },
+                scale: {
+                    color: {
+                        type: 'threshold',
+                        range: isDarkMode ? ['#1f2937', '#3b82f6', '#60a5fa', '#93c5fd', '#bfdbfe'] 
+                                        : ['#f3f4f6', '#3b82f6', '#60a5fa', '#93c5fd', '#bfdbfe'],
+                        domain: [0, 2, 4, 6, 8], // hours
+                    },
+                },
+                theme: isDarkMode ? 'dark' : 'light'
+            });
         }
 
         function findTaskById(tasks, taskId) {
