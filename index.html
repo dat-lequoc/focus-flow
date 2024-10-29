@@ -9,9 +9,14 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <script src="https://d3js.org/d3.v7.min.js"></script>
     <script src="https://unpkg.com/@observablehq/time"></script>
-    <script src="https://unpkg.com/cal-heatmap/dist/cal-heatmap.min.js"></script>
-    <script src="https://unpkg.com/@cal-heatmap/tooltip"></script>
-    <script src="https://unpkg.com/@cal-heatmap/legend-lite"></script>
+    <script type="module">
+        import CalHeatmap from 'https://unpkg.com/cal-heatmap?module';
+        import Tooltip from 'https://unpkg.com/@cal-heatmap/tooltip?module';
+        import LegendLite from 'https://unpkg.com/@cal-heatmap/legend-lite?module';
+        window.CalHeatmap = CalHeatmap;
+        window.Tooltip = Tooltip;
+        window.LegendLite = LegendLite;
+    </script>
     <link rel="stylesheet" href="https://unpkg.com/cal-heatmap/dist/cal-heatmap.css">
     <script>
         tailwind.config = {
@@ -534,8 +539,8 @@
             initializeHeatmap();
             
             // Setup heatmap navigation
-            document.getElementById('cal-prev').addEventListener('click', () => cal?.previous());
-            document.getElementById('cal-next').addEventListener('click', () => cal?.next());
+            document.getElementById('cal-prev').addEventListener('click', () => window.calendarInstance?.previous());
+            document.getElementById('cal-next').addEventListener('click', () => window.calendarInstance?.next());
 
             // Setup settings modal listeners
             document.getElementById('settings-btn').addEventListener('click', showSettings);
@@ -1542,7 +1547,7 @@
                 }
             }
 
-            const cal = new CalHeatmap();
+            window.calendarInstance = new window.CalHeatmap();
             const now = new Date();
             const startDate = new Date(now.getFullYear(), 0, 1);
             
@@ -1562,7 +1567,7 @@
             });
 
             try {
-                cal.paint({
+                window.calendarInstance.paint({
                     itemSelector: '#cal-heatmap',
                     range: 12,
                     domain: {
