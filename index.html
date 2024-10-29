@@ -228,6 +228,7 @@
         let pomodoroTimer = null;
         let pomodoroDuration = 25;
         let pomodoroTimeLeft = pomodoroDuration * 60;
+        let pomodoroStartTime = null;
         let timerSound = document.getElementById('timer-sound');
         let projectDropdowns = [];
 
@@ -1354,8 +1355,8 @@
             currentPomodoroTask = task;
             task.isTimerRunning = true;
             pomodoroDuration = parseInt(document.getElementById('pomodoro-duration').value) || 25;
-            const startTime = Date.now();
-            const endTime = startTime + (pomodoroDuration * 60 * 1000);
+            pomodoroStartTime = Date.now();
+            const endTime = pomodoroStartTime + (pomodoroDuration * 60 * 1000);
             const pomodoroDisplay = document.getElementById('pomodoro-display');
             pomodoroDisplay.classList.remove('hidden');
             document.getElementById('current-task-title').textContent = task.title;
@@ -1374,13 +1375,13 @@
         }
 
         function stopPomodoro() {
-            if (currentPomodoroTask) {
-                const endTime = new Date();
-                const elapsedSeconds = pomodoroDuration * 60; // Full pomodoro duration
-                const startTime = new Date(endTime - (elapsedSeconds * 1000));
+            if (currentPomodoroTask && pomodoroStartTime) {
+                const endTime = Date.now();
+                const elapsedSeconds = Math.floor((endTime - pomodoroStartTime) / 1000);
+                const startTime = new Date(pomodoroStartTime);
                 const timeEntry = {
                     start: startTime.toISOString(),
-                    end: endTime.toISOString(),
+                    end: new Date(endTime).toISOString(),
                     duration: elapsedSeconds
                 };
                 const task = findTaskByIdGlobal(currentPomodoroTask.id);
@@ -1407,6 +1408,7 @@
                     }
                 }
                 currentPomodoroTask = null;
+                pomodoroStartTime = null;
             }
             if (pomodoroTimer) {
                 clearInterval(pomodoroTimer);
