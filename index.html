@@ -124,9 +124,22 @@
                         <span class="font-bold mr-2">Current Task:</span>
                         <span id="current-task-title">None</span>
                     </div>
-                    <div class="flex items-center">
-                        <span id="pomodoro-timer" class="text-2xl font-mono">25:00</span>
-                        <button id="stop-pomodoro" class="ml-4 bg-red-500 text-white px-4 py-2 rounded">Stop</button>
+                    <div class="flex items-center space-x-4">
+                        <span id="pomodoro-timer" class="text-2xl font-mono">00:00</span>
+                        <div class="flex space-x-2">
+                            <button id="toggle-count-mode" class="bg-blue-500 text-white px-4 py-2 rounded" title="Toggle Count Mode">
+                                <i class="fas fa-clock"></i>
+                            </button>
+                            <button id="pause-pomodoro" class="bg-yellow-500 text-white px-4 py-2 rounded hidden">
+                                <i class="fas fa-pause"></i>
+                            </button>
+                            <button id="resume-pomodoro" class="bg-green-500 text-white px-4 py-2 rounded hidden">
+                                <i class="fas fa-play"></i>
+                            </button>
+                            <button id="stop-pomodoro" class="bg-red-500 text-white px-4 py-2 rounded">
+                                <i class="fas fa-stop"></i>
+                            </button>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -212,9 +225,14 @@
         <div class="bg-white p-6 rounded-lg shadow-lg dark:bg-gray-800 dark:text-gray-200">
             <h2 class="text-xl font-bold mb-4">Time's Up!</h2>
             <p class="mb-4">Your pomodoro session is complete.</p>
-            <button id="close-timer-complete" class="w-full px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600">
-                Close
-            </button>
+            <div class="flex space-x-3">
+                <button id="start-new-session" class="flex-1 px-4 py-2 bg-green-500 text-white rounded hover:bg-green-600">
+                    Start New Session
+                </button>
+                <button id="close-timer-complete" class="flex-1 px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600">
+                    Close
+                </button>
+            </div>
         </div>
     </div>
 
@@ -229,6 +247,10 @@
         let pomodoroDuration = 25;
         let pomodoroTimeLeft = pomodoroDuration * 60;
         let pomodoroStartTime = null;
+        let isPomodoroCountUp = false;
+        let isPomodoroRunning = false;
+        let pomodoroElapsedTime = 0;
+        let pomodoroPausedTime = null;
         let timerSound = document.getElementById('timer-sound');
         let projectDropdowns = [];
 
@@ -1361,22 +1383,28 @@
             }
             currentPomodoroTask = task;
             task.isTimerRunning = true;
+            isPomodoroRunning = true;
             pomodoroDuration = parseInt(document.getElementById('pomodoro-duration').value) || 25;
             pomodoroStartTime = Date.now();
-            const endTime = pomodoroStartTime + (pomodoroDuration * 60 * 1000);
+            pomodoroElapsedTime = 0;
+            
             const pomodoroDisplay = document.getElementById('pomodoro-display');
             pomodoroDisplay.classList.remove('hidden');
             document.getElementById('current-task-title').textContent = task.title;
-            updatePomodoroDisplay(endTime);
-            pomodoroTimer = setInterval(() => {
-                const now = Date.now();
-                if (now >= endTime) {
-                    pomodoroComplete();
-                } else {
-                    updatePomodoroDisplay(endTime);
-                }
-            }, 100);
+            
+            updatePomodoroTimer();
+            pomodoroTimer = setInterval(updatePomodoroTimer, 100);
+
+            // Setup button handlers
             document.getElementById('stop-pomodoro').onclick = stopPomodoro;
+            document.getElementById('pause-pomodoro').onclick = pausePomodoro;
+            document.getElementById('resume-pomodoro').onclick = resumePomodoro;
+            document.getElementById('toggle-count-mode').onclick = toggleCountMode;
+            
+            // Show pause button, hide resume
+            document.getElementById('pause-pomodoro').classList.remove('hidden');
+            document.getElementById('resume-pomodoro').classList.add('hidden');
+            
             saveData();
             renderTaskList();
         }
@@ -1427,13 +1455,57 @@
             renderProjectList();
         }
 
-        function updatePomodoroDisplay(endTime) {
+        function updatePomodoroTimer() {
             const now = Date.now();
-            const timeLeft = Math.max(0, Math.floor((endTime - now) / 1000));
-            const minutes = Math.floor(timeLeft / 60);
-            const seconds = timeLeft % 60;
-            const display = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
-            document.getElementById('pomodoro-timer').textContent = display;
+            if (isPomodoroCountUp) {
+                // Count up mode
+                pomodoroElapsedTime = Math.floor((now - pomodoroStartTime) / 1000);
+                const minutes = Math.floor(pomodoroElapsedTime / 60);
+                const seconds = pomodoroElapsedTime % 60;
+                document.getElementById('pomodoro-timer').textContent = 
+                    `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+            } else {
+                // Count down mode
+                const endTime = pomodoroStartTime + (pomodoroDuration * 60 * 1000);
+                const timeLeft = Math.max(0, Math.floor((endTime - now) / 1000));
+                const minutes = Math.floor(timeLeft / 60);
+                const seconds = timeLeft % 60;
+                document.getElementById('pomodoro-timer').textContent = 
+                    `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+                
+                if (timeLeft <= 0 && isPomodoroRunning) {
+                    pomodoroComplete();
+                }
+            }
+        }
+
+        function pausePomodoro() {
+            if (pomodoroTimer) {
+                clearInterval(pomodoroTimer);
+                isPomodoroRunning = false;
+                pomodoroPausedTime = Date.now();
+                document.getElementById('pause-pomodoro').classList.add('hidden');
+                document.getElementById('resume-pomodoro').classList.remove('hidden');
+            }
+        }
+
+        function resumePomodoro() {
+            if (pomodoroPausedTime) {
+                const pauseDuration = Date.now() - pomodoroPausedTime;
+                pomodoroStartTime += pauseDuration;
+                isPomodoroRunning = true;
+                pomodoroTimer = setInterval(updatePomodoroTimer, 100);
+                document.getElementById('pause-pomodoro').classList.remove('hidden');
+                document.getElementById('resume-pomodoro').classList.add('hidden');
+            }
+        }
+
+        function toggleCountMode() {
+            isPomodoroCountUp = !isPomodoroCountUp;
+            pomodoroStartTime = Date.now();
+            pomodoroElapsedTime = 0;
+            document.getElementById('toggle-count-mode').innerHTML = 
+                `<i class="fas fa-${isPomodoroCountUp ? 'stopwatch' : 'clock'}"></i>`;
         }
 
         function toggleDarkMode() {
@@ -1630,6 +1702,15 @@
             timerSound.pause();
             timerSound.currentTime = 0;
         }
+
+        function startNewSession() {
+            closeTimerComplete();
+            if (currentPomodoroTask) {
+                startPomodoro(currentPomodoroTask);
+            }
+        }
+
+        document.getElementById('start-new-session').addEventListener('click', startNewSession);
 
         init();
     </script>
