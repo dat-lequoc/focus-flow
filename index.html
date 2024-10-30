@@ -1705,8 +1705,10 @@
 
         function startNewSession() {
             closeTimerComplete();
-            if (currentPomodoroTask) {
-                startPomodoro(currentPomodoroTask);
+            const task = currentPomodoroTask;
+            currentPomodoroTask = null; // Reset current task
+            if (task) {
+                startPomodoro(task); // Start fresh timer with same task
             }
         }
 
