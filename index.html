@@ -1381,15 +1381,15 @@
             if (currentPomodoroTask) {
                 stopPomodoro();
             }
+            // Show pomodoro display first to avoid visual delay
+            document.getElementById('pomodoro-display').classList.remove('hidden');
+            
             currentPomodoroTask = task;
             task.isTimerRunning = true;
             isPomodoroRunning = true;
             pomodoroDuration = parseInt(document.getElementById('pomodoro-duration').value) || 25;
             pomodoroStartTime = Date.now();
             pomodoroElapsedTime = 0;
-            
-            const pomodoroDisplay = document.getElementById('pomodoro-display');
-            pomodoroDisplay.classList.remove('hidden');
             document.getElementById('current-task-title').textContent = task.title;
             
             updatePomodoroTimer();
@@ -1708,6 +1708,8 @@
             const task = currentPomodoroTask;
             currentPomodoroTask = null; // Reset current task
             if (task) {
+                // Ensure pomodoro display is visible before starting new session
+                document.getElementById('pomodoro-display').classList.remove('hidden');
                 startPomodoro(task); // Start fresh timer with same task
             }
         }
