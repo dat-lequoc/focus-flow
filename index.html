@@ -127,8 +127,9 @@
                     <div class="flex items-center space-x-4">
                         <span id="pomodoro-timer" class="text-2xl font-mono">00:00</span>
                         <div class="flex space-x-2">
-                            <button id="toggle-count-mode" class="bg-blue-500 text-white px-4 py-2 rounded" title="Toggle Count Mode">
-                                <i class="fas fa-clock"></i>
+                            <button id="toggle-count-mode" class="bg-blue-500 text-white px-4 py-2 rounded"
+                                title="Toggle Count Mode">
+                                <i class="fas fa-clock"></i> <!-- Changed icon to fa-clock -->
                             </button>
                             <button id="pause-pomodoro" class="bg-yellow-500 text-white px-4 py-2 rounded hidden">
                                 <i class="fas fa-pause"></i>
@@ -226,10 +227,12 @@
             <h2 class="text-xl font-bold mb-4">Time's Up!</h2>
             <p class="mb-4">Your pomodoro session is complete.</p>
             <div class="flex space-x-3">
-                <button id="start-new-session" class="flex-1 px-4 py-2 bg-green-500 text-white rounded hover:bg-green-600">
+                <button id="start-new-session"
+                    class="flex-1 px-4 py-2 bg-green-500 text-white rounded hover:bg-green-600">
                     Start New Session
                 </button>
-                <button id="close-timer-complete" class="flex-1 px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600">
+                <button id="close-timer-complete"
+                    class="flex-1 px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600">
                     Close
                 </button>
             </div>
@@ -253,6 +256,7 @@
         let pomodoroPausedTime = null;
         let timerSound = document.getElementById('timer-sound');
         let projectDropdowns = [];
+        let lastCompletedTask = null; // Added to handle start-new-session
 
         function createElement(tag, options = {}) {
             const element = document.createElement(tag);
@@ -548,7 +552,7 @@
             showDashboard();
             setupEventListeners();
             setupTimeEntryModal();
-            
+
             // Handle page unload
             window.addEventListener('beforeunload', () => {
                 if (currentPomodoroTask && pomodoroStartTime) {
@@ -621,7 +625,7 @@
                     e.target.value = ''; // Reset file input
                 }
             });
-            document.getElementById('reset-today-btn').addEventListener('click', resetTodayTasks);
+            // Removed the 'reset-today-btn' listener from here
             document.getElementById('add-project-btn').addEventListener('click', addProject);
             document.getElementById('new-project-name').addEventListener('keypress', (e) => {
                 if (e.key === 'Enter') {
@@ -726,7 +730,7 @@
                             todayTimeSpent += entry.duration;
                         }
                     });
-                    task.dailyProgress = Math.floor(todayTimeSpent / 60 / 25);
+                    task.dailyProgress = Math.floor(todayTimeSpent / 60 / pomodoroDuration); // Changed from 25 to pomodoroDuration
                 }
 
                 saveData();
@@ -871,13 +875,15 @@
                     saveData();
                     renderProjectList();
                     if (selectedProject && selectedProject.id === projectId) {
-                        selectedProject = projects.length > 0 ? projects[0] : null;
-                        if (selectedProject) {
+                        if (projects.length > 0) {
+                            selectedProject = projects[0];
                             document.getElementById('project-title').textContent = selectedProject.name;
                             renderTaskList();
                         } else {
-                            document.getElementById('project-title').textContent = '';
+                            selectedProject = null;
+                            document.getElementById('project-title').textContent = 'Focus Flow';
                             document.getElementById('task-list').innerHTML = '';
+                            showDashboard(); // Redirect to dashboard if no projects left
                         }
                     }
                 }
@@ -975,6 +981,9 @@
                     </div>
                 </div>
             `;
+            // Attach event listener for reset-today-btn here
+            document.getElementById('reset-today-btn').addEventListener('click', resetTodayTasks);
+
             const todayTasksContainer = document.getElementById('today-tasks-container');
             const todayTasks = getTodayTasks();
             // Sort tasks - completed tasks go to the end
@@ -1052,13 +1061,13 @@
                         }
                     });
                 }
-                const pomodorosCompleted = todayTimeSpent / 60 / 25;
+                const pomodorosCompleted = todayTimeSpent / 60 / pomodoroDuration;
                 const formattedPomodoros = todayTimeSpent > 0 ? pomodorosCompleted.toFixed(1) : Math.floor(pomodorosCompleted);
                 progressText.textContent = `${formattedPomodoros} / ${task.dailyGoal} pomodoros`;
                 const progressBarContainer = document.createElement('div');
                 progressBarContainer.className = 'flex-grow h-2 bg-gray-200 rounded dark:bg-gray-700';
-                const progressBar = document.createElement('div');
                 const progressPercentage = task.dailyGoal > 0 ? (pomodorosCompleted / task.dailyGoal) * 100 : 0;
+                const progressBar = document.createElement('div');
                 progressBar.className = `h-full rounded transition-all duration-300 ${progressPercentage >= 100 ? 'bg-green-500' : 'bg-blue-500'}`;
                 progressBar.style.width = `${Math.min(progressPercentage, 100)}%`;
                 progressBarContainer.appendChild(progressBar);
@@ -1384,14 +1393,14 @@
             currentPomodoroTask = task;
             task.isTimerRunning = true;
             isPomodoroRunning = true;
-            
+
             // Ensure display is visible
             document.getElementById('pomodoro-display').classList.remove('hidden');
             pomodoroDuration = parseInt(document.getElementById('pomodoro-duration').value) || 25;
             pomodoroStartTime = Date.now();
             pomodoroElapsedTime = 0;
             document.getElementById('current-task-title').textContent = task.title;
-            
+
             updatePomodoroTimer();
             pomodoroTimer = setInterval(updatePomodoroTimer, 100);
 
@@ -1400,11 +1409,11 @@
             document.getElementById('pause-pomodoro').onclick = pausePomodoro;
             document.getElementById('resume-pomodoro').onclick = resumePomodoro;
             document.getElementById('toggle-count-mode').onclick = toggleCountMode;
-            
+
             // Show pause button, hide resume
             document.getElementById('pause-pomodoro').classList.remove('hidden');
             document.getElementById('resume-pomodoro').classList.add('hidden');
-            
+
             saveData();
             renderTaskList();
         }
@@ -1437,11 +1446,12 @@
                                 todayTimeSpent += entry.duration;
                             }
                         });
-                        task.dailyProgress = Math.floor(todayTimeSpent / 60 / 25);
+                        task.dailyProgress = Math.floor(todayTimeSpent / 60 / pomodoroDuration);
                         saveData();
                         renderDashboard();
                     }
                 }
+                lastCompletedTask = currentPomodoroTask; // Store for starting new session
                 currentPomodoroTask = null;
                 pomodoroStartTime = null;
             }
@@ -1462,7 +1472,7 @@
                 pomodoroElapsedTime = Math.floor((now - pomodoroStartTime) / 1000);
                 const minutes = Math.floor(pomodoroElapsedTime / 60);
                 const seconds = pomodoroElapsedTime % 60;
-                document.getElementById('pomodoro-timer').textContent = 
+                document.getElementById('pomodoro-timer').textContent =
                     `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
             } else {
                 // Count down mode
@@ -1470,9 +1480,9 @@
                 const timeLeft = Math.max(0, Math.floor((endTime - now) / 1000));
                 const minutes = Math.floor(timeLeft / 60);
                 const seconds = timeLeft % 60;
-                document.getElementById('pomodoro-timer').textContent = 
+                document.getElementById('pomodoro-timer').textContent =
                     `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
-                
+
                 if (timeLeft <= 0 && isPomodoroRunning) {
                     pomodoroComplete();
                 }
@@ -1504,8 +1514,9 @@
             isPomodoroCountUp = !isPomodoroCountUp;
             pomodoroStartTime = Date.now();
             pomodoroElapsedTime = 0;
-            document.getElementById('toggle-count-mode').innerHTML = 
-                `<i class="fas fa-${isPomodoroCountUp ? 'stopwatch' : 'clock'}"></i>`;
+            // Use valid FontAwesome icons
+            document.getElementById('toggle-count-mode').innerHTML =
+                `<i class="fas fa-${isPomodoroCountUp ? 'hourglass-start' : 'clock'}"></i>`;
         }
 
         function toggleDarkMode() {
@@ -1523,6 +1534,10 @@
         }
 
         function showReport() {
+            if (!selectedProject) {
+                alert('Please select a project to view the report.');
+                return;
+            }
             const reportModal = document.getElementById('report-modal');
             const reportContent = document.getElementById('report-content');
             const totalTime = calculateTotalTime(selectedProject.tasks);
@@ -1684,8 +1699,12 @@
         document.getElementById('custom-sound-file').addEventListener('change', function (e) {
             const file = e.target.files[0];
             if (file) {
+                if (timerSound.dataset.objectUrl) {
+                    URL.revokeObjectURL(timerSound.dataset.objectUrl);
+                }
                 const url = URL.createObjectURL(file);
                 timerSound.src = url;
+                timerSound.dataset.objectUrl = url;
             }
         });
 
@@ -1705,13 +1724,11 @@
 
         function startNewSession() {
             closeTimerComplete();
-            const task = currentPomodoroTask;
-            if (task) {
-                // Show timer bar first
+            if (lastCompletedTask) {
                 document.getElementById('pomodoro-display').classList.remove('hidden');
-                // Then reset and start new session
                 currentPomodoroTask = null;
-                startPomodoro(task);
+                startPomodoro(lastCompletedTask);
+                lastCompletedTask = null;
             }
         }
 
