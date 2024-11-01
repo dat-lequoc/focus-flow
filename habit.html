@@ -121,7 +121,7 @@
   <script>
     // Initialize habits from localStorage or as an empty array
     let habits = JSON.parse(localStorage.getItem('habits')) || [];
-    let isEditing = false, editingHabitId = null, showArchived = false; // Removed 'showArchived' as archived functionality is removed
+    let isEditing = false, editingHabitId = null;
     const habitTableBody = document.getElementById('habitTableBody');
     const habitModal = document.getElementById('habitModal');
     const addHabitBtn = document.getElementById('addHabitBtn');
@@ -147,8 +147,8 @@
     function renderDaysHeader() {
       const totalDays = getDaysInMonth(currentMonth, currentYear);
       
-      // Remove all existing day headers except the first "Habits" header
-      while (headerRow.children.length > 1) {
+      // Remove all existing day headers except the first two ("Habits" and "Streak")
+      while (headerRow.children.length > 2) {
         headerRow.removeChild(headerRow.lastChild);
       }
       
@@ -169,38 +169,31 @@
       }
     }
     
+    // Calculate streak for a habit
+    function calculateStreak(habit) {
+      let streak = 0;
+      const today = new Date();
+      let dateIterator = new Date(today.getFullYear(), today.getMonth(), today.getDate());
+      
+      while (true) {
+        const monthKey = `${dateIterator.getFullYear()}-${String(dateIterator.getMonth() + 1).padStart(2, '0')}`;
+        const day = dateIterator.getDate();
+        
+        if (habit.history[monthKey]?.days.includes(day)) {
+          streak++;
+          dateIterator.setDate(dateIterator.getDate() - 1);
+        } else {
+          break;
+        }
+      }
+      
+      return streak;
+    }
+    
     // Render all habits in the table
     function renderHabits() {
       habitTableBody.innerHTML = '';
       habits.forEach(habit => {
-        // Removed archived check since archive functionality is removed
-        const monthKey = `${currentYear}-${String(currentMonth + 1).padStart(2, '0')}`;
-        if (!habit.history) habit.history = {};
-        if (!habit.history[monthKey]) habit.history[monthKey] = { days: [] };
-        const habitData = habit.history[monthKey];
-        
-        // Calculate current streak
-        const today = new Date();
-        let streak = 0;
-        let currentDate = new Date(currentYear, currentMonth, getDaysInMonth(currentMonth, currentYear));
-        
-        while (true) {
-          const checkMonth = `${currentDate.getFullYear()}-${String(currentDate.getMonth() + 1).padStart(2, '0')}`;
-          const checkDay = currentDate.getDate();
-          
-          if (!habit.history[checkMonth]?.days.includes(checkDay)) {
-            break;
-          }
-          
-          streak++;
-          currentDate.setDate(currentDate.getDate() - 1);
-          
-          // Stop if we're checking a future date
-          if (currentDate > today) {
-            streak = 0;
-            break;
-          }
-        }
         const tr = document.createElement('tr');
         tr.draggable = true;
         tr.dataset.id = habit.id;
@@ -212,7 +205,9 @@
         // Add streak cell
         const streakTd = document.createElement('td');
         streakTd.className = 'p-2 text-center';
+        const streak = calculateStreak(habit);
         streakTd.textContent = `${streak} ${streak === 1 ? 'day' : 'days'}`;
+        
         nameTd.innerHTML = `<div class="flex items-center justify-between">
           <span>${habit.name}</span>
           <div class="flex space-x-1">
@@ -247,7 +242,7 @@
             dayTd.classList.add('today-column', 'light-bg'); // Ensure text is dark on highlighted background
           }
           
-          const completed = habitData.days.includes(day);
+          const completed = habit.history[`${currentYear}-${String(currentMonth + 1).padStart(2, '0')}`]?.days.includes(day);
           dayTd.innerHTML = completed ? '<span class="text-green-500">&#10003;</span>' : '';
           dayTd.addEventListener('click', () => toggleDayCompletion(habit.id, day, dayTd));
           tr.appendChild(dayTd);
@@ -262,7 +257,9 @@
       const habit = habits.find(h => h.id === habitId);
       if (!habit) return;
       const monthKey = `${currentYear}-${String(currentMonth + 1).padStart(2, '0')}`;
+      if (!habit.history[monthKey]) habit.history[monthKey] = { days: [] };
       const habitData = habit.history[monthKey];
+      
       if (habitData.days.includes(day)) {
         habitData.days = habitData.days.filter(d => d !== day);
         td.innerHTML = '';
@@ -271,6 +268,7 @@
         td.innerHTML = '<span class="text-green-500">&#10003;</span>';
       }
       saveHabits();
+      renderHabits(); // Re-render to update streaks
     }
     
     // Show the Add Habit Modal
@@ -346,15 +344,23 @@
     
     // Navigate to Previous Month
     prevMonthBtn.addEventListener('click', () => {
-      currentMonth = currentMonth === 0 ? 11 : currentMonth - 1;
-      if (currentMonth === 11) currentYear--;
+      if (currentMonth === 0) {
+        currentMonth = 11;
+        currentYear--;
+      } else {
+        currentMonth--;
+      }
       updateView();
     });
     
     // Navigate to Next Month
     nextMonthBtn.addEventListener('click', () => {
-      currentMonth = currentMonth === 11 ? 0 : currentMonth + 1;
-      if (currentMonth === 0) currentYear++;
+      if (currentMonth === 11) {
+        currentMonth = 0;
+        currentYear++;
+      } else {
+        currentMonth++;
+      }
       updateView();
     });
     
