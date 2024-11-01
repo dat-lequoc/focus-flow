@@ -71,6 +71,9 @@
     .dark-bg {
       color: #f3f4f6; /* Light text */
     }
+    .status-failed {
+      color: #ef4444; /* Red-500 */
+    }
   </style>
 </head>
 <body class="bg-gray-100 dark:bg-gray-900 text-gray-900 dark:text-gray-100">
@@ -268,8 +271,15 @@
             dayTd.classList.add('today-column', 'light-bg'); // Ensure text is dark on highlighted background
           }
           
-          const completed = habit.history[`${currentYear}-${String(currentMonth + 1).padStart(2, '0')}`]?.days.includes(day);
-          dayTd.innerHTML = completed ? '<span class="text-green-500">&#10003;</span>' : '';
+          const monthKey = `${currentYear}-${String(currentMonth + 1).padStart(2, '0')}`;
+          const status = habit.history[monthKey]?.status?.[day] || 'none';
+          let statusHtml = '';
+          if (status === 'completed') {
+            statusHtml = '<span class="text-green-500">&#10003;</span>';
+          } else if (status === 'failed') {
+            statusHtml = '<span class="status-failed">&#10007;</span>';
+          }
+          dayTd.innerHTML = statusHtml;
           dayTd.addEventListener('click', () => toggleDayCompletion(habit.id, day, dayTd));
           tr.appendChild(dayTd);
         }
@@ -282,17 +292,37 @@
     function toggleDayCompletion(habitId, day, td) {
       const habit = habits.find(h => h.id === habitId);
       if (!habit) return;
-      const monthKey = `${currentYear}-${String(currentMonth + 1).padStart(2, '0')}`;
-      if (!habit.history[monthKey]) habit.history[monthKey] = { days: [] };
-      const habitData = habit.history[monthKey];
       
-      if (habitData.days.includes(day)) {
-        habitData.days = habitData.days.filter(d => d !== day);
-        td.innerHTML = '';
-      } else {
-        habitData.days.push(day);
-        td.innerHTML = '<span class="text-green-500">&#10003;</span>';
+      const monthKey = `${currentYear}-${String(currentMonth + 1).padStart(2, '0')}`;
+      if (!habit.history[monthKey]) {
+        habit.history[monthKey] = { days: [], status: {} };
       }
+      if (!habit.history[monthKey].status) {
+        habit.history[monthKey].status = {};
+      }
+      
+      const currentStatus = habit.history[monthKey].status[day] || 'none';
+      let newStatus;
+      
+      // Cycle through states: none -> completed -> failed -> none
+      switch (currentStatus) {
+        case 'none':
+          newStatus = 'completed';
+          td.innerHTML = '<span class="text-green-500">&#10003;</span>';
+          habit.history[monthKey].days.push(day);
+          break;
+        case 'completed':
+          newStatus = 'failed';
+          td.innerHTML = '<span class="status-failed">&#10007;</span>';
+          habit.history[monthKey].days = habit.history[monthKey].days.filter(d => d !== day);
+          break;
+        case 'failed':
+          newStatus = 'none';
+          td.innerHTML = '';
+          break;
+      }
+      
+      habit.history[monthKey].status[day] = newStatus;
       saveHabits();
       renderHabits(); // Re-render to update streaks
     }
