@@ -1,347 +1,370 @@
 <!DOCTYPE html>
 <html lang="en" class="dark">
 <head>
-<meta charset="UTF-8">
-<title>DailyHabits Clone</title>
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<script src="https://cdn.tailwindcss.com"></script>
-<script>
-  tailwind.config = {
-    darkMode: 'class',
-    theme: { 
-      extend: {
-        width: {
-          'day': '40px', /* Fixed width for day columns */
+  <meta charset="UTF-8">
+  <title>DailyHabits Clone</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: { 
+        extend: {
+          width: {
+            'day': '40px', /* Fixed width for day columns */
+          },
         },
       },
-    },
-    plugins: [],
-  }
-</script>
-<style>
-  .dragging { opacity: 0.5; }
-  .sticky-left { position: sticky; left: 0; background-color: inherit; z-index: 1; }
-  .table-border th, .table-border td { border: 1px solid #e5e7eb; }
-  .dark .table-border th, .dark .table-border td { border-color: #374151; }
-  /* Ensure day columns have fixed width */
-  .day-column {
-    width: 40px;
-  }
-</style>
+      plugins: [],
+    }
+  </script>
+  <style>
+    .dragging { opacity: 0.5; }
+    .sticky-left { position: sticky; left: 0; background-color: inherit; z-index: 1; }
+    .table-border th, .table-border td { border: 1px solid #e5e7eb; }
+    .dark .table-border th, .dark .table-border td { border-color: #374151; }
+    /* Ensure day columns have fixed width */
+    .day-column {
+      width: 40px;
+      text-align: center;
+    }
+    /* Highlight today's column */
+    .today-column {
+      border: 2px solid #f59e0b; /* Amber-500 */
+      background-color: #fef3c7; /* Light Amber Background */
+    }
+    /* Enhance hover effect for day cells */
+    td.day-column:hover {
+      background-color: #f3f4f6; /* Gray-100 */
+      cursor: pointer;
+    }
+  </style>
 </head>
 <body class="bg-gray-100 dark:bg-gray-900 text-gray-900 dark:text-gray-100">
-<header class="bg-white dark:bg-gray-800 shadow p-4 flex justify-between items-center">
-  <h1 class="text-xl font-semibold">DailyHabits</h1>
-  <div class="flex items-center space-x-4">
-    <button id="darkModeToggle" class="focus:outline-none" aria-label="Toggle Dark Mode">
-      <svg id="themeIcon" class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path id="sunIcon" class="dark:hidden" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-          d="M12 3v1m0 16v1m8.66-8.66h-1M4.34 12.34h-1M15.36 6.64l-.7.7M6.34 17.66l-.7.7M6.34 6.34l-.7-.7M15.36 17.66l-.7-.7M12 5a7 7 0 100 14 7 7 0 000-14z"></path>
-        <path id="moonIcon" class="hidden dark:block" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-          d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"></path>
-      </svg>
-    </button>
+  <header class="bg-white dark:bg-gray-800 shadow p-4 flex justify-between items-center">
+    <h1 class="text-xl font-semibold">DailyHabits</h1>
+    <div class="flex items-center space-x-4">
+      <button id="darkModeToggle" class="focus:outline-none" aria-label="Toggle Dark Mode">
+        <svg id="themeIcon" class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path id="sunIcon" class="dark:hidden" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+            d="M12 3v1m0 16v1m8.66-8.66h-1M4.34 12.34h-1M15.36 6.64l-.7.7M6.34 17.66l-.7.7M6.34 6.34l-.7-.7M15.36 17.66l-.7-.7M12 5a7 7 0 100 14 7 7 0 000-14z"></path>
+          <path id="moonIcon" class="hidden dark:block" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+            d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"></path>
+        </svg>
+      </button>
+      <button id="clearHabitsBtn" class="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded">Clear All Habits</button>
+    </div>
+  </header>
+  <main class="max-w-7xl mx-auto p-4">
+    <section class="flex justify-center items-center mb-4">
+      <button id="prevMonthBtn" class="p-2" aria-label="Previous Month">
+        <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" viewBox="0 0 20 20" fill="currentColor">
+          <path fill-rule="evenodd"
+            d="M12.293 2.293a1 1 0 010 1.414L6.414 9.586H18a1 1 0 110 2H6.414l5.879 5.879a1 1 0 11-1.414 1.414l-7.586-7.586a1 1 0 010-1.414l7.586-7.586a1 1 0 011.414 0z"
+            clip-rule="evenodd" />
+        </svg>
+      </button>
+      <h2 id="currentMonthYear" class="mx-4 text-xl font-semibold"></h2>
+      <button id="nextMonthBtn" class="p-2" aria-label="Next Month">
+        <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" viewBox="0 0 20 20" fill="currentColor">
+          <path fill-rule="evenodd"
+            d="M7.707 17.707a1 1 0 010-1.414L13.586 11H2a1 1 0 110-2h11.586l-5.879-5.879a1 1 0 011.414-1.414l7.586 7.586a1 1 0 010 1.414l-7.586 7.586a1 1 0 01-1.414 0z"
+            clip-rule="evenodd" />
+        </svg>
+      </button>
+    </section>
+    <section class="flex justify-between items-center mb-4">
+      <button id="addHabitBtn" class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded">+ New Habit</button>
+      <button id="toggleArchivedBtn" class="text-gray-600 dark:text-gray-300 hover:underline">Show Archived</button>
+    </section>
+    <div class="overflow-x-auto">
+      <table class="min-w-full table-border">
+        <thead class="bg-gray-50 dark:bg-gray-700">
+          <tr id="headerRow">
+            <th class="p-2 sticky-left" scope="col">Habits</th>
+            <!-- Day headers will be appended here dynamically -->
+          </tr>
+        </thead>
+        <tbody id="habitTableBody" class="bg-white dark:bg-gray-800"></tbody>
+      </table>
+    </div>
+  </main>
+  <div id="habitModal" class="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 hidden">
+    <div class="bg-white dark:bg-gray-800 rounded-lg w-96 p-4">
+      <h3 id="modalTitle" class="text-lg font-semibold mb-4">Add New Habit</h3>
+      <form id="habitForm">
+        <div class="mb-4">
+          <label for="habitName" class="block mb-1">Habit Name</label>
+          <input type="text" id="habitName" required class="w-full px-3 py-2 border rounded-md">
+        </div>
+        <div class="mb-4">
+          <label for="habitGoal" class="block mb-1">Monthly Goal</label>
+          <input type="number" id="habitGoal" min="1" required class="w-full px-3 py-2 border rounded-md">
+        </div>
+        <div class="flex justify-end">
+          <button type="button" id="cancelBtn" class="mr-2 px-4 py-2">Cancel</button>
+          <button type="submit" class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded">Save</button>
+        </div>
+      </form>
+    </div>
   </div>
-</header>
-<main class="max-w-7xl mx-auto p-4">
-  <section class="flex justify-center items-center mb-4">
-    <button id="prevMonthBtn" class="p-2" aria-label="Previous Month">
-      <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" viewBox="0 0 20 20" fill="currentColor">
-        <path fill-rule="evenodd"
-          d="M12.293 2.293a1 1 0 010 1.414L6.414 9.586H18a1 1 0 110 2H6.414l5.879 5.879a1 1 0 11-1.414 1.414l-7.586-7.586a1 1 0 010-1.414l7.586-7.586a1 1 0 011.414 0z"
-          clip-rule="evenodd" />
-      </svg>
-    </button>
-    <h2 id="currentMonthYear" class="mx-4 text-xl font-semibold"></h2>
-    <button id="nextMonthBtn" class="p-2" aria-label="Next Month">
-      <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" viewBox="0 0 20 20" fill="currentColor">
-        <path fill-rule="evenodd"
-          d="M7.707 17.707a1 1 0 010-1.414L13.586 11H2a1 1 0 110-2h11.586l-5.879-5.879a1 1 0 011.414-1.414l7.586 7.586a1 1 0 010 1.414l-7.586 7.586a1 1 0 01-1.414 0z"
-          clip-rule="evenodd" />
-      </svg>
-    </button>
-  </section>
-  <section class="flex justify-between items-center mb-4">
-    <button id="addHabitBtn" class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded">+ New Habit</button>
-    <button id="toggleArchivedBtn" class="text-gray-600 dark:text-gray-300 hover:underline">Show Archived</button>
-  </section>
-  <div class="overflow-x-auto">
-    <table class="min-w-full table-border">
-      <thead class="bg-gray-50 dark:bg-gray-700">
-        <tr>
-          <th class="p-2 sticky-left">Habits</th>
-          <!-- Removed Goal column -->
-          <!-- Updated days header with abbreviations -->
-          <th id="daysHeader" class="p-2 text-center" colspan="7"></th>
-          <!-- Removed Achieved column -->
-        </tr>
-        <tr>
-          <th class="p-2 sticky-left"></th>
-          <!-- Render day abbreviations -->
-          <th class="p-2 text-center day-column">S</th>
-          <th class="p-2 text-center day-column">M</th>
-          <th class="p-2 text-center day-column">T</th>
-          <th class="p-2 text-center day-column">W</th>
-          <th class="p-2 text-center day-column">T</th>
-          <th class="p-2 text-center day-column">F</th>
-          <th class="p-2 text-center day-column">S</th>
-        </tr>
-      </thead>
-      <tbody id="habitTableBody" class="bg-white dark:bg-gray-800"></tbody>
-    </table>
-  </div>
-</main>
-<div id="habitModal" class="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 hidden">
-  <div class="bg-white dark:bg-gray-800 rounded-lg w-96 p-4">
-    <h3 id="modalTitle" class="text-lg font-semibold mb-4">Add New Habit</h3>
-    <form id="habitForm">
-      <div class="mb-4">
-        <label for="habitName" class="block mb-1">Habit Name</label>
-        <input type="text" id="habitName" required class="w-full px-3 py-2 border rounded-md">
-      </div>
-      <div class="mb-4">
-        <label for="habitGoal" class="block mb-1">Monthly Goal</label>
-        <input type="number" id="habitGoal" min="1" required class="w-full px-3 py-2 border rounded-md">
-      </div>
-      <div class="flex justify-end">
-        <button type="button" id="cancelBtn" class="mr-2 px-4 py-2">Cancel</button>
-        <button type="submit" class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded">Save</button>
-      </div>
-    </form>
-  </div>
-</div>
-<script>
-let habits = JSON.parse(localStorage.getItem('habits')) || [];
-let isEditing = false, editingHabitId = null, showArchived = false;
-const habitTableBody = document.getElementById('habitTableBody');
-const habitModal = document.getElementById('habitModal');
-const addHabitBtn = document.getElementById('addHabitBtn');
-const cancelBtn = document.getElementById('cancelBtn');
-const habitForm = document.getElementById('habitForm');
-const modalTitle = document.getElementById('modalTitle');
-const darkModeToggle = document.getElementById('darkModeToggle');
-const currentMonthYear = document.getElementById('currentMonthYear');
-const prevMonthBtn = document.getElementById('prevMonthBtn');
-const nextMonthBtn = document.getElementById('nextMonthBtn');
-const toggleArchivedBtn = document.getElementById('toggleArchivedBtn');
-let currentDate = new Date(), currentMonth = currentDate.getMonth(), currentYear = currentDate.getFullYear();
-
-function getDaysInMonth(month, year) { return new Date(year, month + 1, 0).getDate(); }
-function getMonthName(month) { return new Date(currentYear, month).toLocaleString('default', { month: 'long' }); }
-
-function renderMonthYear() { currentMonthYear.textContent = `${getMonthName(currentMonth)}, ${currentYear}`; }
-
-function renderHabits() {
-  habitTableBody.innerHTML = '';
-  habits.forEach(habit => {
-    if (habit.archived && !showArchived) return;
-    const monthKey = `${currentYear}-${String(currentMonth + 1).padStart(2, '0')}`;
-    if (!habit.history) habit.history = {};
-    if (!habit.history[monthKey]) habit.history[monthKey] = { days: [] };
-    const habitData = habit.history[monthKey];
-    const tr = document.createElement('tr');
-    tr.draggable = true;
-    tr.dataset.id = habit.id;
-    tr.className = habit.archived ? 'opacity-50' : '';
+  <script>
+    let habits = JSON.parse(localStorage.getItem('habits')) || [];
+    let isEditing = false, editingHabitId = null, showArchived = false;
+    const habitTableBody = document.getElementById('habitTableBody');
+    const habitModal = document.getElementById('habitModal');
+    const addHabitBtn = document.getElementById('addHabitBtn');
+    const cancelBtn = document.getElementById('cancelBtn');
+    const habitForm = document.getElementById('habitForm');
+    const modalTitle = document.getElementById('modalTitle');
+    const darkModeToggle = document.getElementById('darkModeToggle');
+    const currentMonthYear = document.getElementById('currentMonthYear');
+    const prevMonthBtn = document.getElementById('prevMonthBtn');
+    const nextMonthBtn = document.getElementById('nextMonthBtn');
+    const toggleArchivedBtn = document.getElementById('toggleArchivedBtn');
+    const clearHabitsBtn = document.getElementById('clearHabitsBtn');
+    const headerRow = document.getElementById('headerRow');
+    let currentDate = new Date(), currentMonth = currentDate.getMonth(), currentYear = currentDate.getFullYear();
     
-    // Habit Name Cell
-    const nameTd = document.createElement('td');
-    nameTd.className = 'p-2 sticky-left';
-    nameTd.innerHTML = `<div class="flex items-center justify-between">
-      <span>${habit.name}</span>
-      <div class="flex space-x-1">
-        <button onclick="editHabit('${habit.id}')" class="text-blue-500" aria-label="Edit Habit">
-          <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path stroke-linecap="round"
-              stroke-linejoin="round" stroke-width="2"
-              d="M11 5H6a2 2 0 00-2 2v12a2 2 0 002 2h12a2 2 0 002-2v-5M18.5 2.5a2.121 2.121 0 113 3L12 15l-4 1 1-4 9.5-9.5z" />
-          </svg>
-        </button>
-        <button onclick="deleteHabit('${habit.id}')" class="text-red-500" aria-label="Delete Habit">
-          <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path stroke-linecap="round"
-              stroke-linejoin="round" stroke-width="2"
-              d="M6 18L18 6M6 6l12 12" />
-          </svg>
-        </button>
-        <button onclick="archiveHabit('${habit.id}')" class="text-yellow-500" aria-label="Archive Habit">
-          <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path stroke-linecap="round"
-              stroke-linejoin="round" stroke-width="2"
-              d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-          </svg>
-        </button>
-      </div>
-    </div>`;
-    tr.appendChild(nameTd);
+    function getDaysInMonth(month, year) { return new Date(year, month + 1, 0).getDate(); }
+    function getMonthName(month) { return new Date(currentYear, month).toLocaleString('default', { month: 'long' }); }
     
-    // Day Cells
-    const totalDays = getDaysInMonth(currentMonth, currentYear);
-    const firstDay = new Date(currentYear, currentMonth, 1).getDay(); // 0 (Sun) to 6 (Sat)
+    function renderMonthYear() { currentMonthYear.textContent = `${getMonthName(currentMonth)}, ${currentYear}`; }
     
-    // Create empty cells for days before the first of the month
-    for (let i = 0; i < firstDay; i++) {
-      const emptyTd = document.createElement('td');
-      emptyTd.className = 'p-2 day-column';
-      tr.appendChild(emptyTd);
-    }
-    
-    // Populate day cells
-    for (let day = 1; day <= totalDays; day++) {
-      const dayTd = document.createElement('td');
-      dayTd.className = 'p-2 text-center day-column cursor-pointer';
-      const completed = habitData.days.includes(day);
-      dayTd.innerHTML = completed ? '<span class="text-green-500">&#10003;</span>' : '';
-      dayTd.addEventListener('click', () => toggleDayCompletion(habit.id, day, dayTd));
-      tr.appendChild(dayTd);
-    }
-    
-    // Fill the remaining cells to complete the week
-    const remainingCells = 7 - ((firstDay + totalDays) % 7);
-    if (remainingCells < 7) {
-      for (let i = 0; i < remainingCells; i++) {
-        const emptyTd = document.createElement('td');
-        emptyTd.className = 'p-2 day-column';
-        tr.appendChild(emptyTd);
+    function renderDaysHeader() {
+      const totalDays = getDaysInMonth(currentMonth, currentYear);
+      
+      // Remove all existing day headers except the first "Habits" header
+      while (headerRow.children.length > 1) {
+        headerRow.removeChild(headerRow.lastChild);
+      }
+      
+      // Day Number Headers
+      for (let day = 1; day <= totalDays; day++) {
+        const dayTh = document.createElement('th');
+        dayTh.className = 'p-2 text-center day-column';
+        dayTh.textContent = day;
+        dayTh.scope = 'col';
+        
+        // Highlight today's column
+        const today = new Date();
+        if (day === today.getDate() && currentMonth === today.getMonth() && currentYear === today.getFullYear()) {
+          dayTh.classList.add('today-column');
+        }
+        
+        headerRow.appendChild(dayTh);
       }
     }
     
-    habitTableBody.appendChild(tr);
-  });
-}
-
-function toggleDayCompletion(habitId, day, td) {
-  const habit = habits.find(h => h.id === habitId);
-  if (!habit) return;
-  const monthKey = `${currentYear}-${String(currentMonth + 1).padStart(2, '0')}`;
-  const habitData = habit.history[monthKey];
-  if (habitData.days.includes(day)) {
-    habitData.days = habitData.days.filter(d => d !== day);
-    td.innerHTML = '';
-  } else {
-    habitData.days.push(day);
-    td.innerHTML = '<span class="text-green-500">&#10003;</span>';
-  }
-  saveHabits();
-}
-
-addHabitBtn.addEventListener('click', () => {
-  isEditing = false;
-  editingHabitId = null;
-  modalTitle.textContent = 'Add New Habit';
-  habitForm.reset();
-  habitModal.classList.remove('hidden');
-});
-
-cancelBtn.addEventListener('click', () => { habitModal.classList.add('hidden'); });
-
-habitForm.addEventListener('submit', e => {
-  e.preventDefault();
-  const name = document.getElementById('habitName').value.trim();
-  const goal = parseInt(document.getElementById('habitGoal').value);
-  if (isEditing) {
-    const habit = habits.find(h => h.id === editingHabitId);
-    if (habit) { 
-      habit.name = name; 
-      habit.goal = goal; 
+    function renderHabits() {
+      habitTableBody.innerHTML = '';
+      habits.forEach(habit => {
+        if (habit.archived && !showArchived) return;
+        const monthKey = `${currentYear}-${String(currentMonth + 1).padStart(2, '0')}`;
+        if (!habit.history) habit.history = {};
+        if (!habit.history[monthKey]) habit.history[monthKey] = { days: [] };
+        const habitData = habit.history[monthKey];
+        const tr = document.createElement('tr');
+        tr.draggable = true;
+        tr.dataset.id = habit.id;
+        tr.className = habit.archived ? 'opacity-50' : '';
+        
+        // Habit Name Cell
+        const nameTd = document.createElement('td');
+        nameTd.className = 'p-2 sticky-left';
+        nameTd.innerHTML = `<div class="flex items-center justify-between">
+          <span>${habit.name}</span>
+          <div class="flex space-x-1">
+            <button onclick="editHabit('${habit.id}')" class="text-blue-500" aria-label="Edit Habit">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round"
+                  stroke-linejoin="round" stroke-width="2"
+                  d="M11 5H6a2 2 0 00-2 2v12a2 2 0 002 2h12a2 2 0 002-2v-5M18.5 2.5a2.121 2.121 0 113 3L12 15l-4 1 1-4 9.5-9.5z" />
+              </svg>
+            </button>
+            <button onclick="deleteHabit('${habit.id}')" class="text-red-500" aria-label="Delete Habit">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round"
+                  stroke-linejoin="round" stroke-width="2"
+                  d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </button>
+            <button onclick="archiveHabit('${habit.id}')" class="text-yellow-500" aria-label="Archive Habit">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round"
+                  stroke-linejoin="round" stroke-width="2"
+                  d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+            </button>
+          </div>
+        </div>`;
+        tr.appendChild(nameTd);
+        
+        // Day Cells
+        const totalDays = getDaysInMonth(currentMonth, currentYear);
+        for (let day = 1; day <= totalDays; day++) {
+          const dayTd = document.createElement('td');
+          dayTd.className = 'p-2 text-center day-column cursor-pointer';
+          
+          // Highlight today's column
+          const today = new Date();
+          if (day === today.getDate() && currentMonth === today.getMonth() && currentYear === today.getFullYear()) {
+            dayTd.classList.add('today-column');
+          }
+          
+          const completed = habitData.days.includes(day);
+          dayTd.innerHTML = completed ? '<span class="text-green-500">&#10003;</span>' : '';
+          dayTd.addEventListener('click', () => toggleDayCompletion(habit.id, day, dayTd));
+          tr.appendChild(dayTd);
+        }
+        
+        habitTableBody.appendChild(tr);
+      });
     }
-  } else {
-    habits.push({ id: Date.now().toString(), name, goal, history: {} });
-  }
-  saveHabits();
-  renderHabits();
-  habitModal.classList.add('hidden');
-});
-
-function editHabit(id) {
-  const habit = habits.find(h => h.id === id);
-  if (!habit) return;
-  isEditing = true;
-  editingHabitId = id;
-  modalTitle.textContent = 'Edit Habit';
-  document.getElementById('habitName').value = habit.name;
-  document.getElementById('habitGoal').value = habit.goal;
-  habitModal.classList.remove('hidden');
-}
-
-function deleteHabit(id) {
-  if (confirm('Delete this habit?')) {
-    habits = habits.filter(h => h.id !== id);
-    saveHabits();
-    renderHabits();
-  }
-}
-
-function archiveHabit(id) {
-  const habit = habits.find(h => h.id === id);
-  if (habit) { 
-    habit.archived = !habit.archived; 
-    saveHabits(); 
-    renderHabits(); 
-  }
-}
-
-function saveHabits() { localStorage.setItem('habits', JSON.stringify(habits)); }
-
-darkModeToggle.addEventListener('click', () => {
-  document.documentElement.classList.toggle('dark');
-  localStorage.setItem('theme', document.documentElement.classList.contains('dark') ? 'dark' : 'light');
-});
-
-prevMonthBtn.addEventListener('click', () => {
-  currentMonth = currentMonth === 0 ? 11 : currentMonth - 1;
-  if (currentMonth === 11) currentYear--;
-  updateView();
-});
-
-nextMonthBtn.addEventListener('click', () => {
-  currentMonth = currentMonth === 11 ? 0 : currentMonth + 1;
-  if (currentMonth === 0) currentYear++;
-  updateView();
-});
-
-toggleArchivedBtn.addEventListener('click', () => {
-  showArchived = !showArchived;
-  toggleArchivedBtn.textContent = showArchived ? 'Hide Archived' : 'Show Archived';
-  renderHabits();
-});
-
-function updateView() {
-  renderMonthYear();
-  renderHabits();
-}
-
-window.addEventListener('DOMContentLoaded', () => {
-  if (localStorage.getItem('theme') === 'dark') document.documentElement.classList.add('dark');
-  updateView();
-});
-
-let draggedRow = null;
-habitTableBody.addEventListener('dragstart', e => {
-  const tr = e.target.closest('tr');
-  if (tr) { draggedRow = tr; tr.classList.add('dragging'); }
-});
-
-habitTableBody.addEventListener('dragend', e => {
-  const tr = e.target.closest('tr');
-  if (tr) tr.classList.remove('dragging');
-});
-
-habitTableBody.addEventListener('dragover', e => {
-  e.preventDefault();
-  const target = e.target.closest('tr');
-  if (target && target !== draggedRow) {
-    const rect = target.getBoundingClientRect();
-    const next = (e.clientY - rect.top) / (rect.bottom - rect.top) > 0.5;
-    habitTableBody.insertBefore(draggedRow, next && target.nextSibling || target);
-  }
-});
-
-habitTableBody.addEventListener('drop', () => {
-  const ids = Array.from(habitTableBody.children).map(row => row.dataset.id);
-  habits.sort((a, b) => ids.indexOf(a.id) - ids.indexOf(b.id));
-  saveHabits();
-});
-</script>
+    
+    function toggleDayCompletion(habitId, day, td) {
+      const habit = habits.find(h => h.id === habitId);
+      if (!habit) return;
+      const monthKey = `${currentYear}-${String(currentMonth + 1).padStart(2, '0')}`;
+      const habitData = habit.history[monthKey];
+      if (habitData.days.includes(day)) {
+        habitData.days = habitData.days.filter(d => d !== day);
+        td.innerHTML = '';
+      } else {
+        habitData.days.push(day);
+        td.innerHTML = '<span class="text-green-500">&#10003;</span>';
+      }
+      saveHabits();
+    }
+    
+    addHabitBtn.addEventListener('click', () => {
+      isEditing = false;
+      editingHabitId = null;
+      modalTitle.textContent = 'Add New Habit';
+      habitForm.reset();
+      habitModal.classList.remove('hidden');
+    });
+    
+    cancelBtn.addEventListener('click', () => { habitModal.classList.add('hidden'); });
+    
+    habitForm.addEventListener('submit', e => {
+      e.preventDefault();
+      const name = document.getElementById('habitName').value.trim();
+      const goal = parseInt(document.getElementById('habitGoal').value);
+      if (isEditing) {
+        const habit = habits.find(h => h.id === editingHabitId);
+        if (habit) { 
+          habit.name = name; 
+          habit.goal = goal; 
+        }
+      } else {
+        habits.push({ id: Date.now().toString(), name, goal, history: {} });
+      }
+      saveHabits();
+      renderHabits();
+      habitModal.classList.add('hidden');
+    });
+    
+    function editHabit(id) {
+      const habit = habits.find(h => h.id === id);
+      if (!habit) return;
+      isEditing = true;
+      editingHabitId = id;
+      modalTitle.textContent = 'Edit Habit';
+      document.getElementById('habitName').value = habit.name;
+      document.getElementById('habitGoal').value = habit.goal;
+      habitModal.classList.remove('hidden');
+    }
+    
+    function deleteHabit(id) {
+      if (confirm('Delete this habit?')) {
+        habits = habits.filter(h => h.id !== id);
+        saveHabits();
+        renderHabits();
+      }
+    }
+    
+    function archiveHabit(id) {
+      const habit = habits.find(h => h.id === id);
+      if (habit) { 
+        habit.archived = !habit.archived; 
+        saveHabits(); 
+        renderHabits(); 
+      }
+    }
+    
+    function clearAllHabits() {
+      if (confirm('Are you sure you want to clear all habits? This action cannot be undone.')) {
+        habits = [];
+        saveHabits();
+        renderHabits();
+      }
+    }
+    
+    function saveHabits() { localStorage.setItem('habits', JSON.stringify(habits)); }
+    
+    darkModeToggle.addEventListener('click', () => {
+      document.documentElement.classList.toggle('dark');
+      localStorage.setItem('theme', document.documentElement.classList.contains('dark') ? 'dark' : 'light');
+    });
+    
+    prevMonthBtn.addEventListener('click', () => {
+      currentMonth = currentMonth === 0 ? 11 : currentMonth - 1;
+      if (currentMonth === 11) currentYear--;
+      updateView();
+    });
+    
+    nextMonthBtn.addEventListener('click', () => {
+      currentMonth = currentMonth === 11 ? 0 : currentMonth + 1;
+      if (currentMonth === 0) currentYear++;
+      updateView();
+    });
+    
+    toggleArchivedBtn.addEventListener('click', () => {
+      showArchived = !showArchived;
+      toggleArchivedBtn.textContent = showArchived ? 'Hide Archived' : 'Show Archived';
+      renderHabits();
+    });
+    
+    clearHabitsBtn.addEventListener('click', clearAllHabits);
+    
+    function updateView() {
+      renderMonthYear();
+      renderDaysHeader();
+      renderHabits();
+    }
+    
+    window.addEventListener('DOMContentLoaded', () => {
+      if (localStorage.getItem('theme') === 'dark') document.documentElement.classList.add('dark');
+      updateView();
+    });
+    
+    let draggedRow = null;
+    habitTableBody.addEventListener('dragstart', e => {
+      const tr = e.target.closest('tr');
+      if (tr) { draggedRow = tr; tr.classList.add('dragging'); }
+    });
+    
+    habitTableBody.addEventListener('dragend', e => {
+      const tr = e.target.closest('tr');
+      if (tr) tr.classList.remove('dragging');
+    });
+    
+    habitTableBody.addEventListener('dragover', e => {
+      e.preventDefault();
+      const target = e.target.closest('tr');
+      if (target && target !== draggedRow) {
+        const rect = target.getBoundingClientRect();
+        const next = (e.clientY - rect.top) / (rect.bottom - rect.top) > 0.5;
+        habitTableBody.insertBefore(draggedRow, next && target.nextSibling || target);
+      }
+    });
+    
+    habitTableBody.addEventListener('drop', () => {
+      const ids = Array.from(habitTableBody.children).map(row => row.dataset.id);
+      habits.sort((a, b) => ids.indexOf(a.id) - ids.indexOf(b.id));
+      saveHabits();
+    });
+  </script>
 </body>
 </html>
