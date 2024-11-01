@@ -91,7 +91,7 @@
         <thead class="bg-gray-50 dark:bg-gray-700">
           <tr id="headerRow">
             <th class="p-2 sticky-left" scope="col">Habits</th>
-            <th class="p-2 sticky-left bg-gray-50 dark:bg-gray-700" scope="col">Streak</th>
+            <th class="p-2" scope="col">Streak</th>
             <!-- Day headers will be appended here dynamically -->
           </tr>
         </thead>
@@ -211,7 +211,7 @@
         
         // Add streak cell
         const streakTd = document.createElement('td');
-        streakTd.className = 'p-2 sticky-left bg-gray-50 dark:bg-gray-700 text-center';
+        streakTd.className = 'p-2 text-center';
         streakTd.textContent = `${streak} ${streak === 1 ? 'day' : 'days'}`;
         nameTd.innerHTML = `<div class="flex items-center justify-between">
           <span>${habit.name}</span>
