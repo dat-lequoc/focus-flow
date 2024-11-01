@@ -91,6 +91,7 @@
         <thead class="bg-gray-50 dark:bg-gray-700">
           <tr id="headerRow">
             <th class="p-2 sticky-left" scope="col">Habits</th>
+            <th class="p-2 sticky-left bg-gray-50 dark:bg-gray-700" scope="col">Streak</th>
             <!-- Day headers will be appended here dynamically -->
           </tr>
         </thead>
@@ -177,6 +178,29 @@
         if (!habit.history) habit.history = {};
         if (!habit.history[monthKey]) habit.history[monthKey] = { days: [] };
         const habitData = habit.history[monthKey];
+        
+        // Calculate current streak
+        const today = new Date();
+        let streak = 0;
+        let currentDate = new Date(currentYear, currentMonth, getDaysInMonth(currentMonth, currentYear));
+        
+        while (true) {
+          const checkMonth = `${currentDate.getFullYear()}-${String(currentDate.getMonth() + 1).padStart(2, '0')}`;
+          const checkDay = currentDate.getDate();
+          
+          if (!habit.history[checkMonth]?.days.includes(checkDay)) {
+            break;
+          }
+          
+          streak++;
+          currentDate.setDate(currentDate.getDate() - 1);
+          
+          // Stop if we're checking a future date
+          if (currentDate > today) {
+            streak = 0;
+            break;
+          }
+        }
         const tr = document.createElement('tr');
         tr.draggable = true;
         tr.dataset.id = habit.id;
@@ -184,6 +208,11 @@
         // Habit Name Cell
         const nameTd = document.createElement('td');
         nameTd.className = 'p-2 sticky-left';
+        
+        // Add streak cell
+        const streakTd = document.createElement('td');
+        streakTd.className = 'p-2 sticky-left bg-gray-50 dark:bg-gray-700 text-center';
+        streakTd.textContent = `${streak} ${streak === 1 ? 'day' : 'days'}`;
         nameTd.innerHTML = `<div class="flex items-center justify-between">
           <span>${habit.name}</span>
           <div class="flex space-x-1">
@@ -204,6 +233,7 @@
           </div>
         </div>`;
         tr.appendChild(nameTd);
+        tr.appendChild(streakTd);
         
         // Day Cells
         const totalDays = getDaysInMonth(currentMonth, currentYear);
