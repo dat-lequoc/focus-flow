@@ -4,6 +4,7 @@
   <meta charset="UTF-8">
   <title>DailyHabits Clone</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
+  <!-- Tailwind CSS CDN -->
   <script src="https://cdn.tailwindcss.com"></script>
   <script>
     tailwind.config = {
@@ -32,11 +33,20 @@
     .today-column {
       border: 2px solid #f59e0b; /* Amber-500 */
       background-color: #fef3c7; /* Light Amber Background */
+      color: #1f2937; /* Dark text for contrast */
     }
     /* Enhance hover effect for day cells */
     td.day-column:hover {
-      background-color: #f3f4f6; /* Gray-100 */
+      background-color: #e5e7eb; /* Darker Gray for better contrast */
       cursor: pointer;
+      color: #1f2937; /* Ensure text is dark on hover */
+    }
+    /* Adjust text color based on background */
+    .light-bg {
+      color: #1f2937; /* Dark text */
+    }
+    .dark-bg {
+      color: #f3f4f6; /* Light text */
     }
   </style>
 </head>
@@ -75,7 +85,6 @@
     </section>
     <section class="flex justify-between items-center mb-4">
       <button id="addHabitBtn" class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded">+ New Habit</button>
-      <button id="toggleArchivedBtn" class="text-gray-600 dark:text-gray-300 hover:underline">Show Archived</button>
     </section>
     <div class="overflow-x-auto">
       <table class="min-w-full table-border">
@@ -98,8 +107,8 @@
           <input type="text" id="habitName" required class="w-full px-3 py-2 border rounded-md">
         </div>
         <div class="mb-4">
-          <label for="habitGoal" class="block mb-1">Monthly Goal</label>
-          <input type="number" id="habitGoal" min="1" required class="w-full px-3 py-2 border rounded-md">
+          <label for="habitGoal" class="block mb-1">Monthly Goal (Optional)</label>
+          <input type="number" id="habitGoal" min="1" class="w-full px-3 py-2 border rounded-md">
         </div>
         <div class="flex justify-end">
           <button type="button" id="cancelBtn" class="mr-2 px-4 py-2">Cancel</button>
@@ -109,8 +118,9 @@
     </div>
   </div>
   <script>
+    // Initialize habits from localStorage or as an empty array
     let habits = JSON.parse(localStorage.getItem('habits')) || [];
-    let isEditing = false, editingHabitId = null, showArchived = false;
+    let isEditing = false, editingHabitId = null, showArchived = false; // Removed 'showArchived' as archived functionality is removed
     const habitTableBody = document.getElementById('habitTableBody');
     const habitModal = document.getElementById('habitModal');
     const addHabitBtn = document.getElementById('addHabitBtn');
@@ -121,16 +131,18 @@
     const currentMonthYear = document.getElementById('currentMonthYear');
     const prevMonthBtn = document.getElementById('prevMonthBtn');
     const nextMonthBtn = document.getElementById('nextMonthBtn');
-    const toggleArchivedBtn = document.getElementById('toggleArchivedBtn');
     const clearHabitsBtn = document.getElementById('clearHabitsBtn');
     const headerRow = document.getElementById('headerRow');
     let currentDate = new Date(), currentMonth = currentDate.getMonth(), currentYear = currentDate.getFullYear();
     
+    // Utility functions
     function getDaysInMonth(month, year) { return new Date(year, month + 1, 0).getDate(); }
     function getMonthName(month) { return new Date(currentYear, month).toLocaleString('default', { month: 'long' }); }
     
+    // Render current month and year
     function renderMonthYear() { currentMonthYear.textContent = `${getMonthName(currentMonth)}, ${currentYear}`; }
     
+    // Render day headers dynamically
     function renderDaysHeader() {
       const totalDays = getDaysInMonth(currentMonth, currentYear);
       
@@ -149,17 +161,18 @@
         // Highlight today's column
         const today = new Date();
         if (day === today.getDate() && currentMonth === today.getMonth() && currentYear === today.getFullYear()) {
-          dayTh.classList.add('today-column');
+          dayTh.classList.add('today-column', 'light-bg'); // Ensure text is dark on highlighted background
         }
         
         headerRow.appendChild(dayTh);
       }
     }
     
+    // Render all habits in the table
     function renderHabits() {
       habitTableBody.innerHTML = '';
       habits.forEach(habit => {
-        if (habit.archived && !showArchived) return;
+        // Removed archived check since archive functionality is removed
         const monthKey = `${currentYear}-${String(currentMonth + 1).padStart(2, '0')}`;
         if (!habit.history) habit.history = {};
         if (!habit.history[monthKey]) habit.history[monthKey] = { days: [] };
@@ -167,7 +180,6 @@
         const tr = document.createElement('tr');
         tr.draggable = true;
         tr.dataset.id = habit.id;
-        tr.className = habit.archived ? 'opacity-50' : '';
         
         // Habit Name Cell
         const nameTd = document.createElement('td');
@@ -189,13 +201,6 @@
                   d="M6 18L18 6M6 6l12 12" />
               </svg>
             </button>
-            <button onclick="archiveHabit('${habit.id}')" class="text-yellow-500" aria-label="Archive Habit">
-              <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round"
-                  stroke-linejoin="round" stroke-width="2"
-                  d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-              </svg>
-            </button>
           </div>
         </div>`;
         tr.appendChild(nameTd);
@@ -209,7 +214,7 @@
           // Highlight today's column
           const today = new Date();
           if (day === today.getDate() && currentMonth === today.getMonth() && currentYear === today.getFullYear()) {
-            dayTd.classList.add('today-column');
+            dayTd.classList.add('today-column', 'light-bg'); // Ensure text is dark on highlighted background
           }
           
           const completed = habitData.days.includes(day);
@@ -222,6 +227,7 @@
       });
     }
     
+    // Toggle completion status for a specific day
     function toggleDayCompletion(habitId, day, td) {
       const habit = habits.find(h => h.id === habitId);
       if (!habit) return;
@@ -237,6 +243,7 @@
       saveHabits();
     }
     
+    // Show the Add Habit Modal
     addHabitBtn.addEventListener('click', () => {
       isEditing = false;
       editingHabitId = null;
@@ -245,12 +252,15 @@
       habitModal.classList.remove('hidden');
     });
     
+    // Hide the Modal on Cancel
     cancelBtn.addEventListener('click', () => { habitModal.classList.add('hidden'); });
     
+    // Handle Form Submission for Adding/Editing Habits
     habitForm.addEventListener('submit', e => {
       e.preventDefault();
       const name = document.getElementById('habitName').value.trim();
-      const goal = parseInt(document.getElementById('habitGoal').value);
+      const goalInput = document.getElementById('habitGoal').value;
+      const goal = goalInput ? parseInt(goalInput) : null; // Make goal optional
       if (isEditing) {
         const habit = habits.find(h => h.id === editingHabitId);
         if (habit) { 
@@ -265,6 +275,7 @@
       habitModal.classList.add('hidden');
     });
     
+    // Edit an Existing Habit
     function editHabit(id) {
       const habit = habits.find(h => h.id === id);
       if (!habit) return;
@@ -272,10 +283,11 @@
       editingHabitId = id;
       modalTitle.textContent = 'Edit Habit';
       document.getElementById('habitName').value = habit.name;
-      document.getElementById('habitGoal').value = habit.goal;
+      document.getElementById('habitGoal').value = habit.goal || '';
       habitModal.classList.remove('hidden');
     }
     
+    // Delete a Habit
     function deleteHabit(id) {
       if (confirm('Delete this habit?')) {
         habits = habits.filter(h => h.id !== id);
@@ -284,15 +296,7 @@
       }
     }
     
-    function archiveHabit(id) {
-      const habit = habits.find(h => h.id === id);
-      if (habit) { 
-        habit.archived = !habit.archived; 
-        saveHabits(); 
-        renderHabits(); 
-      }
-    }
-    
+    // Clear All Habits
     function clearAllHabits() {
       if (confirm('Are you sure you want to clear all habits? This action cannot be undone.')) {
         habits = [];
@@ -301,44 +305,46 @@
       }
     }
     
+    // Save Habits to localStorage
     function saveHabits() { localStorage.setItem('habits', JSON.stringify(habits)); }
     
+    // Toggle Dark Mode
     darkModeToggle.addEventListener('click', () => {
       document.documentElement.classList.toggle('dark');
       localStorage.setItem('theme', document.documentElement.classList.contains('dark') ? 'dark' : 'light');
     });
     
+    // Navigate to Previous Month
     prevMonthBtn.addEventListener('click', () => {
       currentMonth = currentMonth === 0 ? 11 : currentMonth - 1;
       if (currentMonth === 11) currentYear--;
       updateView();
     });
     
+    // Navigate to Next Month
     nextMonthBtn.addEventListener('click', () => {
       currentMonth = currentMonth === 11 ? 0 : currentMonth + 1;
       if (currentMonth === 0) currentYear++;
       updateView();
     });
     
-    toggleArchivedBtn.addEventListener('click', () => {
-      showArchived = !showArchived;
-      toggleArchivedBtn.textContent = showArchived ? 'Hide Archived' : 'Show Archived';
-      renderHabits();
-    });
-    
+    // Clear All Habits Button
     clearHabitsBtn.addEventListener('click', clearAllHabits);
     
+    // Update the View (Month, Days, Habits)
     function updateView() {
       renderMonthYear();
       renderDaysHeader();
       renderHabits();
     }
     
+    // Initialize on Page Load
     window.addEventListener('DOMContentLoaded', () => {
       if (localStorage.getItem('theme') === 'dark') document.documentElement.classList.add('dark');
       updateView();
     });
     
+    // Drag and Drop Functionality for Reordering Habits
     let draggedRow = null;
     habitTableBody.addEventListener('dragstart', e => {
       const tr = e.target.closest('tr');
