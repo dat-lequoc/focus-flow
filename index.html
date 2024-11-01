@@ -1355,7 +1355,8 @@
             if (task.isExpanded) {
                 const subtasksDiv = document.createElement('div');
                 if (task.subtasks && task.subtasks.length > 0) {
-                    task.subtasks.forEach(subtask => {
+                    const filteredSubtasks = filterTasks(task.subtasks, searchTerm);
+                    filteredSubtasks.forEach(subtask => {
                         const subtaskElement = createTaskElement(subtask, level + 1);
                         subtasksDiv.appendChild(subtaskElement);
                     });
