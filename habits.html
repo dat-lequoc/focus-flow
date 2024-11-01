@@ -20,7 +20,17 @@
     }
   </script>
   <style>
-    .dragging { opacity: 0.5; }
+    .dragging { 
+      opacity: 0.5;
+      background-color: #e5e7eb;
+      cursor: move;
+    }
+    tr:not(.dragging):hover {
+      cursor: grab;
+    }
+    tr.drag-over {
+      border-top: 2px solid #3b82f6;
+    }
     .sticky-left { 
       position: sticky; 
       left: 0; 
@@ -406,14 +416,31 @@
     habitTableBody.addEventListener('dragend', e => {
       const tr = e.target.closest('tr');
       if (tr) tr.classList.remove('dragging');
+      // Remove drag-over class from all rows
+      Array.from(habitTableBody.children).forEach(row => {
+        row.classList.remove('drag-over');
+      });
     });
     
     habitTableBody.addEventListener('dragover', e => {
       e.preventDefault();
       const target = e.target.closest('tr');
       if (target && target !== draggedRow) {
+        // Remove drag-over class from all rows
+        Array.from(habitTableBody.children).forEach(row => {
+          row.classList.remove('drag-over');
+        });
+        
         const rect = target.getBoundingClientRect();
         const next = (e.clientY - rect.top) / (rect.bottom - rect.top) > 0.5;
+        
+        // Add drag-over class to show drop position
+        if (next) {
+          target.classList.add('drag-over');
+        } else {
+          target.classList.add('drag-over');
+        }
+        
         habitTableBody.insertBefore(draggedRow, next && target.nextSibling || target);
       }
     });
