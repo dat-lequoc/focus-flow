@@ -1025,7 +1025,13 @@
                                 </svg>
                             </button>
                         </div>
-                        <div id="today-tasks-container" class="space-y-3 max-h-[300px] overflow-y-auto"></div>
+                        <div id="today-tasks-container" class="space-y-3" style="max-height: 600px; overflow-y: auto; scrollbar-width: none; -ms-overflow-style: none;">
+                            <style>
+                                #today-tasks-container::-webkit-scrollbar {
+                                    display: none;
+                                }
+                            </style>
+                        </div>
                     </div>
                     <div class="p-6 bg-white rounded-lg shadow dark:bg-gray-800 dark:text-gray-200">
                         <div class="flex justify-between items-center mb-4">
@@ -1036,7 +1042,13 @@
                                 </svg>
                             </button>
                         </div>
-                        <div id="week-tasks-container" class="space-y-3 max-h-[300px] overflow-y-auto"></div>
+                        <div id="week-tasks-container" class="space-y-3" style="max-height: 600px; overflow-y: auto; scrollbar-width: none; -ms-overflow-style: none;">
+                            <style>
+                                #week-tasks-container::-webkit-scrollbar {
+                                    display: none;
+                                }
+                            </style>
+                        </div>
                         <div class="mt-6">
                             <h3 class="font-bold mb-2 text-lg">Weekly Activity</h3>
                             <div style="height: 400px;">
