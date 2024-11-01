@@ -417,6 +417,7 @@
 
         function initializeTaskProperties(task) {
             if (task.inToday === undefined) task.inToday = false;
+            if (task.inWeek === undefined) task.inWeek = false;
             if (task.dailyGoal === undefined) task.dailyGoal = 0;
             if (task.dailyProgress === undefined) task.dailyProgress = 0;
             if (task.isExpanded === undefined) task.isExpanded = false;
@@ -545,6 +546,14 @@
         }
 
         let currentTimeEntryTask = null;
+
+        function getWeekNumber(date) {
+            const d = new Date(date);
+            d.setHours(0, 0, 0, 0);
+            d.setDate(d.getDate() + 4 - (d.getDay() || 7));
+            const yearStart = new Date(d.getFullYear(), 0, 1);
+            return Math.ceil((((d - yearStart) / 86400000) + 1) / 7);
+        }
 
         function init() {
             loadInitialData();
@@ -978,7 +987,7 @@
             });
             const weekData = getWeeklyTimeData();
             dashboardView.innerHTML = `
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
                     <div class="p-6 bg-white rounded-lg shadow dark:bg-gray-800 dark:text-gray-200">
                         <h3 class="font-bold mb-2 text-lg">Weekly Activity</h3>
                         <div style="height: 600px;">
@@ -988,6 +997,17 @@
                     <div class="p-6 bg-white rounded-lg shadow dark:bg-gray-800 dark:text-gray-200">
                         <div class="flex justify-between items-center mb-4">
                             <h3 class="text-xl font-bold">Today's Tasks</h3>
+                            <button id="reset-today-btn" class="p-2 border rounded dark:border-gray-700 hover:bg-gray-100 dark:hover:bg-gray-700" title="Reset Today's Tasks">
+                                <svg class="h-5 w-5 text-gray-700 dark:text-gray-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                                </svg>
+                            </button>
+                        </div>
+                        <div id="today-tasks-container" class="space-y-3 max-h-[300px] overflow-y-auto"></div>
+                    </div>
+                    <div class="p-6 bg-white rounded-lg shadow dark:bg-gray-800 dark:text-gray-200">
+                        <div class="flex justify-between items-center mb-4">
+                            <h3 class="text-xl font-bold">This Week's Tasks</h3>
                             <button id="reset-today-btn" class="p-2 border rounded dark:border-gray-700 hover:bg-gray-100 dark:hover:bg-gray-700" title="Reset Today's Tasks">
                                 <svg class="h-5 w-5 text-gray-700 dark:text-gray-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
@@ -1306,7 +1326,27 @@
                     renderProjectList();
                 }
             });
+            const weekBtn = document.createElement('button');
+            weekBtn.className = 'p-1.5 border rounded-lg hover:bg-gray-100 transition-colors duration-200 dark:border-gray-700 dark:hover:bg-gray-700';
+            weekBtn.innerHTML = task.inWeek ? '📅' : '📆';
+            weekBtn.classList.toggle('bg-blue-100', task.inWeek);
+            weekBtn.title = task.inWeek ? 'Remove from Weekly Tasks' : 'Add to Weekly Tasks';
+            weekBtn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                e.preventDefault();
+                const originalTask = findTaskByIdGlobal(task.id);
+                if (originalTask) {
+                    originalTask.inWeek = !originalTask.inWeek;
+                    weekBtn.innerHTML = originalTask.inWeek ? '📅' : '📆';
+                    weekBtn.classList.toggle('bg-blue-100', originalTask.inWeek);
+                    saveData();
+                    renderTaskList();
+                    renderDashboard();
+                    renderProjectList();
+                }
+            });
             rightDiv.appendChild(todayBtn);
+            rightDiv.appendChild(weekBtn);
             const editBtn = document.createElement('button');
             editBtn.className = 'p-1.5 border rounded-lg hover:bg-gray-100 transition-colors duration-200 dark:border-gray-700 dark:hover:bg-gray-700';
             editBtn.innerHTML = `
