@@ -553,12 +553,35 @@
             setupEventListeners();
             setupTimeEntryModal();
 
-            // Handle page unload
-            window.addEventListener('beforeunload', () => {
-                if (currentPomodoroTask && pomodoroStartTime) {
-                    stopPomodoro();
+            // Load Pomodoro timer state from localStorage
+            const savedPomodoro = JSON.parse(localStorage.getItem('pomodoroTimerState'));
+            if (savedPomodoro && savedPomodoro.isPomodoroRunning && savedPomodoro.currentPomodoroTaskId) {
+                const task = findTaskByIdGlobal(savedPomodoro.currentPomodoroTaskId);
+                if (task) {
+                    currentPomodoroTask = task;
+                    isPomodoroCountUp = savedPomodoro.isPomodoroCountUp;
+                    pomodoroDuration = savedPomodoro.pomodoroDuration;
+                    pomodoroStartTime = savedPomodoro.pomodoroStartTime;
+                    isPomodoroRunning = true;
+                    document.getElementById('pomodoro-display').classList.remove('hidden');
+                    document.getElementById('current-task-title').textContent = task.title;
+                    updatePomodoroTimer();
+                    pomodoroTimer = setInterval(updatePomodoroTimer, 100);
+
+                    // Setup button handlers
+                    document.getElementById('stop-pomodoro').onclick = stopPomodoro;
+                    document.getElementById('pause-pomodoro').onclick = pausePomodoro;
+                    document.getElementById('resume-pomodoro').onclick = resumePomodoro;
+                    document.getElementById('toggle-count-mode').onclick = toggleCountMode;
+
+                    // Show pause button, hide resume
+                    document.getElementById('pause-pomodoro').classList.remove('hidden');
+                    document.getElementById('resume-pomodoro').classList.add('hidden');
+                } else {
+                    // If the task no longer exists, remove the saved state
+                    removePomodoroState();
                 }
-            });
+            }
 
             // Setup settings modal listeners
             document.getElementById('settings-btn').addEventListener('click', showSettings);
@@ -1167,6 +1190,7 @@
 
         function deleteTask(taskId) {
             removeTaskById(selectedProject.tasks, taskId);
+            savePomodoroState();
             saveData();
             renderTaskList();
         }
@@ -1460,6 +1484,7 @@
                 pomodoroTimer = null;
             }
             document.getElementById('pomodoro-display').classList.add('hidden');
+            removePomodoroState();
             saveData();
             renderTaskList();
             renderProjectList();
@@ -1487,6 +1512,10 @@
                     pomodoroComplete();
                 }
             }
+            // Save the current timer state
+            if (isPomodoroRunning) {
+                savePomodoroState();
+            }
         }
 
         function pausePomodoro() {
@@ -1496,6 +1525,7 @@
                 pomodoroPausedTime = Date.now();
                 document.getElementById('pause-pomodoro').classList.add('hidden');
                 document.getElementById('resume-pomodoro').classList.remove('hidden');
+                savePomodoroState();
             }
         }
 
@@ -1507,6 +1537,8 @@
                 pomodoroTimer = setInterval(updatePomodoroTimer, 100);
                 document.getElementById('pause-pomodoro').classList.remove('hidden');
                 document.getElementById('resume-pomodoro').classList.add('hidden');
+                pomodoroPausedTime = null;
+                savePomodoroState();
             }
         }
 
@@ -1517,6 +1549,7 @@
             // Use valid FontAwesome icons
             document.getElementById('toggle-count-mode').innerHTML =
                 `<i class="fas fa-${isPomodoroCountUp ? 'hourglass-start' : 'clock'}"></i>`;
+            savePomodoroState();
         }
 
         function toggleDarkMode() {
@@ -1590,6 +1623,21 @@
                 total += calculateTotalTime(task.subtasks);
             }
             return total;
+        }
+
+        function savePomodoroState() {
+            const state = {
+                currentPomodoroTaskId: currentPomodoroTask ? currentPomodoroTask.id : null,
+                pomodoroStartTime: pomodoroStartTime,
+                isPomodoroCountUp: isPomodoroCountUp,
+                pomodoroDuration: pomodoroDuration,
+                isPomodoroRunning: isPomodoroRunning
+            };
+            localStorage.setItem('pomodoroTimerState', JSON.stringify(state));
+        }
+
+        function removePomodoroState() {
+            localStorage.removeItem('pomodoroTimerState');
         }
 
         function formatTime(seconds) {
