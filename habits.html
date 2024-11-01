@@ -21,7 +21,20 @@
   </script>
   <style>
     .dragging { opacity: 0.5; }
-    .sticky-left { position: sticky; left: 0; background-color: inherit; z-index: 1; }
+    .sticky-left { 
+      position: sticky; 
+      left: 0; 
+      background-color: inherit; 
+      z-index: 1;
+      max-width: 200px; /* Limit width of habit name column */
+    }
+    .habit-name {
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      max-width: 150px; /* Leave space for edit/delete buttons */
+      display: inline-block;
+    }
     .table-border th, .table-border td { border: 1px solid #e5e7eb; }
     .dark .table-border th, .dark .table-border td { border-color: #374151; }
     /* Ensure day columns have fixed width */
@@ -212,7 +225,7 @@
         streakTd.textContent = `${streak} ${streak === 1 ? 'day' : 'days'}`;
         
         nameTd.innerHTML = `<div class="flex items-center justify-between">
-          <span>${habit.name}</span>
+          <span class="habit-name" title="${habit.name}">${habit.name}</span>
           <div class="flex space-x-1">
             <button onclick="editHabit('${habit.id}')" class="text-blue-500" aria-label="Edit Habit">
               <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
