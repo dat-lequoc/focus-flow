@@ -1015,13 +1015,7 @@
             });
             const weekData = getWeeklyTimeData();
             dashboardView.innerHTML = `
-                <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                    <div class="p-6 bg-white rounded-lg shadow dark:bg-gray-800 dark:text-gray-200">
-                        <h3 class="font-bold mb-2 text-lg">Weekly Activity</h3>
-                        <div style="height: 600px;">
-                            <canvas id="weeklyChart"></canvas>
-                        </div>
-                    </div>
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
                     <div class="p-6 bg-white rounded-lg shadow dark:bg-gray-800 dark:text-gray-200">
                         <div class="flex justify-between items-center mb-4">
                             <h3 class="text-xl font-bold">Today's Tasks</h3>
@@ -1052,6 +1046,12 @@
                             </button>
                         </div>
                         <div id="week-tasks-container" class="space-y-3 max-h-[300px] overflow-y-auto"></div>
+                        <div class="mt-6">
+                            <h3 class="font-bold mb-2 text-lg">Weekly Activity</h3>
+                            <div style="height: 400px;">
+                                <canvas id="weeklyChart"></canvas>
+                            </div>
+                        </div>
                     </div>
                 </div>
             `;
