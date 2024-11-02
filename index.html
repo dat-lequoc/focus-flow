@@ -1001,6 +1001,20 @@
             renderWeeklyChart();
         }
 
+        function countCompletedTodayTasks() {
+            let completedTasks = 0;
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
+            projects.forEach(project => {
+                traverseTasks(project.tasks, task => {
+                    if (task.inToday && (task.isCompleted || (task.dailyGoal > 0 && task.dailyProgress >= task.dailyGoal))) {
+                        completedTasks++;
+                    }
+                });
+            });
+            return completedTasks;
+        }
+
         function renderDashboard() {
             const dashboardView = document.getElementById('dashboard-view');
             let totalProjects = projects.length;
@@ -1070,6 +1084,10 @@
                             <div class="p-4 bg-gradient-to-r from-green-500 to-green-600 rounded-lg shadow-lg">
                                 <div class="text-white text-sm mb-1">Today's Total Time</div>
                                 <div class="text-white text-2xl font-bold">${formatTime(todayTimeSpent)}</div>
+                            </div>
+                            <div class="p-4 bg-gradient-to-r from-green-500 to-green-600 rounded-lg shadow-lg mt-4">
+                                <div class="text-white text-sm mb-1">Tasks Completed Today</div>
+                                <div class="text-white text-2xl font-bold">${countCompletedTodayTasks()}</div>
                             </div>
                         </div>
                     </div>
