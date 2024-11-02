@@ -1004,10 +1004,23 @@
         function countCompletedTodayTasks() {
             let completedTasks = 0;
             const todayTasks = getTodayTasks();
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
+            
             todayTasks.forEach(task => {
-                if (task.isCompleted || (task.dailyGoal > 0 && task.dailyProgress >= task.dailyGoal)) {
+                let todayTimeSpent = 0;
+                if (task.timeEntries) {
+                    task.timeEntries.forEach(entry => {
+                        const entryDate = new Date(entry.start);
+                        if (entryDate >= today) {
+                            todayTimeSpent += entry.duration;
+                        }
+                    });
+                }
+                const dailyProgress = Math.floor(todayTimeSpent / 60 / pomodoroDuration);
+                
+                if (task.isCompleted || (task.dailyGoal > 0 && dailyProgress >= task.dailyGoal)) {
                     completedTasks++;
-                    console.log(task);
                 }
             });
             return completedTasks;
