@@ -1007,6 +1007,7 @@
             todayTasks.forEach(task => {
                 if (task.isCompleted || (task.dailyGoal > 0 && task.dailyProgress >= task.dailyGoal)) {
                     completedTasks++;
+                    console.log(task);
                 }
             });
             return completedTasks;
