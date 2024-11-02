@@ -437,6 +437,30 @@
             return Math.random().toString(36).substr(2, 9);
         }
 
+        function getTimeWindowData(daysWindow) {
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
+            const startDate = new Date(today);
+            startDate.setDate(startDate.getDate() - daysWindow + 1);
+            let totalTime = 0;
+
+            projects.forEach(project => {
+                const processTask = (task) => {
+                    if (task.timeEntries) {
+                        task.timeEntries.forEach(entry => {
+                            const entryDate = new Date(entry.start);
+                            if (entryDate >= startDate && entryDate <= today) {
+                                totalTime += entry.duration;
+                            }
+                        });
+                    }
+                    task.subtasks.forEach(processTask);
+                };
+                project.tasks.forEach(processTask);
+            });
+            return totalTime;
+        }
+
         function getWeeklyTimeData() {
             const today = new Date();
             today.setHours(0, 0, 0, 0);
@@ -473,6 +497,13 @@
         function renderWeeklyChart() {
             const ctx = document.getElementById('weeklyChart');
             if (!ctx) return;
+            
+            // Calculate and display time window totals
+            const weekTotal = getTimeWindowData(7);
+            const monthTotal = getTimeWindowData(30);
+            document.getElementById('week-total').textContent = formatTime(weekTotal);
+            document.getElementById('month-total').textContent = formatTime(monthTotal);
+            
             const weekData = getWeeklyTimeData();
             const labels = weekData.map(d => d.date.toLocaleDateString('en-US', { weekday: 'short' }));
             const data = weekData.map(d => (d.timeSpent / 3600).toFixed(2));
