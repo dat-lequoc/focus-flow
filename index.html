@@ -1003,14 +1003,11 @@
 
         function countCompletedTodayTasks() {
             let completedTasks = 0;
-            const today = new Date();
-            today.setHours(0, 0, 0, 0);
-            projects.forEach(project => {
-                traverseTasks(project.tasks, task => {
-                    if (task.inToday && (task.isCompleted || (task.dailyGoal > 0 && task.dailyProgress >= task.dailyGoal))) {
-                        completedTasks++;
-                    }
-                });
+            const todayTasks = getTodayTasks();
+            todayTasks.forEach(task => {
+                if (task.isCompleted || (task.dailyGoal > 0 && task.dailyProgress >= task.dailyGoal)) {
+                    completedTasks++;
+                }
             });
             return completedTasks;
         }
