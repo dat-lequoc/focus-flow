@@ -83,6 +83,19 @@
       <a href="index.html" class="ml-4 text-blue-500 hover:underline">Focus Flow</a>
     </div>
     <div class="flex items-center space-x-4">
+      <button id="exportHabitsBtn" class="p-2 border rounded dark:border-gray-700" title="Export Data">
+        <svg class="h-5 w-5 text-gray-700 dark:text-gray-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+            d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+        </svg>
+      </button>
+      <button id="importHabitsBtn" class="p-2 border rounded dark:border-gray-700" title="Import Data">
+        <svg class="h-5 w-5 text-gray-700 dark:text-gray-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+            d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L7 8m4-4v12" />
+        </svg>
+      </button>
+      <input type="file" id="importHabitsFile" accept=".json" class="hidden">
       <button id="darkModeToggle" class="focus:outline-none" aria-label="Toggle Dark Mode">
         <svg id="themeIcon" class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path id="sunIcon" class="dark:hidden" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -420,7 +433,56 @@
       updateView();
     });
     
-    // Clear All Habits Button
+    // Export habits data
+    function exportHabits() {
+      const data = JSON.stringify(habits, null, 2);
+      const blob = new Blob([data], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `daily-habits-backup-${new Date().toISOString().split('T')[0]}.json`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    }
+
+    // Import habits data
+    function importHabits(file) {
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        try {
+          const importedData = JSON.parse(e.target.result);
+          if (Array.isArray(importedData)) {
+            if (confirm('This will replace all existing habits. Are you sure?')) {
+              habits = importedData;
+              saveHabits();
+              updateView();
+              alert('Habits imported successfully!');
+            }
+          } else {
+            alert('Invalid data format');
+          }
+        } catch (error) {
+          alert('Error importing data: ' + error.message);
+        }
+      };
+      reader.readAsText(file);
+    }
+
+    // Export/Import Buttons
+    document.getElementById('exportHabitsBtn').addEventListener('click', exportHabits);
+    document.getElementById('importHabitsBtn').addEventListener('click', () => {
+      document.getElementById('importHabitsFile').click();
+    });
+    document.getElementById('importHabitsFile').addEventListener('change', (e) => {
+      if (e.target.files.length > 0) {
+        importHabits(e.target.files[0]);
+        e.target.value = ''; // Reset file input
+      }
+    });
+
+    // Clear All Habits Button  
     clearHabitsBtn.addEventListener('click', clearAllHabits);
     
     // Update the View (Month, Days, Habits)
