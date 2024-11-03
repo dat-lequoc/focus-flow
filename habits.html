@@ -4,7 +4,6 @@
   <meta charset="UTF-8">
   <title>Daily Habits</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <!-- Tailwind CSS CDN -->
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
   <script>
@@ -13,11 +12,11 @@
       theme: { 
         extend: {
           width: {
-            'day': '40px', /* Fixed width for day columns */
-          },
-        },
+            'day': '40px'
+          }
+        }
       },
-      plugins: [],
+      plugins: []
     }
   </script>
   <style>
@@ -37,56 +36,45 @@
       left: 0; 
       background-color: inherit; 
       z-index: 1;
-      max-width: 200px; /* Limit width of habit name column */
+      max-width: 200px;
     }
     .habit-name {
       white-space: nowrap;
       overflow: hidden;
       text-overflow: ellipsis;
-      max-width: 200px; /* Full width when buttons are hidden */
+      max-width: 200px;
       display: inline-block;
     }
     .table-border th, .table-border td { border: 1px solid #e5e7eb; }
     .dark .table-border th, .dark .table-border td { border-color: #374151; }
-    /* Ensure day columns have fixed width */
     .day-column {
       width: 40px;
       text-align: center;
     }
-    /* Highlight today's column */
     .today-column {
-      border: 2px solid #f59e0b; /* Amber-500 */
-      background-color: #fef3c7; /* Light Amber Background */
-      color: #1f2937; /* Dark text for contrast */
+      border: 2px solid #f59e0b;
+      background-color: #fef3c7;
+      color: #1f2937;
     }
-    /* Enhance hover effect for day cells */
     td.day-column:hover {
-      background-color: #e5e7eb; /* Darker Gray for better contrast */
+      background-color: #e5e7eb;
       cursor: pointer;
-      color: #1f2937; /* Ensure text is dark on hover */
+      color: #1f2937;
     }
-    /* Adjust text color based on background */
     .light-bg {
-      color: #1f2937; /* Dark text */
+      color: #1f2937;
     }
     .dark-bg {
-      color: #f3f4f6; /* Light text */
+      color: #f3f4f6;
     }
     .status-failed {
-      color: #ef4444; /* Red-500 */
+      color: #ef4444;
     }
-    /* Highlight entire row on hover */
     tr:hover {
-      background-color: rgba(229, 231, 235, 0.2); /* Light gray with transparency */
+      background-color: rgba(229, 231, 235, 0.2);
     }
     .dark tr:hover {
-      background-color: rgba(75, 85, 99, 0.2); /* Dark gray with transparency */
-    }
-    .dropdown-content {
-      background-color: white;
-    }
-    .dark .dropdown-content {
-      background-color: #1f2937;
+      background-color: rgba(75, 85, 99, 0.2);
     }
   </style>
 </head>
@@ -148,7 +136,6 @@
           <tr id="headerRow">
             <th class="p-2 sticky-left" scope="col">Habits</th>
             <th class="p-2 text-center" scope="col">Streak</th>
-            <!-- Day headers will be appended here dynamically -->
           </tr>
         </thead>
         <tbody id="habitTableBody" class="bg-white dark:bg-gray-800"></tbody>
@@ -171,11 +158,11 @@
           <button type="button" id="cancelBtn" class="mr-2 px-4 py-2">Cancel</button>
           <button type="submit" class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded">Save</button>
         </div>
+        <button type="button" id="deleteBtn" class="mt-4 w-full bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded hidden">Delete</button>
       </form>
     </div>
   </div>
   <script>
-    // Initialize habits from localStorage or as an empty array
     let habits = JSON.parse(localStorage.getItem('habits')) || [];
     let isEditing = false, editingHabitId = null;
     const habitTableBody = document.getElementById('habitTableBody');
@@ -184,6 +171,7 @@
     const cancelBtn = document.getElementById('cancelBtn');
     const habitForm = document.getElementById('habitForm');
     const modalTitle = document.getElementById('modalTitle');
+    const deleteBtn = document.getElementById('deleteBtn');
     const darkModeToggle = document.getElementById('darkModeToggle');
     const currentMonthYear = document.getElementById('currentMonthYear');
     const prevMonthBtn = document.getElementById('prevMonthBtn');
@@ -192,49 +180,35 @@
     const headerRow = document.getElementById('headerRow');
     let currentDate = new Date(), currentMonth = currentDate.getMonth(), currentYear = currentDate.getFullYear();
     
-    // Utility functions
     function getDaysInMonth(month, year) { return new Date(year, month + 1, 0).getDate(); }
     function getMonthName(month) { return new Date(currentYear, month).toLocaleString('default', { month: 'long' }); }
-    
-    // Render current month and year
     function renderMonthYear() { currentMonthYear.textContent = `${getMonthName(currentMonth)}, ${currentYear}`; }
     
-    // Render day headers dynamically
     function renderDaysHeader() {
       const totalDays = getDaysInMonth(currentMonth, currentYear);
-      
-      // Remove all existing day headers except the first two ("Habits" and "Streak")
       while (headerRow.children.length > 2) {
         headerRow.removeChild(headerRow.lastChild);
       }
-      
-      // Day Number Headers
       for (let day = 1; day <= totalDays; day++) {
         const dayTh = document.createElement('th');
         dayTh.className = 'p-2 text-center day-column';
         dayTh.textContent = day;
         dayTh.scope = 'col';
-        
-        // Highlight today's column
         const today = new Date();
         if (day === today.getDate() && currentMonth === today.getMonth() && currentYear === today.getFullYear()) {
-          dayTh.classList.add('today-column', 'light-bg'); // Ensure text is dark on highlighted background
+          dayTh.classList.add('today-column', 'light-bg');
         }
-        
         headerRow.appendChild(dayTh);
       }
     }
     
-    // Calculate streak for a habit
     function calculateStreak(habit) {
       let streak = 0;
       const today = new Date();
       let dateIterator = new Date(today.getFullYear(), today.getMonth(), today.getDate());
-      
       while (true) {
         const monthKey = `${dateIterator.getFullYear()}-${String(dateIterator.getMonth() + 1).padStart(2, '0')}`;
         const day = dateIterator.getDate();
-        
         if (habit.history[monthKey]?.days.includes(day)) {
           streak++;
           dateIterator.setDate(dateIterator.getDate() - 1);
@@ -242,104 +216,53 @@
           break;
         }
       }
-      
       return streak;
     }
     
-    // Render all habits in the table
     function renderHabits() {
       habitTableBody.innerHTML = '';
       habits.forEach(habit => {
         const tr = document.createElement('tr');
         tr.draggable = true;
         tr.dataset.id = habit.id;
-        
-        // Habit Name Cell
         const nameTd = document.createElement('td');
         nameTd.className = 'p-2 sticky-left';
-        
-        // Add streak cell
         const streakTd = document.createElement('td');
         streakTd.className = 'p-2 text-center';
         const streak = calculateStreak(habit);
         streakTd.textContent = `${streak} ${streak === 1 ? 'day' : 'days'}`;
-        
         const habitContainer = document.createElement('div');
         habitContainer.className = 'flex items-center justify-between';
-        
         const nameSpan = document.createElement('span');
         nameSpan.className = 'habit-name';
         nameSpan.title = habit.name;
         nameSpan.textContent = habit.name;
-        
         const menuBtn = document.createElement('button');
         menuBtn.className = 'p-1 hover:bg-gray-100 rounded dark:hover:bg-gray-700 ml-2';
         menuBtn.innerHTML = `<i class="fas fa-ellipsis-v text-gray-700 dark:text-gray-200"></i>`;
-        
-        const dropdownDiv = document.createElement('div');
-        dropdownDiv.className = 'dropdown-content absolute right-0 mt-1 w-32 bg-white border rounded shadow-lg hidden z-10 dark:bg-gray-800 dark:border-gray-700';
-        
-        const editBtn = document.createElement('button');
-        editBtn.innerHTML = 'Edit';
-        editBtn.className = 'w-full text-left px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-700';
-        editBtn.onclick = (e) => {
-            e.stopPropagation();
-            dropdownDiv.classList.add('hidden');
-            editHabit(habit.id);
-        };
-        
-        const deleteBtn = document.createElement('button');
-        deleteBtn.innerHTML = 'Delete';
-        deleteBtn.className = 'w-full text-left px-4 py-2 hover:bg-gray-100 text-red-500 dark:hover:bg-gray-700';
-        deleteBtn.onclick = (e) => {
-            e.stopPropagation();
-            dropdownDiv.classList.add('hidden');
-            deleteHabit(habit.id);
-        };
-        
-        dropdownDiv.appendChild(editBtn);
-        dropdownDiv.appendChild(deleteBtn);
-        
-        const menuDiv = document.createElement('div');
-        menuDiv.className = 'relative';
-        menuDiv.appendChild(menuBtn);
-        menuDiv.appendChild(dropdownDiv);
-        
         menuBtn.addEventListener('click', (e) => {
-            e.stopPropagation();
-            const dropdown = menuBtn.nextElementSibling;
-            document.querySelectorAll('.dropdown-content').forEach(d => {
-                if (d !== dropdown) d.classList.add('hidden');
-            });
-            dropdown.classList.toggle('hidden');
+          e.stopPropagation();
+          isEditing = true;
+          editingHabitId = habit.id;
+          modalTitle.textContent = 'Edit Habit';
+          document.getElementById('habitName').value = habit.name;
+          document.getElementById('habitGoal').value = habit.goal || '';
+          deleteBtn.classList.remove('hidden');
+          habitModal.classList.remove('hidden');
         });
-        
         habitContainer.appendChild(nameSpan);
-        habitContainer.appendChild(menuDiv);
-
-        // Add click handler to close dropdowns when clicking outside
-        document.addEventListener('click', () => {
-            document.querySelectorAll('.dropdown-content').forEach(d => {
-                d.classList.add('hidden');
-            });
-        });
-        
+        habitContainer.appendChild(menuBtn);
         nameTd.appendChild(habitContainer);
         tr.appendChild(nameTd);
         tr.appendChild(streakTd);
-        
-        // Day Cells
         const totalDays = getDaysInMonth(currentMonth, currentYear);
         for (let day = 1; day <= totalDays; day++) {
           const dayTd = document.createElement('td');
           dayTd.className = 'p-2 text-center day-column cursor-pointer';
-          
-          // Highlight today's column
           const today = new Date();
           if (day === today.getDate() && currentMonth === today.getMonth() && currentYear === today.getFullYear()) {
-            dayTd.classList.add('today-column', 'light-bg'); // Ensure text is dark on highlighted background
+            dayTd.classList.add('today-column', 'light-bg');
           }
-          
           const monthKey = `${currentYear}-${String(currentMonth + 1).padStart(2, '0')}`;
           const status = habit.history[monthKey]?.status?.[day] || 'none';
           let statusHtml = '';
@@ -352,16 +275,13 @@
           dayTd.addEventListener('click', () => toggleDayCompletion(habit.id, day, dayTd));
           tr.appendChild(dayTd);
         }
-        
         habitTableBody.appendChild(tr);
       });
     }
     
-    // Toggle completion status for a specific day
     function toggleDayCompletion(habitId, day, td) {
       const habit = habits.find(h => h.id === habitId);
       if (!habit) return;
-      
       const monthKey = `${currentYear}-${String(currentMonth + 1).padStart(2, '0')}`;
       if (!habit.history[monthKey]) {
         habit.history[monthKey] = { days: [], status: {} };
@@ -369,11 +289,8 @@
       if (!habit.history[monthKey].status) {
         habit.history[monthKey].status = {};
       }
-      
       const currentStatus = habit.history[monthKey].status[day] || 'none';
       let newStatus;
-      
-      // Cycle through states: none -> completed -> failed -> none
       switch (currentStatus) {
         case 'none':
           newStatus = 'completed';
@@ -390,30 +307,27 @@
           td.innerHTML = '';
           break;
       }
-      
       habit.history[monthKey].status[day] = newStatus;
       saveHabits();
-      renderHabits(); // Re-render to update streaks
+      renderHabits();
     }
     
-    // Show the Add Habit Modal
     addHabitBtn.addEventListener('click', () => {
       isEditing = false;
       editingHabitId = null;
       modalTitle.textContent = 'Add New Habit';
       habitForm.reset();
+      deleteBtn.classList.add('hidden');
       habitModal.classList.remove('hidden');
     });
     
-    // Hide the Modal on Cancel
     cancelBtn.addEventListener('click', () => { habitModal.classList.add('hidden'); });
     
-    // Handle Form Submission for Adding/Editing Habits
     habitForm.addEventListener('submit', e => {
       e.preventDefault();
       const name = document.getElementById('habitName').value.trim();
       const goalInput = document.getElementById('habitGoal').value;
-      const goal = goalInput ? parseInt(goalInput) : null; // Make goal optional
+      const goal = goalInput ? parseInt(goalInput) : null;
       if (isEditing) {
         const habit = habits.find(h => h.id === editingHabitId);
         if (habit) { 
@@ -428,7 +342,15 @@
       habitModal.classList.add('hidden');
     });
     
-    // Edit an Existing Habit
+    deleteBtn.addEventListener('click', () => {
+      if (confirm('Delete this habit?')) {
+        habits = habits.filter(h => h.id !== editingHabitId);
+        saveHabits();
+        renderHabits();
+        habitModal.classList.add('hidden');
+      }
+    });
+    
     function editHabit(id) {
       const habit = habits.find(h => h.id === id);
       if (!habit) return;
@@ -437,10 +359,10 @@
       modalTitle.textContent = 'Edit Habit';
       document.getElementById('habitName').value = habit.name;
       document.getElementById('habitGoal').value = habit.goal || '';
+      deleteBtn.classList.remove('hidden');
       habitModal.classList.remove('hidden');
     }
     
-    // Delete a Habit
     function deleteHabit(id) {
       if (confirm('Delete this habit?')) {
         habits = habits.filter(h => h.id !== id);
@@ -449,7 +371,6 @@
       }
     }
     
-    // Clear All Habits
     function clearAllHabits() {
       if (confirm('Are you sure you want to clear all habits? This action cannot be undone.')) {
         habits = [];
@@ -458,16 +379,13 @@
       }
     }
     
-    // Save Habits to localStorage
     function saveHabits() { localStorage.setItem('habits', JSON.stringify(habits)); }
     
-    // Toggle Dark Mode
     darkModeToggle.addEventListener('click', () => {
       document.documentElement.classList.toggle('dark');
       localStorage.setItem('theme', document.documentElement.classList.contains('dark') ? 'dark' : 'light');
     });
     
-    // Navigate to Previous Month
     prevMonthBtn.addEventListener('click', () => {
       if (currentMonth === 0) {
         currentMonth = 11;
@@ -478,7 +396,6 @@
       updateView();
     });
     
-    // Navigate to Next Month
     nextMonthBtn.addEventListener('click', () => {
       if (currentMonth === 11) {
         currentMonth = 0;
@@ -489,7 +406,6 @@
       updateView();
     });
     
-    // Export habits data
     function exportHabits() {
       const data = JSON.stringify(habits, null, 2);
       const blob = new Blob([data], { type: 'application/json' });
@@ -502,8 +418,7 @@
       document.body.removeChild(a);
       URL.revokeObjectURL(url);
     }
-
-    // Import habits data
+  
     function importHabits(file) {
       const reader = new FileReader();
       reader.onload = function(e) {
@@ -525,8 +440,7 @@
       };
       reader.readAsText(file);
     }
-
-    // Export/Import Buttons
+  
     document.getElementById('exportHabitsBtn').addEventListener('click', exportHabits);
     document.getElementById('importHabitsBtn').addEventListener('click', () => {
       document.getElementById('importHabitsFile').click();
@@ -534,27 +448,23 @@
     document.getElementById('importHabitsFile').addEventListener('change', (e) => {
       if (e.target.files.length > 0) {
         importHabits(e.target.files[0]);
-        e.target.value = ''; // Reset file input
+        e.target.value = '';
       }
     });
-
-    // Clear All Habits Button  
+  
     clearHabitsBtn.addEventListener('click', clearAllHabits);
     
-    // Update the View (Month, Days, Habits)
     function updateView() {
       renderMonthYear();
       renderDaysHeader();
       renderHabits();
     }
     
-    // Initialize on Page Load
     window.addEventListener('DOMContentLoaded', () => {
       if (localStorage.getItem('theme') === 'dark') document.documentElement.classList.add('dark');
       updateView();
     });
     
-    // Drag and Drop Functionality for Reordering Habits
     let draggedRow = null;
     habitTableBody.addEventListener('dragstart', e => {
       const tr = e.target.closest('tr');
@@ -564,7 +474,6 @@
     habitTableBody.addEventListener('dragend', e => {
       const tr = e.target.closest('tr');
       if (tr) tr.classList.remove('dragging');
-      // Remove drag-over class from all rows
       Array.from(habitTableBody.children).forEach(row => {
         row.classList.remove('drag-over');
       });
@@ -574,21 +483,12 @@
       e.preventDefault();
       const target = e.target.closest('tr');
       if (target && target !== draggedRow) {
-        // Remove drag-over class from all rows
         Array.from(habitTableBody.children).forEach(row => {
           row.classList.remove('drag-over');
         });
-        
         const rect = target.getBoundingClientRect();
         const next = (e.clientY - rect.top) / (rect.bottom - rect.top) > 0.5;
-        
-        // Add drag-over class to show drop position
-        if (next) {
-          target.classList.add('drag-over');
-        } else {
-          target.classList.add('drag-over');
-        }
-        
+        target.classList.add('drag-over');
         habitTableBody.insertBefore(draggedRow, next && target.nextSibling || target);
       }
     });
