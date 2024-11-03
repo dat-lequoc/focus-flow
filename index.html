@@ -28,9 +28,6 @@
                 <a href="habits.html" class="mb-2 block text-blue-500 hover:underline">Habits</a>
                 <input id="new-project-name" type="text" placeholder="New project name"
                     class="mb-2 p-2 border rounded-lg w-full focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200 dark:placeholder-gray-400">
-                <button id="add-project-btn"
-                    class="w-full bg-blue-500 hover:bg-blue-600 text-white p-2 rounded-lg shadow-sm transition-all duration-200">Add
-                    Project</button>
             </div>
         </div>
 
@@ -731,7 +728,6 @@
                 }
             });
             // Removed the 'reset-today-btn' listener from here
-            document.getElementById('add-project-btn').addEventListener('click', addProject);
             document.getElementById('new-project-name').addEventListener('keypress', (e) => {
                 if (e.key === 'Enter') {
                     addProject();
@@ -865,21 +861,6 @@
             }
         }
 
-        function addProject() {
-            const projectNameInput = document.getElementById('new-project-name');
-            const name = projectNameInput.value.trim();
-            if (name) {
-                const newProject = {
-                    id: generateId(),
-                    name: name,
-                    tasks: []
-                };
-                projects.push(newProject);
-                saveData();
-                renderProjectList();
-                projectNameInput.value = '';
-            }
-        }
 
         function renderProjectList() {
             const projectList = document.getElementById('project-list');
