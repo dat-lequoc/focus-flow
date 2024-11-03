@@ -6,6 +6,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <script>
     tailwind.config = {
       darkMode: 'class',
@@ -141,6 +142,10 @@
         <tbody id="habitTableBody" class="bg-white dark:bg-gray-800"></tbody>
       </table>
     </div>
+    <!-- Stats Section -->
+    <div id="statsSection" class="mt-6">
+      <!-- Stats content will be injected here -->
+    </div>
   </main>
   <div id="habitModal" class="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 hidden">
     <div class="bg-white dark:bg-gray-800 rounded-lg w-[32rem] p-6">
@@ -176,6 +181,7 @@
     let habits = JSON.parse(localStorage.getItem('habits')) || [];
     let isEditing = false;
     let editingHabitId = null;
+    let chartInstance = null;
 
     const habitTableBody = document.getElementById('habitTableBody');
     const habitModal = document.getElementById('habitModal');
@@ -396,7 +402,7 @@
         }
         habit.history[monthKey].status[day] = newStatus;
         saveHabits();
-        renderHabits();
+        updateView();
       } else if (habit.type === 'number') {
         const currentValue = habit.history[monthKey].status[day] || '';
         const inputValue = prompt('Enter value:', currentValue);
@@ -405,7 +411,7 @@
           if (!isNaN(value)) {
             habit.history[monthKey].status[day] = value;
             saveHabits();
-            renderHabits();
+            updateView();
           }
         }
       } else if (habit.type === 'time') {
@@ -414,7 +420,7 @@
         if (inputValue !== null) {
           habit.history[monthKey].status[day] = inputValue;
           saveHabits();
-          renderHabits();
+          updateView();
         }
       }
     }
@@ -519,7 +525,7 @@
         habits.push({ id: Date.now().toString(), name, type: habitType, goal, target, earlierIsBetter, history: {} });
       }
       saveHabits();
-      renderHabits();
+      updateView();
       habitModal.classList.add('hidden');
     });
 
@@ -527,7 +533,7 @@
       if (confirm('Delete this habit?')) {
         habits = habits.filter(h => h.id !== editingHabitId);
         saveHabits();
-        renderHabits();
+        updateView();
         habitModal.classList.add('hidden');
       }
     });
@@ -607,7 +613,7 @@
       if (confirm('Are you sure you want to clear all habits? This action cannot be undone.')) {
         habits = [];
         saveHabits();
-        renderHabits();
+        updateView();
       }
     });
 
@@ -619,6 +625,93 @@
       renderMonthYear();
       renderDaysHeader();
       renderHabits();
+      renderStats();
+    }
+
+    function renderStats() {
+      const totalDays = getDaysInMonth(currentMonth, currentYear);
+      const daysData = new Array(totalDays).fill(0);
+      const daysLabels = [];
+      const totalHabits = habits.length;
+
+      for (let day = 1; day <= totalDays; day++) {
+        daysLabels.push(day.toString());
+        let completedCount = 0;
+        habits.forEach(habit => {
+          const monthKey = `${currentYear}-${String(currentMonth + 1).padStart(2, '0')}`;
+          const status = habit.history[monthKey]?.status?.[day];
+          let isCompleted = false;
+
+          if (habit.type === 'default' || !habit.type) {
+            isCompleted = status === 'completed';
+          } else if (habit.type === 'number') {
+            if (status !== undefined && habit.target !== null && !isNaN(habit.target)) {
+              isCompleted = status >= habit.target;
+            }
+          } else if (habit.type === 'time') {
+            if (status && habit.target) {
+              const statusTime = parseTime(status);
+              const targetTime = parseTime(habit.target);
+              if (statusTime !== null && targetTime !== null) {
+                const earlierIsBetter = habit.earlierIsBetter;
+                isCompleted = earlierIsBetter ? (statusTime <= targetTime) : (statusTime >= targetTime);
+              }
+            }
+          }
+
+          if (isCompleted) {
+            completedCount++;
+          }
+        });
+        daysData[day - 1] = completedCount;
+      }
+
+      const totalCompleted = daysData.reduce((a, b) => a + b, 0);
+      const averageCompleted = totalCompleted / totalDays || 0;
+
+      const statsSection = document.getElementById('statsSection');
+      statsSection.innerHTML = `
+        <h3 class="text-xl font-semibold mb-4">Monthly Progress</h3>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div>
+            <canvas id="progressChart"></canvas>
+          </div>
+          <div>
+            <div class="bg-white dark:bg-gray-800 p-4 rounded-lg shadow">
+              <h4 class="text-lg font-semibold mb-2">Statistics</h4>
+              <p>Total Habits: <strong>${totalHabits}</strong></p>
+              <p>Total Completed Habits this Month: <strong>${totalCompleted}</strong></p>
+              <p>Average Completed Habits per Day: <strong>${averageCompleted.toFixed(2)}</strong></p>
+            </div>
+          </div>
+        </div>
+      `;
+
+      const ctx = document.getElementById('progressChart').getContext('2d');
+      if (chartInstance) {
+        chartInstance.destroy();
+      }
+      chartInstance = new Chart(ctx, {
+        type: 'line',
+        data: {
+          labels: daysLabels,
+          datasets: [{
+            label: 'Completed Habits',
+            data: daysData,
+            fill: false,
+            borderColor: 'rgb(75, 192, 192)',
+            tension: 0.1
+          }]
+        },
+        options: {
+          scales: {
+            y: {
+              beginAtZero: true,
+              max: totalHabits
+            }
+          }
+        }
+      });
     }
 
     window.addEventListener('DOMContentLoaded', () => {
@@ -659,6 +752,7 @@
       const ids = Array.from(habitTableBody.children).map(row => row.dataset.id);
       habits.sort((a, b) => ids.indexOf(a.id) - ids.indexOf(b.id));
       saveHabits();
+      updateView();
     });
   </script>
 </body>
