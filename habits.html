@@ -151,6 +151,15 @@
           <input type="text" id="habitName" required class="w-full px-4 py-3 border rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 border-gray-300 dark:border-gray-600 focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
         </div>
         <div class="mb-4">
+          <label for="habitType" class="block mb-1">Habit Type</label>
+          <select id="habitType" class="w-full px-4 py-3 border rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 border-gray-300 dark:border-gray-600 focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+            <option value="default">Check/Uncheck/Fail</option>
+            <option value="number">Number</option>
+            <option value="time">Time</option>
+          </select>
+        </div>
+        <div id="additionalSettings"></div>
+        <div class="mb-4">
           <label for="habitGoal" class="block mb-1">Monthly Goal (Optional)</label>
           <input type="number" id="habitGoal" min="1" class="w-full px-4 py-3 border rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 border-gray-300 dark:border-gray-600 focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
         </div>
@@ -217,6 +226,12 @@
       }
     }
 
+    function parseTime(timeStr) {
+      const [hours, minutes] = timeStr.split(':').map(Number);
+      if (isNaN(hours) || isNaN(minutes)) return null;
+      return hours * 60 + minutes; // total minutes
+    }
+
     function calculateStreak(habit) {
       let streak = 0;
       const today = new Date();
@@ -224,7 +239,27 @@
       while (true) {
         const monthKey = `${dateIterator.getFullYear()}-${String(dateIterator.getMonth() + 1).padStart(2, '0')}`;
         const day = dateIterator.getDate();
-        if (habit.history[monthKey]?.days.includes(day)) {
+        const status = habit.history[monthKey]?.status?.[day];
+        let isCompleted = false;
+
+        if (habit.type === 'default' || !habit.type) {
+          isCompleted = status === 'completed';
+        } else if (habit.type === 'number') {
+          if (status !== undefined && habit.target !== null && !isNaN(habit.target)) {
+            isCompleted = status >= habit.target;
+          }
+        } else if (habit.type === 'time') {
+          if (status && habit.target) {
+            const statusTime = parseTime(status);
+            const targetTime = parseTime(habit.target);
+            if (statusTime !== null && targetTime !== null) {
+              const earlierIsBetter = habit.earlierIsBetter;
+              isCompleted = earlierIsBetter ? (statusTime <= targetTime) : (statusTime >= targetTime);
+            }
+          }
+        }
+
+        if (isCompleted) {
           streak++;
           dateIterator.setDate(dateIterator.getDate() - 1);
         } else {
@@ -280,62 +315,156 @@
             dayTd.classList.add('today-column', 'light-bg');
           }
           const monthKey = `${currentYear}-${String(currentMonth + 1).padStart(2, '0')}`;
-          const status = habit.history[monthKey]?.status?.[day] || 'none';
-          let statusHtml = '';
-          if (status === 'completed') {
-            statusHtml = '<span class="text-green-500">&#10003;</span>';
-          } else if (status === 'failed') {
-            statusHtml = '<span class="status-failed">&#10007;</span>';
+          const status = habit.history[monthKey]?.status?.[day];
+
+          if (habit.type === 'default' || !habit.type) {
+            let statusHtml = '';
+            if (status === 'completed') {
+              statusHtml = '<span class="text-green-500">&#10003;</span>';
+            } else if (status === 'failed') {
+              statusHtml = '<span class="status-failed">&#10007;</span>';
+            }
+            dayTd.innerHTML = statusHtml;
+          } else if (habit.type === 'number') {
+            if (status !== undefined) {
+              const target = habit.target;
+              if (target !== null && !isNaN(target)) {
+                if (status >= target) {
+                  dayTd.innerHTML = `<span class="text-green-500">${status}</span>`;
+                } else {
+                  dayTd.innerHTML = `<span class="status-failed">${status}</span>`;
+                }
+              } else {
+                dayTd.textContent = status;
+              }
+            }
+          } else if (habit.type === 'time') {
+            if (status) {
+              const target = habit.target;
+              const earlierIsBetter = habit.earlierIsBetter;
+              if (target) {
+                const statusTime = parseTime(status);
+                const targetTime = parseTime(target);
+                if (statusTime !== null && targetTime !== null) {
+                  const isGood = earlierIsBetter ? (statusTime <= targetTime) : (statusTime >= targetTime);
+                  if (isGood) {
+                    dayTd.innerHTML = `<span class="text-green-500">${status}</span>`;
+                  } else {
+                    dayTd.innerHTML = `<span class="status-failed">${status}</span>`;
+                  }
+                } else {
+                  dayTd.textContent = status;
+                }
+              } else {
+                dayTd.textContent = status;
+              }
+            }
           }
-          dayTd.innerHTML = statusHtml;
-          dayTd.addEventListener('click', () => toggleDayCompletion(habit.id, day, dayTd));
+
+          dayTd.addEventListener('click', () => handleDayCellClick(habit, day, dayTd));
           tr.appendChild(dayTd);
         }
         habitTableBody.appendChild(tr);
       });
     }
 
-    function toggleDayCompletion(habitId, day, td) {
-      const habit = habits.find(h => h.id === habitId);
-      if (!habit) return;
+    function handleDayCellClick(habit, day, td) {
       const monthKey = `${currentYear}-${String(currentMonth + 1).padStart(2, '0')}`;
       if (!habit.history[monthKey]) {
-        habit.history[monthKey] = { days: [], status: {} };
+        habit.history[monthKey] = { status: {} };
       }
       if (!habit.history[monthKey].status) {
         habit.history[monthKey].status = {};
       }
-      const currentStatus = habit.history[monthKey].status[day] || 'none';
-      let newStatus;
-      switch (currentStatus) {
-        case 'none':
-          newStatus = 'completed';
-          td.innerHTML = '<span class="text-green-500">&#10003;</span>';
-          habit.history[monthKey].days.push(day);
-          break;
-        case 'completed':
-          newStatus = 'failed';
-          td.innerHTML = '<span class="status-failed">&#10007;</span>';
-          habit.history[monthKey].days = habit.history[monthKey].days.filter(d => d !== day);
-          break;
-        case 'failed':
-          newStatus = 'none';
-          td.innerHTML = '';
-          break;
+
+      if (habit.type === 'default' || !habit.type) {
+        const currentStatus = habit.history[monthKey].status[day] || 'none';
+        let newStatus;
+        switch (currentStatus) {
+          case 'none':
+            newStatus = 'completed';
+            td.innerHTML = '<span class="text-green-500">&#10003;</span>';
+            break;
+          case 'completed':
+            newStatus = 'failed';
+            td.innerHTML = '<span class="status-failed">&#10007;</span>';
+            break;
+          case 'failed':
+            newStatus = 'none';
+            td.innerHTML = '';
+            break;
+        }
+        habit.history[monthKey].status[day] = newStatus;
+        saveHabits();
+        renderHabits();
+      } else if (habit.type === 'number') {
+        const currentValue = habit.history[monthKey].status[day] || '';
+        const inputValue = prompt('Enter value:', currentValue);
+        if (inputValue !== null) {
+          const value = parseFloat(inputValue);
+          if (!isNaN(value)) {
+            habit.history[monthKey].status[day] = value;
+            saveHabits();
+            renderHabits();
+          }
+        }
+      } else if (habit.type === 'time') {
+        const currentValue = habit.history[monthKey].status[day] || '';
+        const inputValue = prompt('Enter time (HH:MM):', currentValue);
+        if (inputValue !== null) {
+          habit.history[monthKey].status[day] = inputValue;
+          saveHabits();
+          renderHabits();
+        }
       }
-      habit.history[monthKey].status[day] = newStatus;
-      saveHabits();
-      renderHabits();
     }
 
     function openHabitModal(habit) {
       isEditing = true;
       editingHabitId = habit.id;
       modalTitle.textContent = 'Edit Habit';
+      habitForm.reset();
       document.getElementById('habitName').value = habit.name;
+      document.getElementById('habitType').value = habit.type || 'default';
+      updateAdditionalSettings();
+      if (habit.type === 'number') {
+        document.getElementById('habitTargetNumber').value = habit.target || '';
+      } else if (habit.type === 'time') {
+        document.getElementById('habitTargetTime').value = habit.target || '';
+        document.getElementById('habitEarlierIsBetter').value = habit.earlierIsBetter ? 'true' : 'false';
+      }
       document.getElementById('habitGoal').value = habit.goal || '';
       deleteBtn.classList.remove('hidden');
       habitModal.classList.remove('hidden');
+    }
+
+    function updateAdditionalSettings() {
+      const habitType = document.getElementById('habitType').value;
+      const additionalSettings = document.getElementById('additionalSettings');
+      additionalSettings.innerHTML = '';
+
+      if (habitType === 'number') {
+        additionalSettings.innerHTML = `
+          <div class="mb-4">
+            <label for="habitTargetNumber" class="block mb-1">Target Number</label>
+            <input type="number" id="habitTargetNumber" step="any" class="w-full px-4 py-3 border rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 border-gray-300 dark:border-gray-600 focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+          </div>
+        `;
+      } else if (habitType === 'time') {
+        additionalSettings.innerHTML = `
+          <div class="mb-4">
+            <label for="habitTargetTime" class="block mb-1">Target Time</label>
+            <input type="time" id="habitTargetTime" class="w-full px-4 py-3 border rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 border-gray-300 dark:border-gray-600 focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+          </div>
+          <div class="mb-4">
+            <label for="habitEarlierIsBetter" class="block mb-1">Is Earlier Time Better?</label>
+            <select id="habitEarlierIsBetter" class="w-full px-4 py-3 border rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 border-gray-300 dark:border-gray-600 focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+              <option value="true">Yes</option>
+              <option value="false">No</option>
+            </select>
+          </div>
+        `;
+      }
     }
 
     // Event Listeners
@@ -344,6 +473,8 @@
       editingHabitId = null;
       modalTitle.textContent = 'Add New Habit';
       habitForm.reset();
+      document.getElementById('habitType').value = 'default';
+      updateAdditionalSettings();
       deleteBtn.classList.add('hidden');
       habitModal.classList.remove('hidden');
     });
@@ -352,19 +483,40 @@
       habitModal.classList.add('hidden');
     });
 
+    // Update additional settings when habit type changes
+    document.getElementById('habitType').addEventListener('change', updateAdditionalSettings);
+
     habitForm.addEventListener('submit', e => {
       e.preventDefault();
       const name = document.getElementById('habitName').value.trim();
       const goalInput = document.getElementById('habitGoal').value;
       const goal = goalInput ? parseInt(goalInput) : null;
+      const habitType = document.getElementById('habitType').value;
+      let target = null;
+      let earlierIsBetter = null;
+
+      if (habitType === 'number') {
+        const targetInput = document.getElementById('habitTargetNumber');
+        target = targetInput ? parseFloat(targetInput.value) : null;
+        if (isNaN(target)) target = null;
+      } else if (habitType === 'time') {
+        const targetInput = document.getElementById('habitTargetTime');
+        target = targetInput ? targetInput.value : null;
+        const earlierIsBetterInput = document.getElementById('habitEarlierIsBetter');
+        earlierIsBetter = earlierIsBetterInput ? earlierIsBetterInput.value === 'true' : null;
+      }
+
       if (isEditing) {
         const habit = habits.find(h => h.id === editingHabitId);
         if (habit) { 
           habit.name = name; 
           habit.goal = goal; 
+          habit.type = habitType;
+          habit.target = target;
+          habit.earlierIsBetter = earlierIsBetter;
         }
       } else {
-        habits.push({ id: Date.now().toString(), name, goal, history: {} });
+        habits.push({ id: Date.now().toString(), name, type: habitType, goal, target, earlierIsBetter, history: {} });
       }
       saveHabits();
       renderHabits();
