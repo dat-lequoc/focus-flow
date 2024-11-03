@@ -22,7 +22,12 @@
                     onclick="showDashboard()">
                     Projects</h2>
             </div>
-            <div id="project-list" class="mt-4 h-[calc(100vh-10rem)] overflow-y-auto">
+            <div id="project-list" class="mt-4 h-[calc(100vh-10rem)] overflow-y-auto scrollbar-none" style="scrollbar-width: none; -ms-overflow-style: none;">
+                <style>
+                    #project-list::-webkit-scrollbar {
+                        display: none;
+                    }
+                </style>
             </div>
             <div class="mt-4">
                 <a href="habits.html" class="mb-2 block text-blue-500 hover:underline">Habits</a>
