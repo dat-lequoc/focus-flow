@@ -730,7 +730,19 @@
             // Removed the 'reset-today-btn' listener from here
             document.getElementById('new-project-name').addEventListener('keypress', (e) => {
                 if (e.key === 'Enter') {
-                    addProject();
+                    const projectNameInput = document.getElementById('new-project-name');
+                    const name = projectNameInput.value.trim();
+                    if (name) {
+                        const newProject = {
+                            id: generateId(),
+                            name: name,
+                            tasks: []
+                        };
+                        projects.push(newProject);
+                        saveData();
+                        renderProjectList();
+                        projectNameInput.value = '';
+                    }
                 }
             });
             document.getElementById('new-task-title').addEventListener('keypress', (e) => {
