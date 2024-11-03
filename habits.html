@@ -268,32 +268,47 @@
         
         const habitContainer = document.createElement('div');
         habitContainer.className = 'flex items-center justify-between';
-        habitContainer.innerHTML = `
-          <span class="habit-name" title="${habit.name}">${habit.name}</span>
-          <div class="habit-buttons flex space-x-1">
-            <button onclick="editHabit('${habit.id}')" class="text-blue-500" aria-label="Edit Habit">
-              <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round"
-                  stroke-linejoin="round" stroke-width="2"
-                  d="M11 5H6a2 2 0 00-2 2v12a2 2 0 002 2h12a2 2 0 002-2v-5M18.5 2.5a2.121 2.121 0 113 3L12 15l-4 1 1-4 9.5-9.5z" />
-              </svg>
-            </button>
-            <button onclick="deleteHabit('${habit.id}')" class="text-red-500" aria-label="Delete Habit">
-              <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round"
-                  stroke-linejoin="round" stroke-width="2"
-                  d="M6 18L18 6M6 6l12 12" />
-              </svg>
-            </button>
-          </div>
-        `;
         
-        // Add click handler to toggle buttons
-        habitContainer.addEventListener('click', (e) => {
-          // Don't toggle if clicking buttons
-          if (!e.target.closest('button')) {
-            habitContainer.classList.toggle('show-buttons');
-          }
+        const nameSpan = document.createElement('span');
+        nameSpan.className = 'habit-name';
+        nameSpan.title = habit.name;
+        nameSpan.textContent = habit.name;
+        
+        const buttonsDiv = document.createElement('div');
+        buttonsDiv.className = 'habit-buttons flex space-x-1';
+        
+        const editButton = document.createElement('button');
+        editButton.className = 'text-blue-500';
+        editButton.setAttribute('aria-label', 'Edit Habit');
+        editButton.innerHTML = `
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+              d="M11 5H6a2 2 0 00-2 2v12a2 2 0 002 2h12a2 2 0 002-2v-5M18.5 2.5a2.121 2.121 0 113 3L12 15l-4 1 1-4 9.5-9.5z" />
+          </svg>
+        `;
+        editButton.onclick = () => editHabit(habit.id);
+        
+        const deleteButton = document.createElement('button');
+        deleteButton.className = 'text-red-500';
+        deleteButton.setAttribute('aria-label', 'Delete Habit');
+        deleteButton.innerHTML = `
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+              d="M6 18L18 6M6 6l12 12" />
+          </svg>
+        `;
+        deleteButton.onclick = () => deleteHabit(habit.id);
+        
+        buttonsDiv.appendChild(editButton);
+        buttonsDiv.appendChild(deleteButton);
+        
+        habitContainer.appendChild(nameSpan);
+        habitContainer.appendChild(buttonsDiv);
+        
+        // Add click handler to name span to toggle buttons
+        nameSpan.addEventListener('click', (e) => {
+          habitContainer.classList.toggle('show-buttons');
+          e.stopPropagation();
         });
         
         nameTd.appendChild(habitContainer);
