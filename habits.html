@@ -42,8 +42,17 @@
       white-space: nowrap;
       overflow: hidden;
       text-overflow: ellipsis;
-      max-width: 150px; /* Leave space for edit/delete buttons */
+      max-width: 200px; /* Full width when buttons are hidden */
       display: inline-block;
+    }
+    .habit-buttons {
+      display: none;
+    }
+    .show-buttons .habit-buttons {
+      display: flex;
+    }
+    .show-buttons .habit-name {
+      max-width: 150px; /* Reduced width when buttons are shown */
     }
     .table-border th, .table-border td { border: 1px solid #e5e7eb; }
     .dark .table-border th, .dark .table-border td { border-color: #374151; }
@@ -257,9 +266,11 @@
         const streak = calculateStreak(habit);
         streakTd.textContent = `${streak} ${streak === 1 ? 'day' : 'days'}`;
         
-        nameTd.innerHTML = `<div class="flex items-center justify-between">
+        const habitContainer = document.createElement('div');
+        habitContainer.className = 'flex items-center justify-between';
+        habitContainer.innerHTML = `
           <span class="habit-name" title="${habit.name}">${habit.name}</span>
-          <div class="flex space-x-1">
+          <div class="habit-buttons flex space-x-1">
             <button onclick="editHabit('${habit.id}')" class="text-blue-500" aria-label="Edit Habit">
               <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path stroke-linecap="round"
@@ -275,7 +286,17 @@
               </svg>
             </button>
           </div>
-        </div>`;
+        `;
+        
+        // Add click handler to toggle buttons
+        habitContainer.addEventListener('click', (e) => {
+          // Don't toggle if clicking buttons
+          if (!e.target.closest('button')) {
+            habitContainer.classList.toggle('show-buttons');
+          }
+        });
+        
+        nameTd.appendChild(habitContainer);
         tr.appendChild(nameTd);
         tr.appendChild(streakTd);
         
