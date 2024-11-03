@@ -679,11 +679,17 @@
       const totalCompleted = data.reduce((a, b) => a + b, 0);
       const averageCompleted = totalCompleted / 31 || 0;
 
+      // Calculate Best Current Streak
+      const maxStreak = habits.reduce((max, habit) => {
+        const streak = calculateStreak(habit);
+        return streak > max ? streak : max;
+      }, 0);
+
       statsSection.innerHTML = `
         <hr class="my-6 border-gray-300 dark:border-gray-600">
         <div class="mt-6">
           <h3 class="font-bold mb-4 text-xl">Today's Activity</h3>
-          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
             <div class="p-4 bg-gradient-to-r from-blue-500 to-blue-600 rounded-lg shadow-lg">
               <div class="text-white text-sm mb-1">Tasks Completed Today</div>
               <div class="text-white text-2xl font-bold">${completedToday} / ${totalToday}</div>
@@ -691,6 +697,10 @@
             <div class="p-4 bg-gradient-to-r from-purple-500 to-purple-600 rounded-lg shadow-lg">
               <div class="text-white text-sm mb-1">Today's Success Rate</div>
               <div class="text-white text-2xl font-bold">${totalToday > 0 ? ((completedToday / totalToday) * 100).toFixed(1) : 0}%</div>
+            </div>
+            <div class="p-4 bg-gradient-to-r from-green-500 to-green-600 rounded-lg shadow-lg">
+              <div class="text-white text-sm mb-1">Best Current Streak</div>
+              <div class="text-white text-2xl font-bold">${maxStreak} day${maxStreak !== 1 ? 's' : ''}</div>
             </div>
           </div>
         </div>
