@@ -1185,6 +1185,19 @@
                 taskHeader.appendChild(leftDiv);
                 const rightDiv = document.createElement('div');
                 rightDiv.className = 'flex items-center space-x-2';
+                const todayBtn = createTodayButton(task, () => {
+                    const originalTask = findTaskByIdGlobal(task.id);
+                    if (originalTask) {
+                        originalTask.inToday = !originalTask.inToday;
+                        if (originalTask.inToday && originalTask.dailyGoal === 0) {
+                            originalTask.dailyGoal = 1;
+                        }
+                        saveData();
+                        renderDashboard();
+                        renderTaskList();
+                    }
+                });
+                rightDiv.appendChild(todayBtn);
                 const weekBtn = document.createElement('button');
                 weekBtn.className = 'p-1.5 border rounded-lg hover:bg-gray-100 transition-colors duration-200 dark:border-gray-700 dark:hover:bg-gray-700';
                 weekBtn.innerHTML = '📅';
