@@ -82,6 +82,12 @@
     .dark tr:hover {
       background-color: rgba(75, 85, 99, 0.2); /* Dark gray with transparency */
     }
+    .dropdown-content {
+      background-color: white;
+    }
+    .dark .dropdown-content {
+      background-color: #1f2937;
+    }
   </style>
 </head>
 <body class="bg-gray-100 dark:bg-gray-900 text-gray-900 dark:text-gray-100">
@@ -271,7 +277,7 @@
         menuBtn.innerHTML = `<i class="fas fa-ellipsis-v text-gray-700 dark:text-gray-200"></i>`;
         
         const dropdownDiv = document.createElement('div');
-        dropdownDiv.className = 'dropdown-content absolute right-0 mt-1 w-32 bg-white border rounded shadow-lg hidden z-10 dark:bg-gray-800 dark:border-gray-700 backdrop-blur-sm bg-opacity-100 dark:bg-opacity-100';
+        dropdownDiv.className = 'dropdown-content absolute right-0 mt-1 w-32 bg-white border rounded shadow-lg hidden z-10 dark:bg-gray-800 dark:border-gray-700';
         
         const editBtn = document.createElement('button');
         editBtn.innerHTML = 'Edit';
