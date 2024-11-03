@@ -209,6 +209,12 @@
                         class="w-full p-2 border rounded dark:bg-gray-700 dark:border-gray-600">
                 </div>
                 <div class="mt-4">
+                    <label class="flex items-center space-x-2">
+                        <input type="checkbox" id="silence-mode" class="rounded dark:bg-gray-700">
+                        <span>Silent Mode (Use notifications instead of sound)</span>
+                    </label>
+                </div>
+                <div class="mt-4">
                     <button id="test-sound-btn" class="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600">
                         Test Sound
                     </button>
@@ -621,6 +627,10 @@
             showDashboard();
             setupEventListeners();
             setupTimeEntryModal();
+            
+            // Load silence mode setting
+            const silenceMode = localStorage.getItem('silenceMode') === 'true';
+            document.getElementById('silence-mode').checked = silenceMode;
 
             // Load Pomodoro timer state from localStorage
             const savedPomodoro = JSON.parse(localStorage.getItem('pomodoroTimerState'));
@@ -658,6 +668,9 @@
             document.getElementById('sound-select').addEventListener('change', handleSoundSelection);
             document.getElementById('test-sound-btn').addEventListener('click', testSound);
             document.getElementById('close-timer-complete').addEventListener('click', closeTimerComplete);
+            document.getElementById('silence-mode').addEventListener('change', (e) => {
+                localStorage.setItem('silenceMode', e.target.checked);
+            });
             isDarkMode = document.documentElement.classList.contains('dark');
             const icon = document.getElementById('dark-mode-icon');
             if (isDarkMode) {
@@ -1971,9 +1984,32 @@
         function pomodoroComplete() {
             stopPomodoro();
             document.getElementById('timer-complete-modal').classList.remove('hidden');
-            timerSound.play().catch(error => {
-                console.error("Error playing sound:", error);
-            });
+            
+            const silenceMode = document.getElementById('silence-mode').checked;
+            
+            if (silenceMode) {
+                // Show notification
+                if ('Notification' in window) {
+                    if (Notification.permission === 'granted') {
+                        new Notification('Pomodoro Complete!', {
+                            body: 'Your pomodoro session has finished.',
+                        });
+                    } else if (Notification.permission !== 'denied') {
+                        Notification.requestPermission().then(permission => {
+                            if (permission === 'granted') {
+                                new Notification('Pomodoro Complete!', {
+                                    body: 'Your pomodoro session has finished.',
+                                });
+                            }
+                        });
+                    }
+                }
+            } else {
+                // Play sound
+                timerSound.play().catch(error => {
+                    console.error("Error playing sound:", error);
+                });
+            }
         }
 
         function closeTimerComplete() {
