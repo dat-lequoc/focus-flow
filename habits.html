@@ -123,7 +123,7 @@
       <button id="nextMonthBtn" class="p-2" aria-label="Next Month">
         <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" viewBox="0 0 20 20" fill="currentColor">
           <path fill-rule="evenodd"
-            d="M7.707 17.707a1 1 0 010-1.414L13.586 11H2a1 1 0 110-2h11.586l-5.879-5.879a1 1 0 011.414-1.414l7.586 7.586a1 1 0 010 1.414l-7.586 7.586a1 1 0 01-1.414 0z"
+            d="M7.707 17.707a1 1 0 010-1.414L13.586 11H2a1 1 0 110-2h11.586l-5.879-5.879a1 1 0 011.414-1.414l7.586 7.586a1 1 0 01-1.414 0z"
             clip-rule="evenodd" />
         </svg>
       </button>
@@ -628,17 +628,27 @@
       renderStats();
     }
 
+    // Render Stats Section
     function renderStats() {
-      const totalDays = getDaysInMonth(currentMonth, currentYear);
-      const daysData = new Array(totalDays).fill(0);
-      const daysLabels = [];
-      const totalHabits = habits.length;
+      const statsSection = document.getElementById('statsSection');
+      const today = new Date();
+      const pastDate = new Date();
+      pastDate.setDate(today.getDate() - 30); // Last 31 days including today
 
-      for (let day = 1; day <= totalDays; day++) {
-        daysLabels.push(day.toString());
+      const labels = [];
+      const data = [];
+      const completedToday = countCompletedTodayTasks();
+      const totalToday = habits.length;
+
+      for (let i = 30; i >= 0; i--) {
+        const date = new Date();
+        date.setDate(today.getDate() - i);
+        const month = date.getMonth() + 1;
+        const day = date.getDate();
+        labels.push(`${month}/${day}`);
         let completedCount = 0;
         habits.forEach(habit => {
-          const monthKey = `${currentYear}-${String(currentMonth + 1).padStart(2, '0')}`;
+          const monthKey = `${date.getFullYear()}-${String(month).padStart(2, '0')}`;
           const status = habit.history[monthKey]?.status?.[day];
           let isCompleted = false;
 
@@ -663,25 +673,41 @@
             completedCount++;
           }
         });
-        daysData[day - 1] = completedCount;
+        data.push(completedCount);
       }
 
-      const totalCompleted = daysData.reduce((a, b) => a + b, 0);
-      const averageCompleted = totalCompleted / totalDays || 0;
+      const totalCompleted = data.reduce((a, b) => a + b, 0);
+      const averageCompleted = totalCompleted / 31 || 0;
 
-      const statsSection = document.getElementById('statsSection');
       statsSection.innerHTML = `
-        <h3 class="text-xl font-semibold mb-4">Monthly Progress</h3>
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div>
-            <canvas id="progressChart"></canvas>
+        <hr class="my-6 border-gray-300 dark:border-gray-600">
+        <div class="mt-6">
+          <h3 class="font-bold mb-4 text-xl">Today's Activity</h3>
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div class="p-4 bg-gradient-to-r from-blue-500 to-blue-600 rounded-lg shadow-lg">
+              <div class="text-white text-sm mb-1">Tasks Completed Today</div>
+              <div class="text-white text-2xl font-bold">${completedToday} / ${totalToday}</div>
+            </div>
+            <div class="p-4 bg-gradient-to-r from-purple-500 to-purple-600 rounded-lg shadow-lg">
+              <div class="text-white text-sm mb-1">Today's Success Rate</div>
+              <div class="text-white text-2xl font-bold">${totalToday > 0 ? ((completedToday / totalToday) * 100).toFixed(1) : 0}%</div>
+            </div>
           </div>
-          <div>
-            <div class="bg-white dark:bg-gray-800 p-4 rounded-lg shadow">
-              <h4 class="text-lg font-semibold mb-2">Statistics</h4>
-              <p>Total Habits: <strong>${totalHabits}</strong></p>
-              <p>Total Completed Habits this Month: <strong>${totalCompleted}</strong></p>
-              <p>Average Completed Habits per Day: <strong>${averageCompleted.toFixed(2)}</strong></p>
+        </div>
+        <hr class="my-6 border-gray-300 dark:border-gray-600">
+        <div class="mt-6">
+          <h3 class="text-xl font-semibold mb-4">Progress</h3>
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <canvas id="progressChart"></canvas>
+            </div>
+            <div>
+              <div class="bg-white dark:bg-gray-800 p-4 rounded-lg shadow">
+                <h4 class="text-lg font-semibold mb-2">Statistics</h4>
+                <p>Total Habits: <strong>${habits.length}</strong></p>
+                <p>Total Completed Habits in Last 31 Days: <strong>${totalCompleted}</strong></p>
+                <p>Average Completed Habits per Day: <strong>${averageCompleted.toFixed(2)}</strong></p>
+              </div>
             </div>
           </div>
         </div>
@@ -694,24 +720,87 @@
       chartInstance = new Chart(ctx, {
         type: 'line',
         data: {
-          labels: daysLabels,
+          labels: labels,
           datasets: [{
             label: 'Completed Habits',
-            data: daysData,
+            data: data,
             fill: false,
-            borderColor: 'rgb(75, 192, 192)',
-            tension: 0.1
+            borderColor: 'rgb(59, 130, 246)', // Blue color
+            backgroundColor: 'rgba(59, 130, 246, 0.5)',
+            tension: 0.1,
+            pointBackgroundColor: labels.map((label, index) => {
+              const date = new Date();
+              date.setDate(today.getDate() - 30 + index);
+              const isToday = date.toDateString() === today.toDateString();
+              return isToday ? 'red' : 'rgb(59, 130, 246)';
+            }),
+            pointBorderColor: labels.map((label, index) => {
+              const date = new Date();
+              date.setDate(today.getDate() - 30 + index);
+              const isToday = date.toDateString() === today.toDateString();
+              return isToday ? 'red' : 'rgb(59, 130, 246)';
+            }),
+            pointRadius: labels.map((label, index) => {
+              const date = new Date();
+              date.setDate(today.getDate() - 30 + index);
+              const isToday = date.toDateString() === today.toDateString();
+              return isToday ? 6 : 3;
+            }),
           }]
         },
         options: {
+          responsive: true,
+          plugins: {
+            legend: {
+              display: false
+            },
+            tooltip: {
+              callbacks: {
+                label: function(context) {
+                  return `Completed Habits: ${context.parsed.y}`;
+                }
+              }
+            }
+          },
           scales: {
             y: {
               beginAtZero: true,
-              max: totalHabits
+              suggestedMax: Math.max(...data) + 1
+            },
+            x: {
+              ticks: {
+                maxTicksLimit: 10,
+                autoSkip: true
+              }
             }
           }
         }
       });
+    }
+
+    function countCompletedTodayTasks() {
+      const today = new Date();
+      const monthKey = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}`;
+      let count = 0;
+      habits.forEach(habit => {
+        const status = habit.history[monthKey]?.status?.[today.getDate()];
+        if (habit.type === 'default' || !habit.type) {
+          if (status === 'completed') count++;
+        } else if (habit.type === 'number') {
+          if (status !== undefined && habit.target !== null && !isNaN(habit.target) && status >= habit.target) count++;
+        } else if (habit.type === 'time') {
+          if (status && habit.target) {
+            const statusTime = parseTime(status);
+            const targetTime = parseTime(habit.target);
+            if (statusTime !== null && targetTime !== null) {
+              const earlierIsBetter = habit.earlierIsBetter;
+              const isCompleted = earlierIsBetter ? (statusTime <= targetTime) : (statusTime >= targetTime);
+              if (isCompleted) count++;
+            }
+          }
+        }
+      });
+      return count;
     }
 
     window.addEventListener('DOMContentLoaded', () => {
