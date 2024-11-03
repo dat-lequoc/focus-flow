@@ -6,6 +6,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <!-- Tailwind CSS CDN -->
   <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
   <script>
     tailwind.config = {
       darkMode: 'class',
@@ -44,15 +45,6 @@
       text-overflow: ellipsis;
       max-width: 200px; /* Full width when buttons are hidden */
       display: inline-block;
-    }
-    .habit-buttons {
-      display: none;
-    }
-    .show-buttons .habit-buttons {
-      display: flex;
-    }
-    .show-buttons .habit-name {
-      max-width: 150px; /* Reduced width when buttons are shown */
     }
     .table-border th, .table-border td { border: 1px solid #e5e7eb; }
     .dark .table-border th, .dark .table-border td { border-color: #374151; }
@@ -274,41 +266,56 @@
         nameSpan.title = habit.name;
         nameSpan.textContent = habit.name;
         
-        const buttonsDiv = document.createElement('div');
-        buttonsDiv.className = 'habit-buttons flex space-x-1';
+        const menuBtn = document.createElement('button');
+        menuBtn.className = 'p-1 hover:bg-gray-100 rounded dark:hover:bg-gray-700 ml-2';
+        menuBtn.innerHTML = `<i class="fas fa-ellipsis-v text-gray-700 dark:text-gray-200"></i>`;
         
-        const editButton = document.createElement('button');
-        editButton.className = 'text-blue-500';
-        editButton.setAttribute('aria-label', 'Edit Habit');
-        editButton.innerHTML = `
-          <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
-              d="M11 5H6a2 2 0 00-2 2v12a2 2 0 002 2h12a2 2 0 002-2v-5M18.5 2.5a2.121 2.121 0 113 3L12 15l-4 1 1-4 9.5-9.5z" />
-          </svg>
-        `;
-        editButton.onclick = () => editHabit(habit.id);
+        const dropdownDiv = document.createElement('div');
+        dropdownDiv.className = 'dropdown-content absolute right-0 mt-1 w-32 bg-white border rounded shadow-lg hidden z-10 dark:bg-gray-800 dark:border-gray-700';
         
-        const deleteButton = document.createElement('button');
-        deleteButton.className = 'text-red-500';
-        deleteButton.setAttribute('aria-label', 'Delete Habit');
-        deleteButton.innerHTML = `
-          <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-              d="M6 18L18 6M6 6l12 12" />
-          </svg>
-        `;
-        deleteButton.onclick = () => deleteHabit(habit.id);
+        const editBtn = document.createElement('button');
+        editBtn.innerHTML = 'Edit';
+        editBtn.className = 'w-full text-left px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-700';
+        editBtn.onclick = (e) => {
+            e.stopPropagation();
+            dropdownDiv.classList.add('hidden');
+            editHabit(habit.id);
+        };
         
-        buttonsDiv.appendChild(editButton);
-        buttonsDiv.appendChild(deleteButton);
+        const deleteBtn = document.createElement('button');
+        deleteBtn.innerHTML = 'Delete';
+        deleteBtn.className = 'w-full text-left px-4 py-2 hover:bg-gray-100 text-red-500 dark:hover:bg-gray-700';
+        deleteBtn.onclick = (e) => {
+            e.stopPropagation();
+            dropdownDiv.classList.add('hidden');
+            deleteHabit(habit.id);
+        };
+        
+        dropdownDiv.appendChild(editBtn);
+        dropdownDiv.appendChild(deleteBtn);
+        
+        const menuDiv = document.createElement('div');
+        menuDiv.className = 'relative';
+        menuDiv.appendChild(menuBtn);
+        menuDiv.appendChild(dropdownDiv);
+        
+        menuBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            const dropdown = menuBtn.nextElementSibling;
+            document.querySelectorAll('.dropdown-content').forEach(d => {
+                if (d !== dropdown) d.classList.add('hidden');
+            });
+            dropdown.classList.toggle('hidden');
+        });
         
         habitContainer.appendChild(nameSpan);
-        habitContainer.appendChild(buttonsDiv);
-        
-        // Add click handler to name span to toggle buttons
-        nameSpan.addEventListener('click', (e) => {
-          habitContainer.classList.toggle('show-buttons');
-          e.stopPropagation();
+        habitContainer.appendChild(menuDiv);
+
+        // Add click handler to close dropdowns when clicking outside
+        document.addEventListener('click', () => {
+            document.querySelectorAll('.dropdown-content').forEach(d => {
+                d.classList.add('hidden');
+            });
         });
         
         nameTd.appendChild(habitContainer);
