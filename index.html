@@ -1320,6 +1320,7 @@
                     });
                 }
                 const pomodorosCompleted = todayTimeSpent / 60 / pomodoroDuration;
+                console.log(pomodoroDuration);
                 const formattedPomodoros = todayTimeSpent > 0 ? pomodorosCompleted.toFixed(1) : Math.floor(pomodorosCompleted);
                 progressText.textContent = `${formattedPomodoros} / ${task.dailyGoal} pomodoros`;
                 const progressBarContainer = document.createElement('div');
