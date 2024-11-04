@@ -1226,15 +1226,6 @@
                     }
                 });
                 rightDiv.appendChild(weekBtn);
-                const timerBtn = createTimerButton(task, () => {
-                    const currentTask = findTaskByIdGlobal(task.id);
-                    if (currentTask.isTimerRunning) {
-                        stopPomodoro();
-                    } else {
-                        startPomodoro(currentTask);
-                    }
-                });
-                rightDiv.appendChild(timerBtn);
                 taskHeader.appendChild(rightDiv);
                 taskDiv.appendChild(taskHeader);
                 weekTasksContainer.appendChild(taskDiv);
