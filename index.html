@@ -189,6 +189,14 @@
                     <label class="block mb-2">Task Name</label>
                     <input type="text" id="task-name-input" class="w-full p-2 border rounded dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200">
                 </div>
+                <div class="flex items-center space-x-2">
+                    <input type="checkbox" id="task-billable" class="rounded dark:bg-gray-700">
+                    <label>Billable</label>
+                </div>
+                <div id="rate-input-container" class="hidden">
+                    <label class="block mb-2">Hourly Rate ($)</label>
+                    <input type="number" id="task-rate" min="0" step="0.01" class="w-full p-2 border rounded dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200">
+                </div>
             </div>
             <div class="mt-6 flex justify-end space-x-3">
                 <button id="cancel-task-settings" class="px-4 py-2 border rounded hover:bg-gray-100 dark:border-gray-600 dark:hover:bg-gray-700">
@@ -648,6 +656,9 @@
         function openTaskSettings(task) {
             currentEditingTask = task;
             document.getElementById('task-name-input').value = task.title;
+            document.getElementById('task-billable').checked = task.isBillable || false;
+            document.getElementById('task-rate').value = task.hourlyRate || 0;
+            document.getElementById('rate-input-container').classList.toggle('hidden', !task.isBillable);
             document.getElementById('task-settings-modal').classList.remove('hidden');
         }
 
@@ -659,8 +670,18 @@
         function saveTaskSettings() {
             if (currentEditingTask) {
                 const newTitle = document.getElementById('task-name-input').value.trim();
+                const isBillable = document.getElementById('task-billable').checked;
+                const hourlyRate = parseFloat(document.getElementById('task-rate').value) || 0;
+        
                 if (newTitle) {
-                    editTask(currentEditingTask.id, newTitle);
+                    const task = findTaskByIdGlobal(currentEditingTask.id);
+                    if (task) {
+                        task.title = newTitle;
+                        task.isBillable = isBillable;
+                        task.hourlyRate = hourlyRate;
+                        saveData();
+                        renderTaskList();
+                    }
                 }
             }
             closeTaskSettings();
@@ -669,6 +690,9 @@
         // Add event listeners for task settings modal
         document.getElementById('cancel-task-settings').addEventListener('click', closeTaskSettings);
         document.getElementById('save-task-settings').addEventListener('click', saveTaskSettings);
+        document.getElementById('task-billable').addEventListener('change', function(e) {
+            document.getElementById('rate-input-container').classList.toggle('hidden', !e.target.checked);
+        });
         
         // Close modal when clicking outside
         document.getElementById('task-settings-modal').addEventListener('click', function(e) {
