@@ -1185,6 +1185,20 @@
                 taskHeader.appendChild(leftDiv);
                 const rightDiv = document.createElement('div');
                 rightDiv.className = 'flex items-center space-x-2';
+                const completeBtn = document.createElement('button');
+                completeBtn.className = 'p-1.5 border rounded-lg hover:bg-gray-100 transition-colors duration-200 dark:border-gray-700 dark:hover:bg-gray-700';
+                completeBtn.innerHTML = task.isCompleted ? '✅' : '⬜';
+                completeBtn.title = task.isCompleted ? 'Mark as incomplete' : 'Mark as complete';
+                completeBtn.addEventListener('click', () => {
+                    const originalTask = findTaskByIdGlobal(task.id);
+                    if (originalTask) {
+                        originalTask.isCompleted = !originalTask.isCompleted;
+                        saveData();
+                        renderDashboard();
+                        renderTaskList();
+                    }
+                });
+                rightDiv.appendChild(completeBtn);
                 const todayBtn = createTodayButton(task, () => {
                     const originalTask = findTaskByIdGlobal(task.id);
                     if (originalTask) {
