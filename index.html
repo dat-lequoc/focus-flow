@@ -1677,7 +1677,8 @@
 
             // Ensure display is visible
             document.getElementById('pomodoro-display').classList.remove('hidden');
-            pomodoroDuration = parseInt(document.getElementById('pomodoro-duration').value) || 25;
+            const settings = JSON.parse(localStorage.getItem('settings')) || {};
+            pomodoroDuration = settings.pomodoroDuration || parseInt(document.getElementById('pomodoro-duration').value) || 25;
             pomodoroStartTime = Date.now();
             pomodoroElapsedTime = 0;
             document.getElementById('current-task-title').textContent = task.title;
@@ -1727,7 +1728,7 @@
                                 todayTimeSpent += entry.duration;
                             }
                         });
-                        task.dailyProgress = Math.floor(todayTimeSpent / 60 / pomodoroDuration);
+                        task.dailyProgress = Math.floor(todayTimeSpent / 60 / (parseInt(document.getElementById('pomodoro-duration').value) || 25));
                         saveData();
                         renderDashboard();
                     }
