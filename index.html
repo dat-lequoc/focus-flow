@@ -1103,6 +1103,28 @@
             renderWeeklyChart();
         }
 
+        function calculateTodayEarnings() {
+            let totalEarnings = 0;
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
+            
+            projects.forEach(project => {
+                traverseTasks(project.tasks, task => {
+                    if (task.isBillable && task.hourlyRate > 0 && task.timeEntries) {
+                        task.timeEntries.forEach(entry => {
+                            const entryDate = new Date(entry.start);
+                            if (entryDate >= today) {
+                                // Convert seconds to hours and multiply by rate
+                                totalEarnings += (entry.duration / 3600) * task.hourlyRate;
+                            }
+                        });
+                    }
+                });
+            });
+            
+            return totalEarnings;
+        }
+
         function countCompletedTodayTasks() {
             let completedTasks = 0;
             const todayTasks = getTodayTasks();
@@ -1194,7 +1216,7 @@
                         <hr class="my-6 border-gray-300 dark:border-gray-600">
                         <div class="mt-6">
                             <h3 class="font-bold mb-2 text-lg">Today's Activity</h3>
-                            <div class="grid grid-cols-2 gap-4">
+                            <div class="grid grid-cols-3 gap-4">
                                 <div class="p-4 bg-gradient-to-r from-green-500 to-green-600 rounded-lg shadow-lg">
                                     <div class="text-white text-sm mb-1">Today's Total Time</div>
                                     <div class="text-white text-2xl font-bold">${formatTime(todayTimeSpent)}</div>
@@ -1202,6 +1224,10 @@
                                 <div class="p-4 bg-gradient-to-r from-green-500 to-green-600 rounded-lg shadow-lg">
                                     <div class="text-white text-sm mb-1">Tasks Completed Today</div>
                                     <div class="text-white text-2xl font-bold">${countCompletedTodayTasks()} / ${getTodayTasks().length}</div>
+                                </div>
+                                <div class="p-4 bg-gradient-to-r from-blue-500 to-blue-600 rounded-lg shadow-lg">
+                                    <div class="text-white text-sm mb-1">Today's Earnings</div>
+                                    <div class="text-white text-2xl font-bold">$${calculateTodayEarnings().toFixed(2)}</div>
                                 </div>
                             </div>
                         </div>
