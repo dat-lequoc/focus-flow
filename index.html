@@ -1443,7 +1443,9 @@
                     canHaveSubtasks: true,
                     inToday: false,
                     dailyGoal: 0,
-                    dailyProgress: 0
+                    dailyProgress: 0,
+                    isBillable: false,
+                    hourlyRate: 0
                 };
                 if (parentId) {
                     const parentTask = findTaskById(selectedProject.tasks, parentId);
