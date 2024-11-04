@@ -630,9 +630,18 @@
             setupEventListeners();
             setupTimeEntryModal();
             
-            // Load silence mode setting
-            const silenceMode = localStorage.getItem('silenceMode') === 'true';
-            document.getElementById('silence-mode').checked = silenceMode;
+            // Load settings
+            const settings = JSON.parse(localStorage.getItem('settings')) || {
+                silenceMode: false,
+                pomodoroDuration: 25,
+                soundType: 'default',
+                soundUrl: 'https://www.soundjay.com/buttons/sounds/beep-07a.mp3'
+            };
+            
+            document.getElementById('silence-mode').checked = settings.silenceMode;
+            document.getElementById('pomodoro-duration').value = settings.pomodoroDuration;
+            document.getElementById('sound-select').value = settings.soundType;
+            timerSound.src = settings.soundUrl;
 
             // Load Pomodoro timer state from localStorage
             const savedPomodoro = JSON.parse(localStorage.getItem('pomodoroTimerState'));
@@ -670,8 +679,12 @@
             document.getElementById('sound-select').addEventListener('change', handleSoundSelection);
             document.getElementById('test-sound-btn').addEventListener('click', testSound);
             document.getElementById('close-timer-complete').addEventListener('click', closeTimerComplete);
-            document.getElementById('silence-mode').addEventListener('change', (e) => {
-                localStorage.setItem('silenceMode', e.target.checked);
+            // Setup settings change listeners
+            document.getElementById('silence-mode').addEventListener('change', saveSettings);
+            document.getElementById('pomodoro-duration').addEventListener('change', saveSettings);
+            document.getElementById('sound-select').addEventListener('change', (e) => {
+                handleSoundSelection(e);
+                saveSettings();
             });
             isDarkMode = document.documentElement.classList.contains('dark');
             const icon = document.getElementById('dark-mode-icon');
@@ -1966,6 +1979,16 @@
             document.getElementById('settings-modal').classList.add('hidden');
         }
 
+        function saveSettings() {
+            const settings = {
+                silenceMode: document.getElementById('silence-mode').checked,
+                pomodoroDuration: parseInt(document.getElementById('pomodoro-duration').value) || 25,
+                soundType: document.getElementById('sound-select').value,
+                soundUrl: timerSound.src
+            };
+            localStorage.setItem('settings', JSON.stringify(settings));
+        }
+
         function handleSoundSelection(e) {
             const customSoundInput = document.getElementById('custom-sound-input');
             if (e.target.value === 'custom') {
@@ -1973,6 +1996,7 @@
             } else {
                 customSoundInput.classList.add('hidden');
                 timerSound.src = 'https://www.soundjay.com/buttons/sounds/beep-07a.mp3';
+                saveSettings();
             }
         }
 
@@ -1996,6 +2020,7 @@
                 const url = URL.createObjectURL(file);
                 timerSound.src = url;
                 timerSound.dataset.objectUrl = url;
+                saveSettings();
             }
         });
 
