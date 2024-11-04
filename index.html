@@ -181,6 +181,26 @@
 
     <audio id="timer-sound" src="https://www.soundjay.com/buttons/sounds/beep-07a.mp3" preload="auto" loop></audio>
 
+    <div id="task-settings-modal" class="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 hidden z-50">
+        <div class="bg-white p-6 rounded-lg shadow-lg dark:bg-gray-800 dark:text-gray-200 w-[600px] max-w-[90vw]">
+            <h2 class="text-xl font-bold mb-4">Task Settings</h2>
+            <div class="space-y-4">
+                <div>
+                    <label class="block mb-2">Task Name</label>
+                    <input type="text" id="task-name-input" class="w-full p-2 border rounded dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200">
+                </div>
+            </div>
+            <div class="mt-6 flex justify-end space-x-3">
+                <button id="cancel-task-settings" class="px-4 py-2 border rounded hover:bg-gray-100 dark:border-gray-600 dark:hover:bg-gray-700">
+                    Cancel
+                </button>
+                <button id="save-task-settings" class="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600">
+                    Save
+                </button>
+            </div>
+        </div>
+    </div>
+
     <div id="report-modal" class="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 hidden">
         <div class="bg-white p-6 rounded dark:bg-gray-800 dark:text-gray-200">
             <h2 class="text-xl font-bold mb-4">Project Report</h2>
@@ -622,6 +642,40 @@
             const yearStart = new Date(d.getFullYear(), 0, 1);
             return Math.ceil((((d - yearStart) / 86400000) + 1) / 7);
         }
+
+        let currentEditingTask = null;
+
+        function openTaskSettings(task) {
+            currentEditingTask = task;
+            document.getElementById('task-name-input').value = task.title;
+            document.getElementById('task-settings-modal').classList.remove('hidden');
+        }
+
+        function closeTaskSettings() {
+            document.getElementById('task-settings-modal').classList.add('hidden');
+            currentEditingTask = null;
+        }
+
+        function saveTaskSettings() {
+            if (currentEditingTask) {
+                const newTitle = document.getElementById('task-name-input').value.trim();
+                if (newTitle) {
+                    editTask(currentEditingTask.id, newTitle);
+                }
+            }
+            closeTaskSettings();
+        }
+
+        // Add event listeners for task settings modal
+        document.getElementById('cancel-task-settings').addEventListener('click', closeTaskSettings);
+        document.getElementById('save-task-settings').addEventListener('click', saveTaskSettings);
+        
+        // Close modal when clicking outside
+        document.getElementById('task-settings-modal').addEventListener('click', function(e) {
+            if (e.target === this) {
+                closeTaskSettings();
+            }
+        });
 
         function init() {
             loadInitialData();
@@ -1568,14 +1622,13 @@
             editBtn.innerHTML = `
                 <svg class="h-4 w-4 text-gray-700 dark:text-gray-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                        d="M11 5h2a2 2 0 012 2v2m0 0l-6 6m0 0l-6-6m6 6V7" />
+                        d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
                 </svg>
             `;
             editBtn.addEventListener('click', () => {
-                const newTitle = prompt('Edit task title:', task.title);
-                if (newTitle && newTitle.trim()) {
-                    editTask(task.id, newTitle.trim());
-                }
+                openTaskSettings(task);
             });
             rightDiv.appendChild(editBtn);
             const timerBtn = createTimerButton(task, () => startPomodoro(task));
