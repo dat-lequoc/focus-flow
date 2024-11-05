@@ -802,17 +802,28 @@
             if (!confirm('Are you sure you want to delete this time entry?')) return;
 
             const task = findTaskByIdGlobal(taskId);
-            if (!task || !task.timeEntries || !task.timeEntries[entryIndex]) return;
+            if (!task || !task.timeEntries) return;
 
-            const entry = task.timeEntries[entryIndex];
-            task.timeSpent -= entry.duration;
-            task.timeEntries.splice(entryIndex, 1);
+            // Find the entry by its timestamp to ensure we delete the correct one
+            const entryToDelete = task.timeEntries[entryIndex];
+            if (!entryToDelete) return;
 
-            saveData();
-            renderTaskList();
-            renderProjectList();
-            renderDashboard();
-            showTimeLog(task); // Refresh the time log display
+            // Find the actual index in case the display order differs
+            const actualIndex = task.timeEntries.findIndex(entry => 
+                entry.start === entryToDelete.start && 
+                entry.duration === entryToDelete.duration
+            );
+
+            if (actualIndex !== -1) {
+                task.timeSpent -= task.timeEntries[actualIndex].duration;
+                task.timeEntries.splice(actualIndex, 1);
+                
+                saveData();
+                renderTaskList();
+                renderProjectList();
+                renderDashboard();
+                showTimeLog(task); // Refresh the time log display
+            }
         }
 
         // Add close button event listener
