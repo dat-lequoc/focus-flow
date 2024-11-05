@@ -1103,6 +1103,35 @@
             renderWeeklyChart();
         }
 
+        function getWeekStart() {
+            const today = new Date();
+            const day = today.getDay();
+            const diff = today.getDate() - day + (day === 0 ? -6 : 1); // Adjust for Sunday
+            const monday = new Date(today.setDate(diff));
+            monday.setHours(0, 0, 0, 0);
+            return monday;
+        }
+
+        function calculateWeekEarnings() {
+            let totalEarnings = 0;
+            const weekStart = getWeekStart();
+            
+            projects.forEach(project => {
+                traverseTasks(project.tasks, task => {
+                    if (task.isBillable && task.hourlyRate > 0 && task.timeEntries) {
+                        task.timeEntries.forEach(entry => {
+                            const entryDate = new Date(entry.start);
+                            if (entryDate >= weekStart) {
+                                totalEarnings += (entry.duration / 3600) * task.hourlyRate;
+                            }
+                        });
+                    }
+                });
+            });
+            
+            return totalEarnings;
+        }
+
         function calculateTodayEarnings() {
             let totalEarnings = 0;
             const today = new Date();
@@ -1253,7 +1282,7 @@
                         <hr class="my-6 border-gray-300 dark:border-gray-600">
                         <div class="mt-6">
                             <h3 class="font-bold mb-2 text-lg">Weekly Activity</h3>
-                            <div class="grid grid-cols-2 gap-4 mb-6">
+                            <div class="grid grid-cols-3 gap-4 mb-6">
                                 <div class="p-4 bg-gradient-to-r from-blue-500 to-blue-600 rounded-lg shadow-lg">
                                     <div class="text-white text-sm mb-1">Past 7 Days</div>
                                     <div id="week-total" class="text-white text-2xl font-bold"></div>
@@ -1261,6 +1290,10 @@
                                 <div class="p-4 bg-gradient-to-r from-purple-500 to-purple-600 rounded-lg shadow-lg">
                                     <div class="text-white text-sm mb-1">Past 30 Days</div>
                                     <div id="month-total" class="text-white text-2xl font-bold"></div>
+                                </div>
+                                <div class="p-4 bg-gradient-to-r from-green-500 to-green-600 rounded-lg shadow-lg">
+                                    <div class="text-white text-sm mb-1">This Week's Earnings</div>
+                                    <div class="text-white text-2xl font-bold">$${calculateWeekEarnings().toFixed(2)}</div>
                                 </div>
                             </div>
                             <div style="height: 400px;">
