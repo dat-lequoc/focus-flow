@@ -281,6 +281,21 @@
         </div>
     </div>
 
+    <!-- Time Log Modal -->
+    <div id="time-log-modal" class="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 hidden z-50">
+        <div class="bg-white p-6 rounded-lg shadow-lg dark:bg-gray-800 dark:text-gray-200 w-[600px] max-w-[90vw]">
+            <h2 class="text-xl font-bold mb-4">Time Log</h2>
+            <div id="time-log-entries" class="max-h-[400px] overflow-y-auto">
+                <!-- Time entries will be populated here -->
+            </div>
+            <div class="mt-6 flex justify-end space-x-3">
+                <button id="close-time-log" class="px-4 py-2 border rounded hover:bg-gray-100 dark:border-gray-600 dark:hover:bg-gray-700">
+                    Close
+                </button>
+            </div>
+        </div>
+    </div>
+
     <script>
         let projects = [];
         let selectedProject = null;
@@ -707,6 +722,102 @@
             if (e.target === this) {
                 closeTaskSettings();
             }
+        });
+
+        function showTimeLog(task) {
+            const modal = document.getElementById('time-log-modal');
+            const entriesContainer = document.getElementById('time-log-entries');
+            entriesContainer.innerHTML = '';
+
+            if (task.timeEntries && task.timeEntries.length > 0) {
+                // Sort entries by date, newest first
+                const sortedEntries = [...task.timeEntries].sort((a, b) => 
+                    new Date(b.start) - new Date(a.start)
+                );
+
+                sortedEntries.forEach((entry, index) => {
+                    const entryDiv = document.createElement('div');
+                    entryDiv.className = 'mb-4 p-4 border rounded dark:border-gray-700';
+                    
+                    const startDate = new Date(entry.start);
+                    const duration = entry.duration;
+                    const hours = Math.floor(duration / 3600);
+                    const minutes = Math.floor((duration % 3600) / 60);
+                    
+                    entryDiv.innerHTML = `
+                        <div class="flex justify-between items-center">
+                            <div>
+                                <div class="font-medium">${startDate.toLocaleDateString()} ${startDate.toLocaleTimeString()}</div>
+                                <div class="text-sm text-gray-600 dark:text-gray-400">Duration: ${hours}h ${minutes}m</div>
+                            </div>
+                            <div class="flex space-x-2">
+                                <button class="text-blue-500 hover:text-blue-700" onclick="editTimeEntry('${task.id}', ${index})">
+                                    Edit
+                                </button>
+                                <button class="text-red-500 hover:text-red-700" onclick="deleteTimeEntry('${task.id}', ${index})">
+                                    Delete
+                                </button>
+                            </div>
+                        </div>
+                    `;
+                    entriesContainer.appendChild(entryDiv);
+                });
+            } else {
+                entriesContainer.innerHTML = '<p class="text-gray-500 dark:text-gray-400">No time entries yet</p>';
+            }
+
+            modal.classList.remove('hidden');
+            
+            // Close modal when clicking outside
+            modal.addEventListener('click', (e) => {
+                if (e.target === modal) {
+                    modal.classList.add('hidden');
+                }
+            });
+        }
+
+        function editTimeEntry(taskId, entryIndex) {
+            const task = findTaskByIdGlobal(taskId);
+            if (!task || !task.timeEntries || !task.timeEntries[entryIndex]) return;
+
+            const entry = task.timeEntries[entryIndex];
+            const startDate = new Date(entry.start);
+            
+            // Pre-fill the time entry modal with existing values
+            document.getElementById('manual-time-minutes').value = Math.floor(entry.duration / 60);
+            document.getElementById('manual-time-date').value = startDate.toISOString().split('T')[0];
+            
+            // Delete the old entry
+            task.timeSpent -= entry.duration;
+            task.timeEntries.splice(entryIndex, 1);
+            
+            // Open the time entry modal for editing
+            openTimeEntryModal(task);
+            
+            // Hide the time log modal
+            document.getElementById('time-log-modal').classList.add('hidden');
+        }
+
+        function deleteTimeEntry(taskId, entryIndex) {
+            if (!confirm('Are you sure you want to delete this time entry?')) return;
+
+            const task = findTaskByIdGlobal(taskId);
+            if (!task || !task.timeEntries || !task.timeEntries[entryIndex]) return;
+
+            const entry = task.timeEntries[entryIndex];
+            task.timeSpent -= entry.duration;
+            task.timeEntries.splice(entryIndex, 1);
+
+            saveData();
+            renderTaskList();
+            renderProjectList();
+            renderDashboard();
+            showTimeLog(task); // Refresh the time log display
+        }
+
+        // Add close button event listener
+        document.getElementById('close-time-log').addEventListener('click', () => {
+            document.getElementById('time-log-modal').classList.add('hidden');
         });
 
         function init() {
@@ -1741,6 +1852,17 @@
             `;
             addTimeBtn.addEventListener('click', () => openTimeEntryModal(task));
             rightDiv.appendChild(addTimeBtn);
+
+            const timeLogBtn = document.createElement('button');
+            timeLogBtn.className = 'p-1.5 border rounded-lg hover:bg-gray-100 transition-colors duration-200 dark:border-gray-700 dark:hover:bg-gray-700';
+            timeLogBtn.innerHTML = `
+                <svg class="h-4 w-4 text-gray-700 dark:text-gray-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+                          d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z M19 21v-2a4 4 0 00-4-4H9a4 4 0 00-4 4v2" />
+                </svg>
+            `;
+            timeLogBtn.addEventListener('click', () => showTimeLog(task));
+            rightDiv.appendChild(timeLogBtn);
 
             const deleteBtn = document.createElement('button');
             deleteBtn.className = 'p-1.5 border rounded-lg text-red-500 hover:bg-red-50 transition-colors duration-200 dark:border-gray-700 dark:hover:bg-gray-700';
