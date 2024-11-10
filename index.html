@@ -517,6 +517,45 @@
             return totalTime;
         }
 
+        function getWeeklyEarningsData() {
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
+            const weeks = [];
+            
+            // Get data for last 4 weeks
+            for (let i = 3; i >= 0; i--) {
+                const weekEnd = new Date(today);
+                weekEnd.setDate(weekEnd.getDate() - (i * 7));
+                const weekStart = new Date(weekEnd);
+                weekStart.setDate(weekEnd.getDate() - 6);
+                
+                weeks.push({
+                    weekStart: weekStart,
+                    weekEnd: weekEnd,
+                    earnings: 0
+                });
+            }
+
+            projects.forEach(project => {
+                traverseTasks(project.tasks, task => {
+                    if (task.isBillable && task.hourlyRate > 0 && task.timeEntries) {
+                        task.timeEntries.forEach(entry => {
+                            const entryDate = new Date(entry.start);
+                            const week = weeks.find(w => 
+                                entryDate >= w.weekStart && 
+                                entryDate <= w.weekEnd
+                            );
+                            if (week) {
+                                week.earnings += (entry.duration / 3600) * task.hourlyRate;
+                            }
+                        });
+                    }
+                });
+            });
+            
+            return weeks;
+        }
+
         function getWeeklyTimeData() {
             const today = new Date();
             today.setHours(0, 0, 0, 0);
@@ -548,6 +587,73 @@
                 project.tasks.forEach(processTask);
             });
             return days;
+        }
+
+        function renderWeeklyEarningsChart() {
+            const ctx = document.getElementById('weeklyEarningsChart');
+            if (!ctx) return;
+            
+            const weekData = getWeeklyEarningsData();
+            const labels = weekData.map(w => {
+                const start = w.weekStart.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+                const end = w.weekEnd.toLocaleDateString('en-US', { day: 'numeric' });
+                return `${start}-${end}`;
+            });
+            const data = weekData.map(w => w.earnings.toFixed(2));
+
+            if (window.weeklyEarningsChart instanceof Chart) {
+                window.weeklyEarningsChart.destroy();
+            }
+
+            window.weeklyEarningsChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: 'Weekly Earnings ($)',
+                        data: data,
+                        backgroundColor: isDarkMode ? 'rgba(34, 197, 94, 0.5)' : 'rgba(34, 197, 94, 0.8)',
+                        borderColor: isDarkMode ? 'rgba(34, 197, 94, 0.8)' : 'rgba(34, 197, 94, 1)',
+                        borderWidth: 2,
+                        pointRadius: 5,
+                        pointBackgroundColor: isDarkMode ? 'rgba(34, 197, 94, 0.8)' : 'rgba(34, 197, 94, 1)',
+                        tension: 0.4,
+                        fill: false
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: {
+                                callback: function(value) {
+                                    return '$' + value;
+                                },
+                                color: isDarkMode ? '#e5e7eb' : '#374151'
+                            },
+                            grid: {
+                                color: isDarkMode ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.1)'
+                            }
+                        },
+                        x: {
+                            ticks: {
+                                color: isDarkMode ? '#e5e7eb' : '#374151'
+                            },
+                            grid: {
+                                color: isDarkMode ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.1)'
+                            }
+                        }
+                    },
+                    plugins: {
+                        legend: {
+                            labels: {
+                                color: isDarkMode ? '#e5e7eb' : '#374151'
+                            }
+                        }
+                    }
+                }
+            });
         }
 
         function renderWeeklyChart() {
@@ -1227,6 +1333,8 @@
             renderDashboard();
             renderProjectList();
             renderWeeklyChart();
+            renderWeeklyEarningsChart();
+            renderWeeklyEarningsChart();
         }
 
         function getWeekStart() {
@@ -1426,6 +1534,9 @@
                                     <div class="text-white text-sm mb-1">This Week's Earnings</div>
                                     <div class="text-white text-2xl font-bold">$${calculateWeekEarnings().toFixed(2)}</div>
                                 </div>
+                            </div>
+                            <div style="height: 400px;">
+                                <canvas id="weeklyEarningsChart"></canvas>
                             </div>
                         </div>
                     </div>
