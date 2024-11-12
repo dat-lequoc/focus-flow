@@ -1371,6 +1371,27 @@
             return totalEarnings;
         }
 
+        function calculateTwoWeekEarnings() {
+            let totalEarnings = 0;
+            const twoWeeksAgo = new Date(getWeekStart());
+            twoWeeksAgo.setDate(twoWeeksAgo.getDate() - 7); // Go back one more week
+            
+            projects.forEach(project => {
+                traverseTasks(project.tasks, task => {
+                    if (task.isBillable && task.hourlyRate > 0 && task.timeEntries) {
+                        task.timeEntries.forEach(entry => {
+                            const entryDate = new Date(entry.start);
+                            if (entryDate >= twoWeeksAgo) {
+                                totalEarnings += (entry.duration / 3600) * task.hourlyRate;
+                            }
+                        });
+                    }
+                });
+            });
+            
+            return totalEarnings;
+        }
+
         function calculateTodayEarnings() {
             let totalEarnings = 0;
             const today = new Date();
@@ -1534,10 +1555,14 @@
                                     <div id="month-total" class="text-white text-2xl font-bold"></div>
                                 </div>
                             </div>
-                            <div class="grid grid-cols-1 gap-4 mb-6">
+                            <div class="grid grid-cols-2 gap-4 mb-6">
                                 <div class="p-4 bg-gradient-to-r from-green-500 to-green-600 rounded-lg shadow-lg">
                                     <div class="text-white text-sm mb-1">This Week's Earnings</div>
                                     <div class="text-white text-2xl font-bold">$${calculateWeekEarnings().toFixed(2)}</div>
+                                </div>
+                                <div class="p-4 bg-gradient-to-r from-green-500 to-green-600 rounded-lg shadow-lg">
+                                    <div class="text-white text-sm mb-1">Last 2 Weeks' Earnings</div>
+                                    <div class="text-white text-2xl font-bold">$${calculateTwoWeekEarnings().toFixed(2)}</div>
                                 </div>
                             </div>
                             <div style="height: 400px;">
