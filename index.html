@@ -522,12 +522,17 @@
             today.setHours(0, 0, 0, 0);
             const weeks = [];
             
-            // Get data for last 4 weeks
+            // Get data for last 4 weeks, aligned to Monday-Sunday
             for (let i = 3; i >= 0; i--) {
                 const weekEnd = new Date(today);
+                // Move to the most recent Sunday
+                while (weekEnd.getDay() !== 0) {
+                    weekEnd.setDate(weekEnd.getDate() - 1);
+                }
                 weekEnd.setDate(weekEnd.getDate() - (i * 7));
+                
                 const weekStart = new Date(weekEnd);
-                weekStart.setDate(weekEnd.getDate() - 6);
+                weekStart.setDate(weekEnd.getDate() - 6); // Go back to Monday
                 
                 weeks.push({
                     weekStart: weekStart,
