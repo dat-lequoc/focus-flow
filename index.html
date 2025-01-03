@@ -1803,6 +1803,16 @@
                     isBillable: false,
                     hourlyRate: 0
                 };
+
+                // If this is a subtask, check parent's billable status
+                if (parentId) {
+                    const parentTask = findTaskById(selectedProject.tasks, parentId);
+                    if (parentTask && parentTask.isBillable) {
+                        newTask.isBillable = true;
+                        newTask.hourlyRate = parentTask.hourlyRate;
+                    }
+                }
+
                 if (parentId) {
                     const parentTask = findTaskById(selectedProject.tasks, parentId);
                     if (parentTask) {
