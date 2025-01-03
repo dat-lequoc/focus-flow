@@ -1290,15 +1290,74 @@
 
         function editProject(projectId) {
             const project = projects.find(p => p.id === projectId);
-            const newName = prompt('Edit project name:', project.name);
-            if (newName && newName.trim()) {
-                project.name = newName.trim();
-                saveData();
-                renderProjectList();
-                if (selectedProject && selectedProject.id === projectId) {
-                    document.getElementById('project-title').textContent = newName;
+            
+            // Create modal content
+            const modalContent = `
+                <div class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+                    <div class="bg-white p-6 rounded-lg shadow-lg dark:bg-gray-800 dark:text-gray-200 w-[400px]">
+                        <h2 class="text-xl font-bold mb-4">Edit Project</h2>
+                        <div class="space-y-4">
+                            <div>
+                                <label class="block mb-2">Project Name</label>
+                                <input type="text" id="edit-project-name" value="${project.name}" 
+                                    class="w-full p-2 border rounded dark:bg-gray-700 dark:border-gray-600">
+                            </div>
+                            <div class="flex items-center space-x-2">
+                                <input type="checkbox" id="project-billable" ${project.isBillable ? 'checked' : ''} 
+                                    class="rounded dark:bg-gray-700">
+                                <label>Billable</label>
+                            </div>
+                            <div id="project-rate-container" class="${project.isBillable ? '' : 'hidden'}">
+                                <label class="block mb-2">Default Hourly Rate ($)</label>
+                                <input type="number" id="project-rate" value="${project.hourlyRate || 0}" min="0" step="0.01"
+                                    class="w-full p-2 border rounded dark:bg-gray-700 dark:border-gray-600">
+                            </div>
+                        </div>
+                        <div class="mt-6 flex justify-end space-x-3">
+                            <button id="cancel-project-edit" 
+                                class="px-4 py-2 border rounded hover:bg-gray-100 dark:border-gray-600 dark:hover:bg-gray-700">
+                                Cancel
+                            </button>
+                            <button id="save-project-edit" 
+                                class="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600">
+                                Save
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            `;
+
+            // Add modal to document
+            const modalContainer = document.createElement('div');
+            modalContainer.innerHTML = modalContent;
+            document.body.appendChild(modalContainer);
+
+            // Setup event listeners
+            document.getElementById('project-billable').addEventListener('change', function(e) {
+                document.getElementById('project-rate-container').classList.toggle('hidden', !e.target.checked);
+            });
+
+            document.getElementById('cancel-project-edit').addEventListener('click', () => {
+                document.body.removeChild(modalContainer);
+            });
+
+            document.getElementById('save-project-edit').addEventListener('click', () => {
+                const newName = document.getElementById('edit-project-name').value.trim();
+                const isBillable = document.getElementById('project-billable').checked;
+                const hourlyRate = parseFloat(document.getElementById('project-rate').value) || 0;
+
+                if (newName) {
+                    project.name = newName;
+                    project.isBillable = isBillable;
+                    project.hourlyRate = hourlyRate;
+                    saveData();
+                    renderProjectList();
+                    if (selectedProject && selectedProject.id === projectId) {
+                        document.getElementById('project-title').textContent = newName;
+                    }
                 }
-            }
+                document.body.removeChild(modalContainer);
+            });
         }
 
         function deleteProject(projectId) {
@@ -1804,13 +1863,18 @@
                     hourlyRate: 0
                 };
 
-                // If this is a subtask, check parent's billable status
+                // If this is a subtask, inherit from parent task
                 if (parentId) {
                     const parentTask = findTaskById(selectedProject.tasks, parentId);
                     if (parentTask && parentTask.isBillable) {
                         newTask.isBillable = true;
                         newTask.hourlyRate = parentTask.hourlyRate;
                     }
+                } 
+                // If this is a top-level task, inherit from project
+                else if (selectedProject.isBillable) {
+                    newTask.isBillable = true;
+                    newTask.hourlyRate = selectedProject.hourlyRate;
                 }
 
                 if (parentId) {
