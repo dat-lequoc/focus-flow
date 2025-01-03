@@ -325,15 +325,7 @@
         function createElement(tag, options = {}) {
             const element = document.createElement(tag);
             for (let [key, value] of Object.entries(options)) {
-                if (key === 'className') {
-                    element.className = value;
-                } else if (key === 'innerHTML') {
-                    element.innerHTML = value;
-                } else if (key.startsWith('on')) {
-                    element.addEventListener(key.substring(2).toLowerCase(), value);
-                } else {
-                    element.setAttribute(key, value);
-                }
+                element.setAttribute(key, value);
             }
             return element;
         }
@@ -344,15 +336,11 @@
 
         function createSVGIcon(pathData, className = '') {
             const svg = createElement('svg', {
-                className: `h-5 w-5 ${className}`,
-                fill: 'none',
-                stroke: 'currentColor',
+                class: className,
                 viewBox: '0 0 24 24'
             });
             const path = createElement('path', {
                 d: pathData,
-                'stroke-linecap': 'round',
-                'stroke-linejoin': 'round',
                 'stroke-width': '2'
             });
             svg.appendChild(path);
@@ -489,6 +477,7 @@
             if (task.isCompleted === undefined) task.isCompleted = false;
             if (task.timeSpent === undefined) task.timeSpent = 0;
             if (task.subtasks === undefined) task.subtasks = [];
+            if (task.timeEntries === undefined) task.timeEntries = [];
             task.subtasks.forEach(subtask => initializeTaskProperties(subtask));
         }
 
