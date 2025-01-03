@@ -1,4 +1,3 @@
-<!DOCTYPE html>
 <html lang="en" class="dark">
 
 <head>
@@ -7,11 +6,63 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <!-- Add Frappe Gantt dependencies -->
+    <script src="https://cdn.jsdelivr.net/npm/frappe-gantt@0.6.1/dist/frappe-gantt.min.js"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/frappe-gantt@0.6.1/dist/frappe-gantt.min.css">
     <script>
         tailwind.config = {
             darkMode: 'class',
         }
     </script>
+    <style>
+        /* Custom styles for Gantt chart in dark mode */
+        .dark .gantt .bar-wrapper:hover .bar {
+            fill: #60a5fa !important;
+        }
+        .dark .gantt .bar {
+            fill: #3b82f6 !important;
+        }
+        .dark .gantt .bar-label {
+            fill: #e5e7eb !important;
+        }
+        .dark .gantt .grid-header {
+            fill: #1f2937 !important;
+        }
+        .dark .gantt .grid-row {
+            fill: #374151 !important;
+        }
+        .dark .gantt .lower-text, .dark .gantt .upper-text {
+            fill: #e5e7eb !important;
+        }
+        .dark .gantt .today-highlight {
+            fill: #059669 !important;
+        }
+        .dark .gantt .handle {
+            fill: #60a5fa !important;
+        }
+        .dark .gantt .bar-progress {
+            fill: #10b981 !important;
+        }
+        .gantt-container {
+            height: 400px;
+            overflow-x: auto;
+            overflow-y: hidden;
+        }
+        #gantt {
+            height: 100%;
+        }
+        .gantt .popup-wrapper {
+            background: white;
+            border-radius: 0.375rem;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            padding: 0.5rem;
+        }
+        .dark .gantt .popup-wrapper {
+            background: #1f2937;
+            border: 1px solid #374151;
+            color: #e5e7eb;
+        }
+    </style>
 </head>
 
 <body class="bg-gray-100 text-black dark:bg-gray-900 dark:text-white">
@@ -114,11 +165,30 @@
             <div id="dashboard-view">
             </div>
             <div id="project-view" class="hidden">
-                <div id="task-input" class="mb-4">
+                <!-- Add Gantt chart container -->
+                <div id="gantt-container" class="mb-6 bg-white dark:bg-gray-800 p-4 rounded-lg shadow">
+                    <div class="flex justify-between items-center mb-4">
+                        <h3 class="text-lg font-semibold dark:text-gray-200">Project Timeline</h3>
+                        <div class="flex gap-2">
+                            <button id="zoom-in-btn" class="p-2 border rounded dark:border-gray-700 hover:bg-gray-100 dark:hover:bg-gray-700">
+                                <i class="fas fa-search-plus"></i>
+                            </button>
+                            <button id="zoom-out-btn" class="p-2 border rounded dark:border-gray-700 hover:bg-gray-100 dark:hover:bg-gray-700">
+                                <i class="fas fa-search-minus"></i>
+                            </button>
+                            <button id="today-btn" class="p-2 border rounded dark:border-gray-700 hover:bg-gray-100 dark:hover:bg-gray-700">
+                                <i class="fas fa-calendar-day"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="gantt-container">
+                        <div id="gantt"></div>
+                    </div>
+                </div>
+                <div id="task-list" class="space-y-4 mb-4"></div>
+                <div id="task-input">
                     <input id="new-task-title" type="text" placeholder="+ task "
                         class="mb-4 p-3 border rounded-lg w-full shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200 dark:placeholder-gray-400">
-                </div>
-                <div id="task-list" class="h-[calc(100vh-20rem)] overflow-y-auto">
                 </div>
             </div>
             <div id="pomodoro-display"
@@ -478,6 +548,14 @@
             if (task.timeSpent === undefined) task.timeSpent = 0;
             if (task.subtasks === undefined) task.subtasks = [];
             if (task.timeEntries === undefined) task.timeEntries = [];
+            // Add start and end dates for Gantt chart
+            if (task.start === undefined) task.start = new Date().toISOString().split('T')[0];
+            if (task.end === undefined) {
+                const endDate = new Date();
+                endDate.setDate(endDate.getDate() + 7); // Default duration: 1 week
+                task.end = endDate.toISOString().split('T')[0];
+            }
+            if (task.progress === undefined) task.progress = task.isCompleted ? 100 : 0;
             task.subtasks.forEach(subtask => initializeTaskProperties(subtask));
         }
 
@@ -794,6 +872,32 @@
             document.getElementById('task-rate').value = task.hourlyRate || 0;
             document.getElementById('task-pomodoro-duration').value = task.pomodoroDuration || '';
             document.getElementById('rate-input-container').classList.toggle('hidden', !task.isBillable);
+            
+            // Add date inputs to the modal
+            const modalContent = document.querySelector('#task-settings-modal .space-y-4');
+            if (!document.getElementById('task-dates-container')) {
+                const datesContainer = document.createElement('div');
+                datesContainer.id = 'task-dates-container';
+                datesContainer.innerHTML = `
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <label class="block mb-2">Start Date</label>
+                            <input type="date" id="task-start-date" 
+                                class="w-full p-2 border rounded dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200">
+                        </div>
+                        <div>
+                            <label class="block mb-2">End Date</label>
+                            <input type="date" id="task-end-date"
+                                class="w-full p-2 border rounded dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200">
+                        </div>
+                    </div>
+                `;
+                modalContent.insertBefore(datesContainer, document.getElementById('rate-input-container'));
+            }
+            
+            document.getElementById('task-start-date').value = task.start;
+            document.getElementById('task-end-date').value = task.end;
+            
             document.getElementById('task-settings-modal').classList.remove('hidden');
         }
 
@@ -808,6 +912,8 @@
                 const isBillable = document.getElementById('task-billable').checked;
                 const hourlyRate = parseFloat(document.getElementById('task-rate').value) || 0;
                 const pomodoroDuration = parseInt(document.getElementById('task-pomodoro-duration').value) || 0;
+                const startDate = document.getElementById('task-start-date').value;
+                const endDate = document.getElementById('task-end-date').value;
 
                 if (newTitle) {
                     const task = findTaskByIdGlobal(currentEditingTask.id);
@@ -816,8 +922,11 @@
                         task.isBillable = isBillable;
                         task.hourlyRate = hourlyRate;
                         task.pomodoroDuration = pomodoroDuration || null;
+                        task.start = startDate;
+                        task.end = endDate;
                         saveData();
                         renderTaskList();
+                        initGanttChart(); // Refresh Gantt chart after saving
                     }
                 }
             }
@@ -1390,6 +1499,7 @@
             document.getElementById('project-view').classList.remove('hidden');
             renderProjectList();
             renderTaskList();
+            initGanttChart(); // Initialize Gantt chart when project is selected
         }
 
         function showDashboard() {
@@ -1847,6 +1957,10 @@
         async function addTask(parentId = null, customTitle = null) {
             const title = customTitle || document.getElementById('new-task-title').value.trim();
             if (title && selectedProject) {
+                const startDate = new Date();
+                const endDate = new Date();
+                endDate.setDate(endDate.getDate() + 7); // Default duration: 1 week
+
                 const newTask = {
                     id: generateId(),
                     title: title,
@@ -1860,7 +1974,10 @@
                     dailyGoal: 0,
                     dailyProgress: 0,
                     isBillable: false,
-                    hourlyRate: 0
+                    hourlyRate: 0,
+                    start: startDate.toISOString().split('T')[0],
+                    end: endDate.toISOString().split('T')[0],
+                    progress: 0
                 };
 
                 // If this is a subtask, inherit from parent task
@@ -1890,6 +2007,7 @@
                     requestAnimationFrame(() => {
                         renderTaskList();
                         renderProjectList();
+                        initGanttChart(); // Refresh Gantt chart after adding task
                         resolve();
                     });
                 });
@@ -2170,12 +2288,15 @@
             const task = findTaskById(selectedProject.tasks, taskId);
             if (task) {
                 task.isCompleted = !task.isCompleted;
+                task.progress = task.isCompleted ? 100 : 0;
                 traverseTasks(task.subtasks, (subtask) => {
                     subtask.isCompleted = task.isCompleted;
+                    subtask.progress = task.isCompleted ? 100 : 0;
                 });
                 saveData();
                 renderTaskList();
                 renderProjectList();
+                initGanttChart(); // Refresh Gantt chart after toggling completion
             }
         }
 
@@ -2595,6 +2716,262 @@
         }
 
         document.getElementById('start-new-session').addEventListener('click', startNewSession);
+
+        // Add Gantt chart instance variable
+        let ganttChart = null;
+
+        function initGanttChart() {
+            const ganttTasks = [];
+            
+            function processTask(task, level = 0) {
+                const ganttTask = {
+                    id: task.id,
+                    name: task.title,
+                    start: task.start,
+                    end: task.end,
+                    progress: task.progress,
+                    dependencies: '',
+                    custom_class: task.isCompleted ? 'completed' : ''
+                };
+                ganttTasks.push(ganttTask);
+                
+                task.subtasks.forEach(subtask => processTask(subtask, level + 1));
+            }
+            
+            if (selectedProject) {
+                selectedProject.tasks.forEach(task => processTask(task));
+            }
+
+            const ganttContainer = document.getElementById('gantt');
+            if (!ganttContainer) return;
+            
+            // Clear existing chart if it exists
+            ganttContainer.innerHTML = '';
+            
+            try {
+                if (ganttChart) {
+                    ganttChart.refresh(ganttTasks);
+                } else {
+                    ganttChart = new Gantt("#gantt", ganttTasks, {
+                        view_modes: ['Quarter Day', 'Half Day', 'Day', 'Week', 'Month'],
+                        view_mode: 'Week',
+                        date_format: 'YYYY-MM-DD',
+                        on_click: task => {
+                            const originalTask = findTaskByIdGlobal(task.id);
+                            if (originalTask) {
+                                openTaskSettings(originalTask);
+                            }
+                        },
+                        on_date_change: (task, start, end) => {
+                            const originalTask = findTaskByIdGlobal(task.id);
+                            if (originalTask) {
+                                originalTask.start = start.toISOString().split('T')[0];
+                                originalTask.end = end.toISOString().split('T')[0];
+                                saveData();
+                                renderTaskList();
+                            }
+                        },
+                        on_progress_change: (task, progress) => {
+                            const originalTask = findTaskByIdGlobal(task.id);
+                            if (originalTask) {
+                                originalTask.progress = progress;
+                                if (progress === 100) {
+                                    originalTask.isCompleted = true;
+                                }
+                                saveData();
+                                renderTaskList();
+                            }
+                        },
+                        custom_popup_html: task => {
+                            const originalTask = findTaskByIdGlobal(task.id);
+                            if (!originalTask) return '';
+                            
+                            const startDate = new Date(task.start).toLocaleDateString();
+                            const endDate = new Date(task.end).toLocaleDateString();
+                            const timeSpent = formatTime(originalTask.timeSpent);
+                            
+                            return `
+                                <div class="p-2 bg-white dark:bg-gray-800 rounded shadow-lg border dark:border-gray-700">
+                                    <h3 class="font-bold mb-2 dark:text-gray-200">${task.name}</h3>
+                                    <div class="text-sm dark:text-gray-300">
+                                        <p>Start: ${startDate}</p>
+                                        <p>End: ${endDate}</p>
+                                        <p>Progress: ${task.progress}%</p>
+                                        <p>Time Spent: ${timeSpent}</p>
+                                    </div>
+                                </div>
+                            `;
+                        }
+                    });
+                }
+            } catch (error) {
+                console.error('Error initializing Gantt chart:', error);
+                return;
+            }
+
+            // Add zoom controls
+            document.getElementById('zoom-in-btn').onclick = () => {
+                const modes = ['Quarter Day', 'Half Day', 'Day', 'Week', 'Month'];
+                const currentMode = ganttChart.options.view_mode;
+                const currentIndex = modes.indexOf(currentMode);
+                if (currentIndex > 0) {
+                    ganttChart.change_view_mode(modes[currentIndex - 1]);
+                }
+            };
+
+            document.getElementById('zoom-out-btn').onclick = () => {
+                const modes = ['Quarter Day', 'Half Day', 'Day', 'Week', 'Month'];
+                const currentMode = ganttChart.options.view_mode;
+                const currentIndex = modes.indexOf(currentMode);
+                if (currentIndex < modes.length - 1) {
+                    ganttChart.change_view_mode(modes[currentIndex + 1]);
+                }
+            };
+
+            document.getElementById('today-btn').onclick = () => {
+                ganttChart.scroll_to_today();
+            };
+        }
+
+        // Modify selectProject function to initialize Gantt chart
+        function selectProject(projectId) {
+            selectedProject = projects.find(p => p.id === projectId);
+            document.getElementById('project-title').textContent = selectedProject.name;
+            document.getElementById('dashboard-view').classList.add('hidden');
+            document.getElementById('project-view').classList.remove('hidden');
+            renderProjectList();
+            renderTaskList();
+            initGanttChart(); // Initialize Gantt chart when project is selected
+        }
+
+        // Modify task settings modal to include date inputs
+        function openTaskSettings(task) {
+            currentEditingTask = task;
+            document.getElementById('task-name-input').value = task.title;
+            document.getElementById('task-billable').checked = task.isBillable || false;
+            document.getElementById('task-rate').value = task.hourlyRate || 0;
+            document.getElementById('task-pomodoro-duration').value = task.pomodoroDuration || '';
+            document.getElementById('rate-input-container').classList.toggle('hidden', !task.isBillable);
+            
+            // Add date inputs to the modal
+            const modalContent = document.querySelector('#task-settings-modal .space-y-4');
+            if (!document.getElementById('task-dates-container')) {
+                const datesContainer = document.createElement('div');
+                datesContainer.id = 'task-dates-container';
+                datesContainer.innerHTML = `
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <label class="block mb-2">Start Date</label>
+                            <input type="date" id="task-start-date" 
+                                class="w-full p-2 border rounded dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200">
+                        </div>
+                        <div>
+                            <label class="block mb-2">End Date</label>
+                            <input type="date" id="task-end-date"
+                                class="w-full p-2 border rounded dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200">
+                        </div>
+                    </div>
+                `;
+                modalContent.insertBefore(datesContainer, document.getElementById('rate-input-container'));
+            }
+            
+            document.getElementById('task-start-date').value = task.start;
+            document.getElementById('task-end-date').value = task.end;
+            
+            document.getElementById('task-settings-modal').classList.remove('hidden');
+        }
+
+        // Modify saveTaskSettings to save dates
+        function saveTaskSettings() {
+            if (currentEditingTask) {
+                const newTitle = document.getElementById('task-name-input').value.trim();
+                const isBillable = document.getElementById('task-billable').checked;
+                const hourlyRate = parseFloat(document.getElementById('task-rate').value) || 0;
+                const pomodoroDuration = parseInt(document.getElementById('task-pomodoro-duration').value) || 0;
+                const startDate = document.getElementById('task-start-date').value;
+                const endDate = document.getElementById('task-end-date').value;
+
+                if (newTitle) {
+                    const task = findTaskByIdGlobal(currentEditingTask.id);
+                    if (task) {
+                        task.title = newTitle;
+                        task.isBillable = isBillable;
+                        task.hourlyRate = hourlyRate;
+                        task.pomodoroDuration = pomodoroDuration || null;
+                        task.start = startDate;
+                        task.end = endDate;
+                        saveData();
+                        renderTaskList();
+                        initGanttChart(); // Refresh Gantt chart after saving
+                    }
+                }
+            }
+            closeTaskSettings();
+        }
+
+        // Modify addTask to include start and end dates
+        async function addTask(parentId = null, customTitle = null) {
+            const title = customTitle || document.getElementById('new-task-title').value.trim();
+            if (title && selectedProject) {
+                const startDate = new Date();
+                const endDate = new Date();
+                endDate.setDate(endDate.getDate() + 7); // Default duration: 1 week
+
+                const newTask = {
+                    id: generateId(),
+                    title: title,
+                    timeSpent: 0,
+                    isTimerRunning: false,
+                    isExpanded: false,
+                    isCompleted: false,
+                    subtasks: [],
+                    canHaveSubtasks: true,
+                    inToday: false,
+                    dailyGoal: 0,
+                    dailyProgress: 0,
+                    isBillable: false,
+                    hourlyRate: 0,
+                    start: startDate.toISOString().split('T')[0],
+                    end: endDate.toISOString().split('T')[0],
+                    progress: 0
+                };
+
+                // If this is a subtask, inherit from parent task
+                if (parentId) {
+                    const parentTask = findTaskById(selectedProject.tasks, parentId);
+                    if (parentTask && parentTask.isBillable) {
+                        newTask.isBillable = true;
+                        newTask.hourlyRate = parentTask.hourlyRate;
+                    }
+                } 
+                // If this is a top-level task, inherit from project
+                else if (selectedProject.isBillable) {
+                    newTask.isBillable = true;
+                    newTask.hourlyRate = selectedProject.hourlyRate;
+                }
+
+                if (parentId) {
+                    const parentTask = findTaskById(selectedProject.tasks, parentId);
+                    if (parentTask) {
+                        parentTask.subtasks.push(newTask);
+                    }
+                } else {
+                    selectedProject.tasks.push(newTask);
+                }
+                saveData();
+                await new Promise(resolve => {
+                    requestAnimationFrame(() => {
+                        renderTaskList();
+                        renderProjectList();
+                        initGanttChart(); // Refresh Gantt chart after adding task
+                        resolve();
+                    });
+                });
+                if (!customTitle) {
+                    document.getElementById('new-task-title').value = '';
+                }
+            }
+        }
 
         init();
     </script>
