@@ -6,3 +6,11 @@
 
 *.xml
 log/
+
+
+# Coder tool state and logs (auto-added)
+.cwc/
+
+
+# Coder tool user-saved prompts (auto-added)
+prompts/*.txt
